@@ -2,7 +2,6 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/refs/heads/main/schemas/config.json",
   "release-type": "simple",
   "bump-minor-pre-major": true,
-  "separate-pull-requests": true,
   "pull-request-title-pattern": "chore: release ${version}",
   "packages": {
     ".": {
@@ -12,8 +11,11 @@
         ".release-please-manifest.json",
         "release-please-config.json"
       ],
-      "extra-files": ["version.go"],
+      "extra-files": [
+        "version.go"
+      ],
       "pull-request-title-pattern": "chore: release ${version}"
     }
-  }
+  },
+  "bootstrap-sha": "d68f7eb2d535de515f3275885010d837d30a12c7"
 }
