@@ -14,7 +14,8 @@
       "extra-files": [
         "version.go"
       ],
-      "pull-request-title-pattern": "chore: release ${version}"
+      "pull-request-title-pattern": "chore: release ${version}",
+      "release-as": "0.1.0"
     }
   },
   "bootstrap-sha": "d68f7eb2d535de515f3275885010d837d30a12c7"

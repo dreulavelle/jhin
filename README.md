@@ -66,7 +66,8 @@ parser.GetPartialParser([]string{"resolution", "year"}) // few-field fast path
 
 The `rank` package answers three questions for every release: *how good is
 it* (rank), *am I allowed to grab it* (fetch + rejection reasons), and *in
-what order should I take them* (sort).
+what order to output them* (sort) — releases are bucketed by resolution with
+higher resolutions on top, ranked descending within each bucket.
 
 ```go
 package main
