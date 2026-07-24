@@ -112,3 +112,63 @@ func TestSimilarityProperties(t *testing.T) {
 		t.Error("identity similarity must be 1")
 	}
 }
+
+func TestResolutionOrderAndPatternRanks(t *testing.T) {
+	// prefer 1080p over 2160p without disabling 4K
+	p := Default()
+	p.ResolutionOrder = []Resolution{Res1080p, Res720p, Res2160p}
+	p.PatternRanks = []PatternRank{
+		{Pattern: `\bIMAX\b`, Rank: 500},
+		{Pattern: `\bHDCAM\b`, Rank: -2000},
+	}
+	r := mustRanker(t, p)
+
+	torrents := r.RankAll([]string{
+		"Movie.2020.2160p.WEB-DL.HEVC-A",
+		"Movie.2020.1080p.WEB-DL.H264-B",
+		"Movie.2020.720p.WEB-DL.H264-C",
+	})
+	sorted := r.Sort(torrents, SortOptions{FetchableOnly: true})
+	if sorted[0].Resolution() != Res1080p || sorted[1].Resolution() != Res720p || sorted[2].Resolution() != Res2160p {
+		t.Fatalf("custom resolution order not honored: %v %v %v",
+			sorted[0].Resolution(), sorted[1].Resolution(), sorted[2].Resolution())
+	}
+	// free Sort keeps the default highest-first order
+	def := Sort(torrents, SortOptions{FetchableOnly: true})
+	if def[0].Resolution() != Res2160p {
+		t.Fatalf("default order should lead with 2160p: %v", def[0].Resolution())
+	}
+
+	plain := r.Rank("Movie.2020.1080p.WEB-DL-GRP")
+	imax := r.Rank("Movie.2020.IMAX.1080p.WEB-DL-GRP")
+	if imax.Rank-plain.Rank < 500 {
+		t.Fatalf("pattern rank not applied: %d vs %d", imax.Rank, plain.Rank)
+	}
+	found := false
+	for _, c := range r.Explain(&imax) {
+		if c.Source == `pattern:(?i)\bIMAX\b` && c.Rank == 500 {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("pattern contribution missing from Explain: %+v", r.Explain(&imax))
+	}
+}
+
+func TestSortCriteriaChain(t *testing.T) {
+	r := mustRanker(t, Default())
+	torrents := r.RankAll([]string{
+		"Movie.2020.720p.BluRay.REMUX-A",
+		"Movie.2020.2160p.WEBRip-B",
+	})
+	// rank-first chain ignores resolution buckets
+	byRank := Sort(torrents, SortOptions{Criteria: []SortCriterion{{Key: SortByRank}}})
+	if byRank[0].Raw != "Movie.2020.720p.BluRay.REMUX-A" {
+		t.Fatalf("rank-first chain should lead with remux: %q", byRank[0].Raw)
+	}
+	// ascending rank reverses
+	asc := Sort(torrents, SortOptions{Criteria: []SortCriterion{{Key: SortByRank, Ascending: true}}})
+	if asc[0].Raw != "Movie.2020.2160p.WEBRip-B" {
+		t.Fatalf("ascending rank chain wrong: %q", asc[0].Raw)
+	}
+}

@@ -14,6 +14,13 @@ type Policy struct {
 	Rank  int  `json:"rank"`
 }
 
+// PatternRank scores a regex match on the raw title. Patterns wrapped in
+// slashes ("/X/") are case-sensitive; anything else is case-insensitive.
+type PatternRank struct {
+	Pattern string `json:"pattern"`
+	Rank    int    `json:"rank"`
+}
+
 // Resolution buckets, finest-grained; sorting and per-resolution gating both
 // use these.
 type Resolution string
@@ -109,6 +116,16 @@ type Profile struct {
 	Require   []string `json:"require,omitempty"`
 	Exclude   []string `json:"exclude,omitempty"`
 	Preferred []string `json:"preferred,omitempty"`
+
+	// PatternRanks add their Rank (positive or negative) to every release
+	// whose raw title matches Pattern — weighted keywords without vetoes.
+	PatternRanks []PatternRank `json:"pattern_ranks,omitempty"`
+
+	// ResolutionOrder, when set, replaces the built-in best-to-worst
+	// resolution ordering used by Ranker.Sort: first entry sorts highest.
+	// Unlisted resolutions fall below all listed ones, keeping their
+	// default relative order.
+	ResolutionOrder []Resolution `json:"resolution_order,omitempty"`
 
 	Resolutions map[Resolution]bool `json:"resolutions,omitempty"`
 	Languages   Languages           `json:"languages,omitempty"`

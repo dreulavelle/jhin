@@ -97,8 +97,9 @@ func main() {
 		fmt.Printf("%6d fetch=%-5v %v %s\n", t.Rank, t.Fetch, t.Rejections, t.Raw)
 	}
 
-	// Sorting is separate and explicit: resolution bucket, then rank.
-	best := rank.Sort(torrents, rank.SortOptions{
+	// Sorting is separate and explicit: resolution bucket, then rank by
+	// default — or compose your own chain via SortOptions.Criteria.
+	best := ranker.Sort(torrents, rank.SortOptions{
 		FetchableOnly: true,
 		BucketLimit:   5, // top 5 per resolution bucket
 	})
@@ -125,10 +126,17 @@ p.Exclude = []string{`\bHDCAM\b`}
 p.Preferred = []string{`\bIMAX\b`} // matching adds Options.PreferredBonus
 
 // Resolution and language rules. Default enables 4K/1440p/1080p/720p;
-// disable what you don't want.
+// disable what you don't want, or reorder preference without banning:
 p.Resolutions[rank.Res2160p] = false
+p.ResolutionOrder = []rank.Resolution{rank.Res1080p, rank.Res2160p, rank.Res720p}
 p.Languages.Exclude = []string{"ru"}       // codes or groups: anime/common/all
 p.Languages.Preferred = []string{"en"}
+
+// Weighted keywords: additive scores without vetoes.
+p.PatternRanks = []rank.PatternRank{
+	{Pattern: `\bIMAX\b`, Rank: 500},
+	{Pattern: `\bHDCAM\b`, Rank: -2000},
+}
 
 p.Save("profile.json")                      // and rank.Load("profile.json")
 
@@ -147,7 +155,9 @@ t := ranker.Rank(raw, rank.RankOptions{
 ```
 
 Standalone helpers: `rank.TitleMatch(a, b, threshold, aliases...)`,
-`rank.Similarity(a, b)`, `rank.Normalize(title)`.
+`rank.Similarity(a, b)`, `rank.Normalize(title)`. For debugging a score,
+`ranker.Explain(&torrent)` returns the per-clause breakdown — every point
+traces to an attribute, pattern, or preference in the profile.
 
 ## CLI
 

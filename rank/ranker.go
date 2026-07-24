@@ -46,17 +46,24 @@ func (t *Torrent) Resolution() Resolution {
 // use; the profile is snapshotted at construction, so later mutation of the
 // caller's Profile has no effect.
 type Ranker struct {
-	profile     Profile
-	policies    map[Attr]Policy
-	resolutions map[Resolution]bool
-	require     []*regexp.Regexp
-	exclude     []*regexp.Regexp
-	preferred   []*regexp.Regexp
+	profile       Profile
+	policies      map[Attr]Policy
+	resolutions   map[Resolution]bool
+	require       []*regexp.Regexp
+	exclude       []*regexp.Regexp
+	preferred     []*regexp.Regexp
+	patternRanks  []compiledPatternRank
+	resPrecedence map[Resolution]int
 
 	requiredLangs  map[string]bool
 	allowedLangs   map[string]bool
 	excludeLangs   map[string]bool
 	preferredLangs map[string]bool
+}
+
+type compiledPatternRank struct {
+	re   *regexp.Regexp
+	rank int
 }
 
 // New compiles a profile into a Ranker.
@@ -72,6 +79,16 @@ func New(p Profile) (*Ranker, error) {
 	if r.preferred, err = compilePatterns(p.Preferred); err != nil {
 		return nil, fmt.Errorf("preferred: %w", err)
 	}
+	for _, pr := range p.PatternRanks {
+		res, err := compilePatterns([]string{pr.Pattern})
+		if err != nil {
+			return nil, fmt.Errorf("pattern_ranks: %w", err)
+		}
+		if len(res) == 1 {
+			r.patternRanks = append(r.patternRanks, compiledPatternRank{re: res[0], rank: pr.Rank})
+		}
+	}
+	r.resPrecedence = resolutionPrecedence(p.ResolutionOrder)
 	r.requiredLangs = expandLangs(p.Languages.Required)
 	r.allowedLangs = expandLangs(p.Languages.Allowed)
 	r.excludeLangs = expandLangs(p.Languages.Exclude)
@@ -218,6 +235,11 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 	}
 	if len(r.preferredLangs) > 0 && langOverlap(d.Languages, r.preferredLangs) {
 		rank += o.PreferredBonus
+	}
+	for _, pr := range r.patternRanks {
+		if pr.re.MatchString(t.Raw) {
+			rank += pr.rank
+		}
 	}
 	t.Rank = rank
 

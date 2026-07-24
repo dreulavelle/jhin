@@ -33,5 +33,10 @@ func (r *Ranker) Explain(t *Torrent) []Contribution {
 	if len(r.preferredLangs) > 0 && langOverlap(t.Data.Languages, r.preferredLangs) {
 		out = append(out, Contribution{Source: "preferred_language", Rank: r.profile.Options.PreferredBonus})
 	}
+	for _, pr := range r.patternRanks {
+		if pr.re.MatchString(t.Raw) {
+			out = append(out, Contribution{Source: "pattern:" + pr.re.String(), Rank: pr.rank})
+		}
+	}
 	return out
 }
