@@ -3,8 +3,18 @@ name: CI
 on:
   push:
     branches: [main]
+    paths: &code-paths
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "parser/keywords/**"
+      - "parser/testdata/**"
+      - ".golangci.yml"
+      - ".goreleaser.yaml"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
+    paths: *code-paths
 
 permissions:
   contents: read

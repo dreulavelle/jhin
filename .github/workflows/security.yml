@@ -3,8 +3,14 @@ name: Security
 on:
   push:
     branches: [main]
+    paths: &code-paths
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/security.yml"
   pull_request:
     branches: [main]
+    paths: *code-paths
   schedule:
     - cron: "0 6 * * 1" # weekly: vulns are published after code ships
 
