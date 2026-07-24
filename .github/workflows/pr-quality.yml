@@ -1,0 +1,31 @@
+name: PR Quality
+
+# Screens external PRs for low-effort / AI-slop signals before they reach
+# review. Metadata checks only — PR code is never checked out or executed.
+# Owners, collaborators, and the default bot list (dependabot,
+# github-actions, i.e. release-please) are exempt.
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+jobs:
+  anti-slop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: peakoss/anti-slop@v0.3.0
+        with:
+          # four independent checks must fail before any action is taken,
+          # so legitimate first-time contributors are not penalized
+          max-failures: 4
+          failure-pr-message: >
+            This PR was automatically closed because it matched several
+            signals of a low-effort or machine-generated submission. If this
+            is a mistake, please open a new PR with a clear description of
+            what changed and why — real contributions are very welcome.
