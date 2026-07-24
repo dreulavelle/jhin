@@ -5,7 +5,6 @@ on:
     branches: [main]
 
 permissions:
-  id-token: write
   contents: write
   issues: write
   pull-requests: write
@@ -15,18 +14,13 @@ jobs:
     name: release
     runs-on: ubuntu-latest
     steps:
-      - name: Generate GitHub Token
-        uses: actions/create-github-app-token@v2
-        id: gh-token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-
+      # Requires: Settings → Actions → General → Workflow permissions →
+      # "Allow GitHub Actions to create and approve pull requests"
       - name: Release
         id: release
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ steps.gh-token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout
         if: ${{ steps.release.outputs['release_created'] }}
@@ -44,4 +38,4 @@ jobs:
         with:
           args: release
         env:
-          GITHUB_TOKEN: ${{ steps.gh-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

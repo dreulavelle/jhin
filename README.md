@@ -5,16 +5,19 @@
 # Jhin
 
 All-in-one Go library for torrent release names: **parsing**, **ranking**,
-**filtering**, and **sorting** — built for high accuracy and high throughput.
+**filtering**, and **sorting** — built for high accuracy and high throughput,
+with **zero runtime dependencies**.
 
-Jhin is the Go successor to [PTT](https://github.com/dreulavelle/PTT) (parsing)
-and [rank-torrent-name](https://github.com/dreulavelle/rank-torrent-name)
-(ranking/filtering/sorting), unified into a single dependency-light library.
+Jhin is the Go successor to [PTT](https://github.com/dreulavelle/PTT) and
+[rank-torrent-name](https://github.com/dreulavelle/rank-torrent-name),
+unified into one library:
 
-## Status
-
-- `jhin` / `jhin/parser` — torrent title parsing (100% parity with PTT v1.6.16, golden-verified, ~92µs/title)
-- `jhin/rank` — ranking, filtering, and sorting (successor to rank-torrent-name)
+- **`jhin/parser`** extracts 46 metadata fields from a release name in ~90µs.
+  Accuracy is contract-tested: a 1,133-title golden corpus verifies
+  byte-identical output against the battle-tested Python PTT parser.
+- **`jhin/rank`** scores, filters, and sorts releases against a declarative
+  user profile — per-attribute policies, regex gates, resolution and language
+  rules — evaluated in parallel.
 
 ## Install
 
@@ -22,7 +25,7 @@ and [rank-torrent-name](https://github.com/dreulavelle/rank-torrent-name)
 go get github.com/dreulavelle/jhin
 ```
 
-## Usage
+## Quick start: parsing
 
 ```go
 package main
@@ -34,44 +37,116 @@ import (
 )
 
 func main() {
-	result := jhin.Parse("The.Matrix.1999.1080p.BluRay.x264")
-	fmt.Println(result.Title, result.Year, result.Resolution, result.Codec)
+	r := jhin.Parse("The.Witcher.S01-S03.COMPLETE.2160p.NF.WEB-DL.DDP5.1.Atmos.DV.HDR.HEVC.10bit.MULTi-Kitsune[TGx]")
+
+	fmt.Println(r.Title)      // "The Witcher"
+	fmt.Println(r.Seasons)    // [1 2 3]
+	fmt.Println(r.Resolution) // "2160p"
+	fmt.Println(r.Quality)    // "WEB-DL"
+	fmt.Println(r.HDR)        // ["DV" "HDR"]
+	fmt.Println(r.Audio)      // ["Atmos" "Dolby Digital Plus"]
+	fmt.Println(r.Network)    // "Netflix"
+	fmt.Println(r.Group)      // "Kitsune"
 }
 ```
 
-Only need a few fields? A partial parser skips every other handler:
+`Result` has ~46 fields (see the [reference](#result-reference) below) and
+marshals straight to JSON. Useful extras:
 
 ```go
-parse := jhin.GetPartialParser([]string{"resolution", "year"})
-result := parse("The.Matrix.1999.1080p.BluRay.x264")
+r.Normalize()                 // canonical forms: 2160p→4k, codec avc→AVC, ...
+r.LanguageNames()             // ["fr"] → ["French"]
+
+parser.ParseAll(titles)       // parallel batch, index-aligned with input
+parser.ExtractSeasons(title)  // just the season numbers
+parser.GetPartialParser([]string{"resolution", "year"}) // few-field fast path
 ```
 
-### Ranking, filtering & sorting
+## Quick start: ranking, filtering & sorting
+
+The `rank` package answers three questions for every release: *how good is
+it* (rank), *am I allowed to grab it* (fetch + rejection reasons), and *in
+what order should I take them* (sort).
 
 ```go
-import "github.com/dreulavelle/jhin/rank"
+package main
 
-ranker, _ := rank.New(rank.Default())
+import (
+	"fmt"
 
-// Evaluate a batch in parallel — the result is index-aligned with the input;
-// each entry carries the parse, a score, a fetch verdict, and rejection reasons.
-torrents := ranker.RankAll(titles)
+	"github.com/dreulavelle/jhin/rank"
+)
 
-// Sorting is a separate, explicit step.
-best := rank.Sort(torrents, rank.SortOptions{
-	FetchableOnly: true,
-	BucketLimit:   5, // top 5 per resolution bucket
+func main() {
+	ranker, err := rank.New(rank.Default())
+	if err != nil {
+		panic(err)
+	}
+
+	titles := []string{
+		"Movie.2020.2160p.BluRay.REMUX.DV.TrueHD.7.1-GRP",
+		"Movie.2020.1080p.WEB-DL.DDP5.1.H.264-GRP",
+		"Movie.2020.CAM.x264-TRASH",
+	}
+
+	// Index-aligned with the input — nothing is reordered or dropped.
+	torrents := ranker.RankAll(titles)
+	for _, t := range torrents {
+		fmt.Printf("%6d fetch=%-5v %v %s\n", t.Rank, t.Fetch, t.Rejections, t.Raw)
+	}
+
+	// Sorting is separate and explicit: resolution bucket, then rank.
+	best := rank.Sort(torrents, rank.SortOptions{
+		FetchableOnly: true,
+		BucketLimit:   5, // top 5 per resolution bucket
+	})
+	fmt.Println("best:", best[0].Raw)
+}
+```
+
+### Profiles
+
+Everything tunable lives in one declarative, JSON-serializable `Profile`:
+
+```go
+p := rank.Default()
+
+// Per-attribute policy: may it be fetched, and what is it worth?
+p.Attributes = map[rank.Attr]rank.Policy{
+	rank.AttrRemux:       {Fetch: true, Rank: 25000},
+	rank.AttrDolbyVision: {Fetch: false},           // veto DV entirely
+}
+
+// Regex gates against the raw title ("/pat/" = case-sensitive).
+p.Require = []string{`\b(2160p|1080p)\b`}
+p.Exclude = []string{`\bHDCAM\b`}
+p.Preferred = []string{`\bIMAX\b`} // matching adds Options.PreferredBonus
+
+// Resolution and language rules.
+p.Resolutions[rank.Res2160p] = true
+p.Languages.Exclude = []string{"ru"}       // codes or groups: anime/common/all
+p.Languages.Preferred = []string{"en"}
+
+p.Save("profile.json")                      // and rank.Load("profile.json")
+
+ranker, _ := rank.New(p)
+```
+
+### Pinning to a specific movie or show
+
+```go
+t := ranker.Rank(raw, rank.RankOptions{
+	TargetTitle: "The Matrix",
+	Aliases:     []string{"Matrix"},
 })
+// t.TitleRatio holds the similarity; below Options.TitleThreshold (0.85)
+// the release is rejected with "title_mismatch".
 ```
 
-Profiles declare everything tunable — per-attribute fetch/rank policies,
-require/exclude/preferred patterns, resolution gates, language rules — and
-serialize to JSON (`profile.Save` / `rank.Load`). Pin releases to a specific
-piece of media with `rank.RankOptions{TargetTitle: "The Matrix"}`; standalone
-helpers `rank.TitleMatch`, `rank.Similarity`, and `rank.Normalize` are also
-exported.
+Standalone helpers: `rank.TitleMatch(a, b, threshold, aliases...)`,
+`rank.Similarity(a, b)`, `rank.Normalize(title)`.
 
-### CLI
+## CLI
 
 ```sh
 go install github.com/dreulavelle/jhin/cmd/jhin@latest
@@ -79,10 +154,32 @@ go install github.com/dreulavelle/jhin/cmd/jhin@latest
 jhin parse --pretty "The.Matrix.1999.1080p.BluRay.x264"
 ```
 
+## Performance
+
+Benchmarked on a Ryzen 9 5900HX (see `benchmarks/`):
+
+| Operation | Time | Notes |
+|---|---|---|
+| Parse (simple title) | ~92µs | 68 allocs |
+| Parse (complex UHD title) | ~190µs | 102 allocs |
+| 100k-title batch | ~1s | `ParseAll`/`RankAll` across 8 cores |
+
+The parser runs an ordered table of 424 handlers behind a literal prefilter:
+each handler's regex is analyzed at init to derive required substrings, and
+handlers that provably cannot match are skipped. Equivalence is enforced by
+tests and fuzzing — the prefilter can never change a result.
+
+## Accuracy
+
+`parser/testdata/golden.json` pins the expected output for 1,133 real-world
+release names across every field — the corpus was generated by the original
+Python PTT parser and jhin reproduces it byte-for-byte. Any behavioral
+regression fails CI.
+
 ## `Result` Reference
 
-Field semantics match [PTT](https://github.com/dreulavelle/PTT) v1.6.16 exactly
-(verified by a 1,133-title golden corpus generated from the Python parser).
+Field semantics match [PTT](https://github.com/dreulavelle/PTT) v1.6.16
+exactly (golden-verified).
 
 - **Adult** (`bool`): adult-content detection (keyword list)
 - **Audio** (`[]string`): `DTS Lossless`, `DTS Lossy`, `Atmos`, `TrueHD`, `FLAC`, `Dolby Digital Plus`, `Dolby Digital`, `AAC`, `PCM`, `OPUS`, `MP3`, `HQ Clean Audio`

@@ -14,8 +14,9 @@ import (
 func main() {
 	cmd := &cli.Command{
 		Name:  "jhin",
-		Usage: "torrent title parser",
+		Usage: "torrent release name parser, ranker, and filter",
 		Commands: []*cli.Command{
+			rankCommand,
 			{
 				Name: "parse",
 				Flags: []cli.Flag{
