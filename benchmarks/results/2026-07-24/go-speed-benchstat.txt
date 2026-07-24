@@ -4,24 +4,24 @@ pkg: github.com/dreulavelle/jhin/benchmarks
 cpu: AMD Ryzen 9 5900HX with Radeon Graphics        
                                         │             │
                                         │   sec/op    │
-Parse/jhin-8                              181.1µ ± 7%
-Parse/ProfChaos/torrent-name-parser-8     63.99µ ± 5%
-Parse/razsteinmetz/go-ptn-8               45.25µ ± 5%
-Parse/middelink/go-parse-torrent-name-8   37.97µ ± 1%
-geomean                                   66.80µ
+Parse/jhin-8                              73.51µ ± 1%
+Parse/ProfChaos/torrent-name-parser-8     60.86µ ± 1%
+Parse/razsteinmetz/go-ptn-8               43.34µ ± 1%
+Parse/middelink/go-parse-torrent-name-8   37.98µ ± 0%
+geomean                                   52.09µ
 
                                         │              │
                                         │     B/op     │
-Parse/jhin-8                              4.975Ki ± 9%
-Parse/ProfChaos/torrent-name-parser-8       747.0 ± 0%
-Parse/razsteinmetz/go-ptn-8               2.627Ki ± 0%
-Parse/middelink/go-parse-torrent-name-8   1.239Ki ± 0%
-geomean                                   1.854Ki
+Parse/jhin-8                              4.444Ki ± 1%
+Parse/ProfChaos/torrent-name-parser-8       745.0 ± 0%
+Parse/razsteinmetz/go-ptn-8               2.624Ki ± 0%
+Parse/middelink/go-parse-torrent-name-8   1.238Ki ± 0%
+geomean                                   1.800Ki
 
                                         │            │
                                         │ allocs/op  │
-Parse/jhin-8                              60.00 ± 0%
+Parse/jhin-8                              59.00 ± 0%
 Parse/ProfChaos/torrent-name-parser-8     15.00 ± 0%
 Parse/razsteinmetz/go-ptn-8               23.00 ± 0%
 Parse/middelink/go-parse-torrent-name-8   14.00 ± 0%
-geomean                                   23.20
+geomean                                   23.10

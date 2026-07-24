@@ -35,27 +35,28 @@ normalization (see below).
 
 | Library | per title | B/op | allocs/op |
 |---|---|---|---|
-| middelink/go-parse-torrent-name | 38.0µs ± 1% | 1.2Ki | 14 |
-| razsteinmetz/go-ptn | 45.3µs ± 5% | 2.6Ki | 23 |
-| ProfChaos/torrent-name-parser | 64.0µs ± 5% | 0.7Ki | 15 |
-| **jhin** | **181.1µs ± 7%** | 5.0Ki | 60 |
-| jhin `ParseAll` (batch, 8 threads) | ~43µs/title | — | — |
+| middelink/go-parse-torrent-name | 38.0µs ± 0% | 1.2Ki | 14 |
+| razsteinmetz/go-ptn | 43.3µs ± 1% | 2.6Ki | 23 |
+| ProfChaos/torrent-name-parser | 60.9µs ± 1% | 0.7Ki | 15 |
+| **jhin** | **73.5µs ± 1%** | 4.4Ki | 60 |
+| jhin `ParseAll` (batch, 8 threads) | ~19µs/title | — | — |
 
-**jhin is the slowest Go parser per single-threaded call, and that is the
-trade on display**: it runs 424 ordered handlers extracting 46 fields where
-the others run ~30 regexes filling ~20 scalar fields — the accuracy table is
-what that extra work buys. `ParseAll` is jhin's built-in parallel batch API;
-no competitor ships one, so that row is jhin-only (any parser can be sharded
-by the caller).
+**jhin is still the slowest of the four per single-threaded call — published
+as measured** — but the gap is the trade on display: it runs 424 ordered
+handlers extracting 46 fields (behind an Aho-Corasick literal prefilter)
+where the others run ~30 regexes filling ~20 scalar fields, and the accuracy
+table is what that extra work buys at a ~1.2x speed cost over the nearest
+rival. `ParseAll` is jhin's built-in parallel batch API; no competitor ships
+one, so that row is jhin-only (any parser can be sharded by the caller).
 
 ### Speed — cross-language, same corpus, in-process timing
 
 | Library | per title | vs jhin |
 |---|---|---|
-| parse-torrent-title 3.0.1 (npm, Node 22) | 17.2µs | 10.5x faster — but a much smaller handler set (fewer fields, not accuracy-scored here) |
-| **jhin** (Go, serial) | 181.1µs | — |
-| PTT 1.8.5 (parsett, Python 3.13) | 595.0µs | jhin 3.3x faster **with byte-identical output** |
-| guessit 4.1.0 (Python 3.13) | 4,430µs | jhin 24x faster |
+| parse-torrent-title 3.0.1 (npm, Node 22) | 17.2µs | 4.3x faster — but a much smaller handler set (fewer fields, not accuracy-scored here) |
+| **jhin** (Go, serial) | 73.5µs | — |
+| PTT 1.8.5 (parsett, Python 3.13) | 595.0µs | jhin 8.1x faster **with byte-identical output** |
+| guessit 4.1.0 (Python 3.13) | 4,430µs | jhin 60x faster |
 
 Interpreter startup and corpus loading are excluded on all sides — each
 script times only the parse loop, so the numbers are comparable to Go ns/op.
