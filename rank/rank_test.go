@@ -15,9 +15,7 @@ func mustRanker(t *testing.T, p Profile) *Ranker {
 }
 
 func TestDefaultProfileOrdering(t *testing.T) {
-	p := Default()
-	p.Resolutions[Res2160p] = true
-	r := mustRanker(t, p)
+	r := mustRanker(t, Default())
 
 	remux := r.Rank("The.Matrix.1999.2160p.UHD.BluRay.REMUX.DV.HDR10.HEVC.TrueHD.7.1.Atmos-FGT")
 	webdl := r.Rank("The.Matrix.1999.1080p.WEB-DL.DDP5.1.H.264-GRP")
@@ -57,19 +55,30 @@ func TestTrashAndAdultVetoes(t *testing.T) {
 }
 
 func TestResolutionGate(t *testing.T) {
-	r := mustRanker(t, Default()) // 2160p disabled by default
-	tor := r.Rank("Movie.2020.2160p.WEB-DL.HEVC")
+	r := mustRanker(t, Default())
+	if tor := r.Rank("Movie.2020.2160p.WEB-DL.HEVC"); !tor.Fetch {
+		t.Fatalf("2160p should pass the default profile: %+v", tor.Rejections)
+	}
+	tor := r.Rank("Movie.2001.480p.WEB-DL.HEVC")
 	if tor.Fetch {
-		t.Fatalf("2160p should be rejected by default profile: %+v", tor)
+		t.Fatalf("480p should be rejected by the default profile: %+v", tor)
 	}
 	found := false
 	for _, rej := range tor.Rejections {
-		if rej == "resolution:2160p" {
+		if rej == "resolution:480p" {
 			found = true
 		}
 	}
 	if !found {
 		t.Fatalf("expected resolution rejection, got %v", tor.Rejections)
+	}
+
+	only1080 := Default()
+	only1080.Resolutions[Res2160p] = false
+	only1080.Resolutions[Res1440p] = false
+	r2 := mustRanker(t, only1080)
+	if tor := r2.Rank("Movie.2020.2160p.WEB-DL.HEVC"); tor.Fetch {
+		t.Fatalf("2160p should be rejected after disabling: %+v", tor)
 	}
 }
 
@@ -174,9 +183,7 @@ func TestRankAllPreservesOrder(t *testing.T) {
 }
 
 func TestSort(t *testing.T) {
-	p := Default()
-	p.Resolutions[Res2160p] = true
-	r := mustRanker(t, p)
+	r := mustRanker(t, Default())
 	titles := []string{
 		"Movie.2020.720p.WEB-DL-A",
 		"Movie.2020.2160p.WEB-DL.DV-B",

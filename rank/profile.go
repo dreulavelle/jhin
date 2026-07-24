@@ -117,13 +117,16 @@ type Profile struct {
 	Attributes map[Attr]Policy `json:"attributes,omitempty"`
 }
 
-// Default returns a sensible starting profile: 1080p/720p enabled, trash
-// and adult content removed, remux/HDR/lossless audio ranked highest.
+// Default returns a sensible starting profile: 4K/1440p/1080p/720p enabled
+// with higher quality favored, SD tiers disabled, and trash, CAMs, 3D, and
+// adult content removed. Disable tiers you don't want (for example
+// Resolutions[Res2160p] = false) or replace the maps wholesale — consuming
+// apps are expected to build their own profiles on top of these defaults.
 func Default() Profile {
 	return Profile{
 		Name: "default",
 		Resolutions: map[Resolution]bool{
-			Res2160p: false, Res1440p: false, Res1080p: true, Res720p: true,
+			Res2160p: true, Res1440p: true, Res1080p: true, Res720p: true,
 			Res576p: false, Res480p: false, Res360p: false, Res240p: false,
 			ResUnknown: true,
 		},

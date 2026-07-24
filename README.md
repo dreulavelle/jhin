@@ -123,8 +123,9 @@ p.Require = []string{`\b(2160p|1080p)\b`}
 p.Exclude = []string{`\bHDCAM\b`}
 p.Preferred = []string{`\bIMAX\b`} // matching adds Options.PreferredBonus
 
-// Resolution and language rules.
-p.Resolutions[rank.Res2160p] = true
+// Resolution and language rules. Default enables 4K/1440p/1080p/720p;
+// disable what you don't want.
+p.Resolutions[rank.Res2160p] = false
 p.Languages.Exclude = []string{"ru"}       // codes or groups: anime/common/all
 p.Languages.Preferred = []string{"en"}
 
