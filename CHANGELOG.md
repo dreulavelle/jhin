@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/dreulavelle/jhin/compare/v0.1.0...v0.1.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **ci:** draft releases so binaries attach before publishing ([d4bf34e](https://github.com/dreulavelle/jhin/commit/d4bf34e72aa64d8b5bb85a66ef0cf8923f8d9036))
+
 ## 0.1.0 (2026-07-24)
 
 
