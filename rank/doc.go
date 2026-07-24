@@ -1,6 +1,4 @@
-// Package rank scores, filters, and sorts torrent releases — the successor
-// to rank-torrent-name (github.com/dreulavelle/rank-torrent-name), rebuilt
-// around a single attribute registry.
+// Package rank scores, filters, and sorts torrent releases.
 //
 // A Profile declares everything tunable: per-attribute policies (fetch
 // yes/no + score), require/exclude/preferred regex patterns, resolution

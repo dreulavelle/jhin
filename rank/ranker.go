@@ -75,8 +75,8 @@ func New(p Profile) (*Ranker, error) {
 	return r, nil
 }
 
-// compile_patterns follows the RTN convention: "/pat/" is case-sensitive,
-// anything else case-insensitive.
+// compile_patterns treats "/pat/" as case-sensitive and anything else as
+// case-insensitive.
 func compile_patterns(patterns []string) ([]*regexp.Regexp, error) {
 	out := make([]*regexp.Regexp, 0, len(patterns))
 	for _, p := range patterns {

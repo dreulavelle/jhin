@@ -1,8 +1,7 @@
 package rank
 
-// Title similarity: RTN used the Levenshtein package's ratio() (indel
-// distance); this is the same math in pure Go over runes, with RTN's title
-// normalization (accent folding + punctuation stripping).
+// Title similarity: indel ratio over normalized titles (accent folding +
+// punctuation stripping).
 
 import (
 	"strings"
@@ -82,7 +81,7 @@ func BestSimilarity(correctTitle, parsedTitle string, aliases ...string) float64
 
 // indel_ratio computes 1 - D/(m+n) where D is the minimum number of
 // insertions+deletions transforming a into b (substitution costs 2, i.e.
-// LCS-based distance) — identical to Levenshtein.ratio / rapidfuzz.
+// LCS-based distance).
 func indel_ratio(a, b []rune) float64 {
 	if len(a) == 0 && len(b) == 0 {
 		return 1

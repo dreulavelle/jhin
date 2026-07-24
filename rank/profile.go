@@ -1,8 +1,6 @@
 package rank
 
 // Profile: everything a user can tune, in one declarative structure.
-// A Policy per attribute replaces RTN's parallel BaseRankingModel /
-// CustomRank / category-model hierarchy.
 
 import (
 	"encoding/json"
@@ -101,9 +99,8 @@ type Options struct {
 
 // Profile is a complete, serializable ranking/filtering configuration.
 //
-// Patterns in Require/Exclude/Preferred follow RTN's convention: a pattern
-// wrapped in slashes ("/X/") is case-sensitive, anything else is compiled
-// case-insensitively.
+// Patterns in Require/Exclude/Preferred wrapped in slashes ("/X/") are
+// case-sensitive; anything else is compiled case-insensitively.
 type Profile struct {
 	Name string `json:"name,omitempty"`
 
@@ -120,8 +117,8 @@ type Profile struct {
 	Attributes map[Attr]Policy `json:"attributes,omitempty"`
 }
 
-// Default returns the batteries-included profile: 1080p/720p sweet spot,
-// trash and adult removed, remux/HDR/lossless audio ranked to the top.
+// Default returns a sensible starting profile: 1080p/720p enabled, trash
+// and adult content removed, remux/HDR/lossless audio ranked highest.
 func Default() Profile {
 	return Profile{
 		Name: "default",
@@ -141,9 +138,8 @@ func Default() Profile {
 	}
 }
 
-// DefaultPolicies is the base Policy table (RTN's DefaultRanking lineage,
-// with its fetch/rank contradictions resolved: nothing is ranked +10000 yet
-// unfetchable).
+// DefaultPolicies is the base Policy table; profiles override per
+// attribute via Profile.Attributes.
 var DefaultPolicies = map[Attr]Policy{
 	// sources
 	AttrRemux:    {Fetch: true, Rank: 10000},
