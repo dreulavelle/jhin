@@ -2,14 +2,14 @@ goos: linux
 goarch: amd64
 pkg: github.com/dreulavelle/jhin/parser
 cpu: AMD Ryzen 9 5900HX with Radeon Graphics        
-BenchmarkParse-8          	    1224	    943033 ns/op	   53889 B/op	     886 allocs/op
-BenchmarkParse-8          	    1296	    949815 ns/op	   54017 B/op	     886 allocs/op
-BenchmarkParse-8          	    1297	    933975 ns/op	   54045 B/op	     886 allocs/op
-BenchmarkParseSimple-8    	   23949	     49403 ns/op	    4220 B/op	      69 allocs/op
-BenchmarkParseSimple-8    	   24136	     49534 ns/op	    4218 B/op	      69 allocs/op
-BenchmarkParseSimple-8    	   24355	     50481 ns/op	    4232 B/op	      69 allocs/op
-BenchmarkParseComplex-8   	   10000	    105089 ns/op	    5979 B/op	     103 allocs/op
-BenchmarkParseComplex-8   	   13550	     88510 ns/op	    5976 B/op	     103 allocs/op
-BenchmarkParseComplex-8   	   13624	     87881 ns/op	    5956 B/op	     103 allocs/op
+BenchmarkParse-8          	    1364	    857567 ns/op	   53939 B/op	     886 allocs/op
+BenchmarkParse-8          	    1436	    857888 ns/op	   53913 B/op	     886 allocs/op
+BenchmarkParse-8          	    1406	    852927 ns/op	   53841 B/op	     886 allocs/op
+BenchmarkParseSimple-8    	   26618	     45482 ns/op	    4223 B/op	      69 allocs/op
+BenchmarkParseSimple-8    	   25904	     46005 ns/op	    4214 B/op	      69 allocs/op
+BenchmarkParseSimple-8    	   26118	     45646 ns/op	    4221 B/op	      69 allocs/op
+BenchmarkParseComplex-8   	   14323	     83453 ns/op	    5962 B/op	     103 allocs/op
+BenchmarkParseComplex-8   	   14230	     83908 ns/op	    5959 B/op	     103 allocs/op
+BenchmarkParseComplex-8   	   14178	     84199 ns/op	    5960 B/op	     103 allocs/op
 PASS
-ok  	github.com/dreulavelle/jhin/parser	10.676s
+ok  	github.com/dreulavelle/jhin/parser	10.802s

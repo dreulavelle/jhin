@@ -2,11 +2,11 @@ goos: linux
 goarch: amd64
 pkg: github.com/dreulavelle/jhin/benchmarks
 cpu: AMD Ryzen 9 5900HX with Radeon Graphics        
-BenchmarkParseAll-8   	      55	  21519038 ns/op	     18615 ns/title	 5307068 B/op	   69031 allocs/op
-BenchmarkParseAll-8   	      56	  20992298 ns/op	     18159 ns/title	 5293164 B/op	   69025 allocs/op
-BenchmarkParseAll-8   	      56	  21441178 ns/op	     18548 ns/title	 5324985 B/op	   69032 allocs/op
-BenchmarkParseAll-8   	      48	  21554398 ns/op	     18646 ns/title	 5309632 B/op	   69027 allocs/op
-BenchmarkParseAll-8   	      54	  21927766 ns/op	     18969 ns/title	 5341293 B/op	   69035 allocs/op
-BenchmarkParseAll-8   	      56	  21937225 ns/op	     18977 ns/title	 5338263 B/op	   69033 allocs/op
+BenchmarkParseAll-8   	      58	  20440722 ns/op	     17682 ns/title	 5356762 B/op	   69039 allocs/op
+BenchmarkParseAll-8   	      58	  19951184 ns/op	     17259 ns/title	 5268986 B/op	   69022 allocs/op
+BenchmarkParseAll-8   	      51	  19718273 ns/op	     17057 ns/title	 5275716 B/op	   69022 allocs/op
+BenchmarkParseAll-8   	      52	  19855656 ns/op	     17176 ns/title	 5317827 B/op	   69030 allocs/op
+BenchmarkParseAll-8   	      55	  19921352 ns/op	     17233 ns/title	 5303585 B/op	   69028 allocs/op
+BenchmarkParseAll-8   	      58	  19999983 ns/op	     17301 ns/title	 5262825 B/op	   69020 allocs/op
 PASS
-ok  	github.com/dreulavelle/jhin/benchmarks	7.053s
+ok  	github.com/dreulavelle/jhin/benchmarks	6.680s

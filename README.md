@@ -12,7 +12,7 @@ Jhin is the Go successor to [PTT](https://github.com/dreulavelle/PTT) and
 [rank-torrent-name](https://github.com/dreulavelle/rank-torrent-name),
 unified into one library:
 
-- **`jhin/parser`** extracts 46 metadata fields from a release name in ~74µs.
+- **`jhin/parser`** extracts 46 metadata fields from a release name in ~69µs.
   Accuracy is contract-tested: a 1,156-title golden corpus verifies
   byte-identical output against the Python PTT parser.
 - **`jhin/rank`** scores, filters, and sorts releases against a declarative
@@ -173,16 +173,16 @@ Benchmarked on a Ryzen 9 5900HX (see `benchmarks/`):
 
 | Operation | Time | Notes |
 |---|---|---|
-| Parse (simple title) | ~51µs | 69 allocs |
-| Parse (corpus mean, 1,156 mixed titles) | ~74µs | easy and hostile titles alike |
-| Batch parse | ~19µs/title | `ParseAll` across 8 threads — 100k titles in ~2s |
+| Parse (simple title) | ~46µs | 69 allocs |
+| Parse (corpus mean, 1,156 mixed titles) | ~69µs | easy and hostile titles alike |
+| Batch parse | ~18µs/title | `ParseAll` across 8 threads — 100k titles in ~1.8s |
 
 The parser runs an ordered table of 424 handlers behind a prefilter: each
 handler's regex is analyzed at init to derive required literals (down to
 digram sets like `s0`…`s9` for `S01`-style patterns) or required unicode
 scripts, all literals are compiled into a single Aho-Corasick automaton, and
 one scan per title decides which handlers can possibly match — cutting ~430
-potential regex executions to ~50. Equivalence is enforced by tests and
+potential regex executions to ~46. Equivalence is enforced by tests and
 fuzzing — the prefilter can never change a result.
 
 ## Accuracy
@@ -201,7 +201,7 @@ the 9 fields every library claims, after neutral vocabulary normalization.
 
 | Library | Accuracy (9 shared fields) | Speed (per title, serial) | Fields |
 |---|---|---|---|
-| **jhin** (Go) | **100%**¹ | 74µs (19µs batched) | 46 |
+| **jhin** (Go) | **100%**¹ | 69µs (18µs batched) | 46 |
 | [ProfChaos/torrent-name-parser](https://github.com/ProfChaos/torrent-name-parser) (Go) | 78.8% | 61µs | 28 |
 | [middelink/go-parse-torrent-name](https://github.com/middelink/go-parse-torrent-name) (Go, unmaintained) | 70.1% | 38µs | 22 |
 | [razsteinmetz/go-ptn](https://github.com/razsteinmetz/go-ptn) (Go) | 67.4% | 43µs | 26 |
@@ -218,7 +218,7 @@ a shared gold standard, so speed only.
 The lighter Go parsers run ~30 regexes filling ~20 scalar fields; jhin runs
 424 handlers behind an Aho-Corasick prefilter to extract 46 fields
 (multi-season packs, episode ranges, 60+ languages, HDR, editions, trash
-detection) — and still lands within ~1.2x of the fastest serious rival.
+detection) — and still lands within ~1.1x of the fastest serious rival.
 The accuracy column is what the remaining microseconds buy.
 
 ## `Result` Reference
