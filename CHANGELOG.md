@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/dreulavelle/jhin/compare/v0.1.1...v0.1.2) (2026-07-24)
+
+
+### Bug Fixes
+
+* **ci:** publish releases with binaries in one step ([f59dd92](https://github.com/dreulavelle/jhin/commit/f59dd9263b1fe92890f91a45abfdf7b79010fa48))
+
 ## [0.1.1](https://github.com/dreulavelle/jhin/compare/v0.1.0...v0.1.1) (2026-07-24)
 
 
