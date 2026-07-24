@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0](https://github.com/dreulavelle/jhin/compare/v0.1.2...v0.2.0) (2026-07-24)
+
+
+### Features
+
+* **rank:** export Attributes; document app-integration pattern ([4b945b5](https://github.com/dreulavelle/jhin/commit/4b945b5b5d6353dd806adbb74a35f87756a26c54))
+* **rank:** preference-order sorting, composable sort chains, weighted patterns ([6171271](https://github.com/dreulavelle/jhin/commit/617127175bac171c9265989b0ddf931ea2c617cc))
+* **rank:** score explanations, OPUS/PCM attributes, corpus invariants ([bdbd4f3](https://github.com/dreulavelle/jhin/commit/bdbd4f3f4f61d9ab0dec7b9dcead3cd438c2d564))
+
 ## [0.1.2](https://github.com/dreulavelle/jhin/compare/v0.1.1...v0.1.2) (2026-07-24)
 
 
