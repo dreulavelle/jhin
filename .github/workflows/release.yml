@@ -9,14 +9,17 @@ permissions:
   issues: write
   pull-requests: write
 
+# Releases on this repo are immutable: assets can only exist if they are
+# attached when the release is published. release-please therefore only
+# computes the version and notes (as a draft, which carries the outputs);
+# the workflow pushes the tag, discards the draft, and goreleaser publishes
+# the real release with binaries in a single step.
 jobs:
   release:
     name: release
     runs-on: ubuntu-latest
     steps:
-      # Requires: Settings → Actions → General → Workflow permissions →
-      # "Allow GitHub Actions to create and approve pull requests"
-      - name: Release
+      - name: Release PR / Version
         id: release
         uses: googleapis/release-please-action@v4
         with:
@@ -26,24 +29,36 @@ jobs:
         if: ${{ steps.release.outputs['release_created'] }}
         uses: actions/checkout@v4
         with:
-          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Push Tag
+        if: ${{ steps.release.outputs['release_created'] }}
+        run: |
+          git tag "${{ steps.release.outputs['tag_name'] }}" "${{ steps.release.outputs['sha'] }}" || true
+          git push origin "${{ steps.release.outputs['tag_name'] }}"
+
+      - name: Discard Draft
+        if: ${{ steps.release.outputs['release_created'] }}
+        run: gh release delete "${{ steps.release.outputs['tag_name'] }}" --repo "$GITHUB_REPOSITORY" --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write Release Notes
+        if: ${{ steps.release.outputs['release_created'] }}
+        run: printf '%s' "$NOTES" > /tmp/release-notes.md
+        env:
+          NOTES: ${{ steps.release.outputs['body'] }}
+
       - name: Setup Go
         if: ${{ steps.release.outputs['release_created'] }}
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-      - name: Build and Release Artifact
+          go-version: stable
+
+      - name: Build and Publish Release
         if: ${{ steps.release.outputs['release_created'] }}
         uses: goreleaser/goreleaser-action@v6
         with:
-          args: release
+          args: release --clean --release-notes /tmp/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Releases are immutable once published, so release-please creates a
-      # draft, goreleaser attaches binaries to it, and this publishes it.
-      - name: Publish Release
-        if: ${{ steps.release.outputs['release_created'] }}
-        run: gh release edit "${{ steps.release.outputs['tag_name'] }}" --repo "$GITHUB_REPOSITORY" --draft=false --latest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
