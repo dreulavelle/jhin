@@ -13,9 +13,8 @@ and [rank-torrent-name](https://github.com/dreulavelle/rank-torrent-name)
 
 ## Status
 
-- `jhin` / `jhin/parser` — torrent title parsing (100% parity with PTT v1.6.16, golden-verified)
-- `jhin/rank` — ranking engine (in progress)
-- `jhin/filter` — filtering engine (in progress)
+- `jhin` / `jhin/parser` — torrent title parsing (100% parity with PTT v1.6.16, golden-verified, ~92µs/title)
+- `jhin/rank` — ranking, filtering, and sorting (successor to rank-torrent-name)
 
 ## Install
 
@@ -46,6 +45,31 @@ Only need a few fields? A partial parser skips every other handler:
 parse := jhin.GetPartialParser([]string{"resolution", "year"})
 result := parse("The.Matrix.1999.1080p.BluRay.x264")
 ```
+
+### Ranking, filtering & sorting
+
+```go
+import "github.com/dreulavelle/jhin/rank"
+
+ranker, _ := rank.New(rank.Default())
+
+// Evaluate a batch in parallel — the result is index-aligned with the input;
+// each entry carries the parse, a score, a fetch verdict, and rejection reasons.
+torrents := ranker.RankAll(titles)
+
+// Sorting is a separate, explicit step.
+best := rank.Sort(torrents, rank.SortOptions{
+	FetchableOnly: true,
+	BucketLimit:   5, // top 5 per resolution bucket
+})
+```
+
+Profiles declare everything tunable — per-attribute fetch/rank policies,
+require/exclude/preferred patterns, resolution gates, language rules — and
+serialize to JSON (`profile.Save` / `rank.Load`). Pin releases to a specific
+piece of media with `rank.RankOptions{TargetTitle: "The Matrix"}`; standalone
+helpers `rank.TitleMatch`, `rank.Similarity`, and `rank.Normalize` are also
+exported.
 
 ### CLI
 

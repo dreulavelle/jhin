@@ -1,17 +1,22 @@
 // Package jhin is an all-in-one library for working with torrent release
-// names: parsing metadata out of raw titles, and (coming soon) ranking,
-// filtering, and sorting torrents.
+// names: parsing metadata out of raw titles, then ranking, filtering, and
+// sorting releases against a user profile.
 //
 // The root package is a thin facade over the subpackages so that the common
 // case stays a one-liner:
 //
 //	result := jhin.Parse("Deadpool 2016 1080p BluRay x264 DTS-JYK")
 //
-// For advanced use, import the subpackages directly:
+// For ranking, filtering, and sorting, use the rank subpackage:
+//
+//	ranker, _ := rank.New(rank.Default())
+//	torrents := ranker.RankAll(titles)          // index-aligned with input
+//	best := rank.Sort(torrents, rank.SortOptions{FetchableOnly: true})
+//
+// Subpackages:
 //
 //   - github.com/dreulavelle/jhin/parser — the title parsing engine
-//   - github.com/dreulavelle/jhin/rank — torrent ranking (planned)
-//   - github.com/dreulavelle/jhin/filter — torrent filtering (planned)
+//   - github.com/dreulavelle/jhin/rank — ranking, filtering, and sorting
 package jhin
 
 import "github.com/dreulavelle/jhin/parser"
