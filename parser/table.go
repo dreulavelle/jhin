@@ -307,6 +307,8 @@ var handlers = []handler{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b`),
 		Transform: toBoolean(),
+		// every match contains T followed by ELE, C, or S
+		Gate: gate("te", "tc", "ts"),
 	},
 	// trash: \bPre.?DVD(?:Rip)?\b
 	{
@@ -664,6 +666,7 @@ var handlers = []handler{
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:HD[ .-]*)?T(?:ELE)?S(?:YNC)?(?:Rip)?\b`),
+		Gate:      gate("te", "ts"),
 		Transform: toValue(`TeleSync`),
 		Remove:    true,
 	},
@@ -671,6 +674,7 @@ var handlers = []handler{
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`\b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b`),
+		Gate:      gate("te", "tc"),
 		Transform: toValue(`TeleCine`),
 		Remove:    true,
 	},

@@ -15,14 +15,26 @@ import (
 //go:embed keywords/combined-keywords.txt
 var adultKeywordsRaw string
 
-func buildAdultPattern() *regexp.Regexp {
+// adultKeywords returns the cleaned keyword list; it doubles as the adult
+// handler's prefilter gate (containment of any keyword is the exact
+// necessary condition for the handler to fire).
+func adultKeywords() []string {
 	lines := strings.Split(adultKeywordsRaw, "\n")
-	escaped := make([]string, 0, len(lines))
+	out := make([]string, 0, len(lines))
 	for _, line := range lines {
 		kw := strings.ToLower(strings.TrimSpace(line))
 		if kw == "" {
 			continue
 		}
+		out = append(out, kw)
+	}
+	return out
+}
+
+func buildAdultPattern() *regexp.Regexp {
+	kws := adultKeywords()
+	escaped := make([]string, 0, len(kws))
+	for _, kw := range kws {
 		escaped = append(escaped, regexp.QuoteMeta(kw))
 	}
 	// substring containment (no word boundaries): any keyword occurring
