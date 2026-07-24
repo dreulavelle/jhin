@@ -195,31 +195,11 @@ func (r *Ranker) RankEntries(entries []Entry, opts ...RankOptions) []Torrent {
 // (one hash cannot describe many releases) — use RankEntries to carry
 // per-release infohashes.
 func (r *Ranker) RankAll(titles []string, opts ...RankOptions) []Torrent {
-	var opt RankOptions
-	if len(opts) > 0 {
-		opt = opts[0]
+	entries := make([]Entry, len(titles))
+	for i, t := range titles {
+		entries[i] = Entry{Title: t}
 	}
-	out := make([]Torrent, len(titles))
-	workers := min(runtime.GOMAXPROCS(0), max(1, len(titles)))
-	var wg sync.WaitGroup
-	ch := make(chan int, workers*2)
-	for range workers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for i := range ch {
-				data := parser.Parse(titles[i])
-				out[i] = Torrent{Raw: titles[i], Data: data}
-				r.evaluate(&out[i], &opt)
-			}
-		}()
-	}
-	for i := range titles {
-		ch <- i
-	}
-	close(ch)
-	wg.Wait()
-	return out
+	return r.RankEntries(entries, opts...)
 }
 
 // evaluate applies the veto chain and scoring to a parsed release.

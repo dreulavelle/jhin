@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func benchTitles(b *testing.B) []string {
+func benchTitles(b testing.TB) []string {
 	blob, err := os.ReadFile("../parser/testdata/golden.json")
 	if err != nil {
 		b.Skip("golden corpus unavailable")

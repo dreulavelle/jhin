@@ -66,6 +66,8 @@ const (
 	AttrDTSLossy         Attr = "dts_lossy"
 	AttrDTSLossless      Attr = "dts_lossless"
 	AttrFLAC             Attr = "flac"
+	AttrOPUS             Attr = "opus"
+	AttrPCM              Attr = "pcm"
 	AttrMP3              Attr = "mp3"
 	AttrTrueHD           Attr = "truehd"
 	AttrCleanAudio       Attr = "clean_audio"
@@ -154,6 +156,8 @@ var audioAttrs = map[string]Attr{
 	"DTS Lossy":          AttrDTSLossy,
 	"DTS Lossless":       AttrDTSLossless,
 	"FLAC":               AttrFLAC,
+	"OPUS":               AttrOPUS,
+	"PCM":                AttrPCM,
 	"MP3":                AttrMP3,
 	"TrueHD":             AttrTrueHD,
 	"HQ Clean Audio":     AttrCleanAudio,

@@ -90,7 +90,9 @@ type Options struct {
 	// AllowEnglish accepts releases containing English regardless of the
 	// language exclusion rules.
 	AllowEnglish bool `json:"allow_english"`
-	// MinRank rejects releases scoring below it (use math.MinInt to disable).
+	// MinRank rejects releases scoring below it (use math.MinInt to
+	// disable). Unlike rank-torrent-name, this gate always applies rather
+	// than only when trash removal is requested.
 	MinRank int `json:"min_rank"`
 	// PreferredBonus is added once when any preferred pattern or preferred
 	// language matches.
@@ -196,6 +198,8 @@ var DefaultPolicies = map[Attr]Policy{
 	AttrAAC:              {Fetch: true, Rank: 100},
 	AttrDolbyDigital:     {Fetch: true, Rank: 50},
 	AttrFLAC:             {Fetch: true, Rank: 0},
+	AttrOPUS:             {Fetch: true, Rank: 0},
+	AttrPCM:              {Fetch: true, Rank: 0},
 	AttrMP3:              {Fetch: false, Rank: -1000},
 	AttrCleanAudio:       {Fetch: false, Rank: -10000},
 
