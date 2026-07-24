@@ -71,3 +71,19 @@ func TestCodexFindings(t *testing.T) {
 		t.Fatalf("infohash not carried: %+v", out)
 	}
 }
+
+func TestAttributesExported(t *testing.T) {
+	r := mustRanker(t, Default())
+	tor := r.Rank("Movie.2020.2160p.BluRay.REMUX.DV.TrueHD.7.1.Atmos-GRP")
+	attrs := Attributes(tor.Data)
+	want := map[Attr]bool{AttrRemux: true, AttrDolbyVision: true, AttrTrueHD: true, AttrAtmos: true, AttrSurround: true}
+	found := map[Attr]bool{}
+	for _, a := range attrs {
+		found[a] = true
+	}
+	for a := range want {
+		if !found[a] {
+			t.Errorf("missing attribute %s in %v", a, attrs)
+		}
+	}
+}

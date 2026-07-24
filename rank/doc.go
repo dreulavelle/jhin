@@ -28,4 +28,23 @@
 //
 // Helpers rank.TitleMatch, rank.Similarity, and rank.Normalize are exported
 // for standalone use.
+//
+// # App integration
+//
+// Everything derivable from a release name is profile-configurable; signals
+// only the app has (seeders, size, cached state) are folded in by editing
+// the evaluated slice directly — Torrent's fields are yours between stages:
+//
+//	torrents := ranker.RankEntries(entries)
+//	for i := range torrents {
+//		torrents[i].Rank += seederBonus(meta[i].Seeders)
+//		if meta[i].Dead {
+//			torrents[i].Fetch = false
+//			torrents[i].Rejections = append(torrents[i].Rejections, "app:dead")
+//		}
+//	}
+//	best := ranker.Sort(torrents, rank.SortOptions{FetchableOnly: true})
+//
+// Attributes exposes the same detection scoring uses, for apps that format
+// or branch on release traits.
 package rank

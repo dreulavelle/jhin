@@ -171,8 +171,15 @@ var channelAttrs = map[string]Attr{
 	"mono":   AttrMono,
 }
 
-// attributes returns every attribute present in a parse result. This is the
-// single source of truth consumed by both scoring and fetch filtering.
+// Attributes returns every rank attribute detected in a parse result —
+// exported so apps can drive formatting or their own logic from the same
+// detection scoring and filtering use.
+func Attributes(d *parser.Result) []Attr {
+	return attributes(d)
+}
+
+// attributes is the single source of truth consumed by both scoring and
+// fetch filtering.
 func attributes(d *parser.Result) []Attr {
 	attrs := make([]Attr, 0, 12)
 
