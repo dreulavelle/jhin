@@ -73,9 +73,10 @@ func foldLowerRune(r rune) rune {
 }
 
 const (
-	gateMaxAlternatives = 32 // max literals per gate
+	gateMaxAlternatives = 64 // max literals per gate group
 	gateMinLiteralLen   = 2  // bytes; a multibyte rune alone qualifies
-	gateMergeCap        = 32 // max literals in a cross-product merge
+	gateMergeCap        = 64 // max literals in a cross-product merge
+	gateMaxGroups       = 4  // max AND-ed factor groups per gate
 	classExpandCap      = 14 // max runes when expanding a character class
 	maxScriptClasses    = 32 // script presence is a uint32 bitmask
 )
@@ -181,48 +182,104 @@ func (h *haystack) scan(title string) {
 // Gates
 // ---------------------------------------------------------------------------
 
-type gateLits struct {
+// gateGroup is one necessary condition: at least one literal (or a rune from
+// the script classes) must occur in the title.
+type gateGroup struct {
 	lits       []string // folded; interned into the automaton at init
-	bit        int32    // gate index; the automaton sets the gate's bit when any of its literals occurs
-	scriptMask uint32   // alternative requirement: any of these scripts present
+	bit        int32    // set by the automaton when any literal occurs
+	scriptMask uint32   // alternative: any of these scripts present
 }
 
-// hit reports whether the handler could possibly match: at least one gate
-// literal or required script occurs in the title.
-func (g *gateLits) hit(h *haystack) bool {
+// gateLits is the AND of its groups: every group's condition must hold, or
+// the handler cannot match. Factors of a concatenation are each individually
+// required, so AND-ing them is sound and strictly stronger than any single
+// factor.
+type gateLits struct {
+	groups []gateGroup
+}
+
+func (g *gateGroup) hit(h *haystack) bool {
 	if len(g.lits) > 0 && h.hits[g.bit>>6]&(1<<(uint(g.bit)&63)) != 0 {
 		return true
 	}
 	return g.scriptMask != 0 && h.scripts&g.scriptMask != 0
 }
 
-func gate(lits ...string) *gateLits {
-	return &gateLits{lits: lits}
+// hit reports whether the handler could possibly match.
+func (g *gateLits) hit(h *haystack) bool {
+	for i := range g.groups {
+		if !g.groups[i].hit(h) {
+			return false
+		}
+	}
+	return true
 }
 
-// deriveGate computes required literals (and/or a required script class) for
-// a pattern, or nil when the pattern cannot be gated safely.
+func gate(lits ...string) *gateLits {
+	return &gateLits{groups: []gateGroup{{lits: lits}}}
+}
+
+// groupOK vets one factor as a usable gate group.
+func groupOK(info *litInfo) bool {
+	if info == nil || (len(info.lits) == 0 && info.scriptMask == 0) {
+		return false
+	}
+	if len(info.lits) > gateMaxAlternatives {
+		return false
+	}
+	for _, l := range info.lits {
+		if len(l) < gateMinLiteralLen {
+			return false
+		}
+	}
+	return true
+}
+
+// deriveGate computes required-literal factors for a pattern, or nil when
+// the pattern cannot be gated safely. A top-level concatenation yields up to
+// gateMaxGroups independent factors, AND-ed together.
 func deriveGate(pattern string) *gateLits {
 	re, err := syntax.Parse(pattern, syntax.Perl)
 	if err != nil {
 		return nil
 	}
-	info := requiredLiterals(re)
-	if info == nil {
-		return nil
+	root := re
+	for root.Op == syntax.OpCapture {
+		root = root.Sub[0]
 	}
-	if len(info.lits) == 0 && info.scriptMask == 0 {
-		return nil
-	}
-	if len(info.lits) > gateMaxAlternatives {
-		return nil
-	}
-	for _, l := range info.lits {
-		if len(l) < gateMinLiteralLen {
-			return nil
+	var factors []*litInfo
+	if root.Op == syntax.OpConcat {
+		_, cands := concatLiterals(root.Sub)
+		for _, c := range cands {
+			if groupOK(c) {
+				factors = append(factors, c)
+			}
 		}
 	}
-	return &gateLits{lits: info.lits, scriptMask: info.scriptMask}
+	if len(factors) == 0 {
+		if info := requiredLiterals(re); groupOK(info) {
+			factors = []*litInfo{info}
+		}
+	}
+	if len(factors) == 0 {
+		return nil
+	}
+	// keep the strongest distinct factors
+	sort.SliceStable(factors, func(a, b int) bool { return litStronger(factors[a], factors[b]) })
+	g := &gateLits{}
+	seen := map[string]bool{}
+	for _, f := range factors {
+		key := strings.Join(f.lits, "\x00")
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		g.groups = append(g.groups, gateGroup{lits: f.lits, scriptMask: f.scriptMask})
+		if len(g.groups) == gateMaxGroups {
+			break
+		}
+	}
+	return g
 }
 
 // ---------------------------------------------------------------------------
@@ -320,7 +377,8 @@ func requiredLiterals(re *syntax.Regexp) *litInfo {
 		}
 		return nil
 	case syntax.OpConcat:
-		return concatLiterals(re.Sub)
+		best, _ := concatLiterals(re.Sub)
+		return best
 	case syntax.OpAlternate:
 		// every branch must contribute, else the gate is not a necessary
 		// condition
@@ -396,11 +454,18 @@ func cross(a, b []string) []string {
 	return out
 }
 
-func concatLiterals(subs []*syntax.Regexp) *litInfo {
+// concatLiterals returns the strongest single factor plus every candidate
+// factor found. Each candidate is independently a necessary condition of the
+// whole concatenation, so callers may AND them.
+func concatLiterals(subs []*syntax.Regexp) (*litInfo, []*litInfo) {
 	var best *litInfo
+	var cands []*litInfo
 	consider := func(c *litInfo) {
-		if c != nil && (len(c.lits) > 0 || c.scriptMask != 0) &&
-			(best == nil || litStronger(c, best)) {
+		if c == nil || (len(c.lits) == 0 && c.scriptMask == 0) {
+			return
+		}
+		cands = append(cands, c)
+		if best == nil || litStronger(c, best) {
 			best = c
 		}
 	}
@@ -477,7 +542,7 @@ func concatLiterals(subs []*syntax.Regexp) *litInfo {
 	flush(true)
 
 	if best == nil {
-		return nil
+		return nil, nil
 	}
 	// exactness survives only when a single merged run covered everything
 	out := &litInfo{lits: best.lits, scriptMask: best.scriptMask, exact: best.exact && runAll}
@@ -487,7 +552,7 @@ func concatLiterals(subs []*syntax.Regexp) *litInfo {
 			out.head, out.tail = out.lits, out.lits
 		}
 	}
-	return out
+	return out, cands
 }
 
 func gateMinLen(lits []string) int {
@@ -572,18 +637,23 @@ func buildAutomaton(gates []*gateLits) *acAutomaton {
 	ids := map[string]int32{}
 	var lits []string
 	var litGates [][]int32
-	for gi, g := range gates {
-		g.bit = int32(gi)
-		for _, l := range g.lits {
-			f := foldLower(l)
-			id, ok := ids[f]
-			if !ok {
-				id = int32(len(lits))
-				ids[f] = id
-				lits = append(lits, f)
-				litGates = append(litGates, nil)
+	nextBit := int32(0)
+	for _, g := range gates {
+		for gi := range g.groups {
+			grp := &g.groups[gi]
+			grp.bit = nextBit
+			nextBit++
+			for _, l := range grp.lits {
+				f := foldLower(l)
+				id, ok := ids[f]
+				if !ok {
+					id = int32(len(lits))
+					ids[f] = id
+					lits = append(lits, f)
+					litGates = append(litGates, nil)
+				}
+				litGates[id] = append(litGates[id], grp.bit)
 			}
-			litGates[id] = append(litGates[id], int32(gi))
 		}
 	}
 
@@ -609,7 +679,7 @@ func buildAutomaton(gates []*gateLits) *acAutomaton {
 	}
 
 	a := &acAutomaton{
-		numGates:  len(gates),
+		numGates:  int(nextBit),
 		fail:      make([]int32, len(nodes)),
 		out:       make([][]int32, len(nodes)),
 		edgeStart: make([]int32, len(nodes)),
@@ -697,6 +767,14 @@ func buildAutomaton(gates []*gateLits) *acAutomaton {
 	return a
 }
 
+func mustParse(pattern string) *syntax.Regexp {
+	re, err := syntax.Parse(pattern, syntax.Perl)
+	if err != nil {
+		return &syntax.Regexp{Op: syntax.OpNoMatch}
+	}
+	return re
+}
+
 func init() {
 	var gates []*gateLits
 	for i := range handlers {
@@ -707,16 +785,16 @@ func init() {
 		if h.Gate == nil && h.Field == "adult" && h.Process != nil {
 			// the adult handler is pure keyword containment; its keyword
 			// list is the exact necessary condition
-			h.Gate = &gateLits{lits: adultKeywords()}
+			h.Gate = gate(adultKeywords()...)
 		}
 		if h.Gate == nil && h.Field == "scene" && h.Process != nil {
 			// customScene fires only on a sceneWebRegex or sceneGroupsRegex
 			// match; the union of their required literals is a necessary
 			// condition
-			gw := deriveGate(sceneWebRegex.String())
-			gg := deriveGate(sceneGroupsRegex.String())
-			if gw != nil && gg != nil && gw.scriptMask == 0 && gg.scriptMask == 0 {
-				h.Gate = &gateLits{lits: append(gw.lits, gg.lits...)}
+			iw := requiredLiterals(mustParse(sceneWebRegex.String()))
+			ig := requiredLiterals(mustParse(sceneGroupsRegex.String()))
+			if groupOK(iw) && groupOK(ig) && iw.scriptMask == 0 && ig.scriptMask == 0 {
+				h.Gate = gate(append(iw.lits, ig.lits...)...)
 			}
 		}
 		if h.Gate != nil {
