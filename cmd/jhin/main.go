@@ -13,9 +13,18 @@ import (
 
 func main() {
 	cmd := &cli.Command{
-		Name:  "jhin",
-		Usage: "torrent release name parser, ranker, and filter",
+		Name:    "jhin",
+		Usage:   "torrent release name parser, ranker, and filter",
+		Version: jhin.Version().String(),
 		Commands: []*cli.Command{
+			{
+				Name:  "version",
+				Usage: "print the jhin version",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					fmt.Println(jhin.Version().String())
+					return nil
+				},
+			},
 			rankCommand,
 			{
 				Name: "parse",

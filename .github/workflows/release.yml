@@ -67,11 +67,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
-        with:
-          subject-checksums: ./dist/jhin_*_checksums.txt
-
       # avoids proxy.golang.org's negative-cache window and triggers
       # pkg.go.dev indexing before any user fetches the new version
       - name: Warm Module Proxy
@@ -79,3 +74,8 @@ jobs:
           cd "$(mktemp -d)"
           go mod init warm
           GOPROXY=https://proxy.golang.org go mod download "github.com/dreulavelle/jhin@${{ needs.release-please.outputs.tag_name }}" || true
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-checksums: ./dist/checksums.txt
