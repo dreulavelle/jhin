@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/dreulavelle/jhin/compare/v0.2.0...v0.3.0) (2026-07-24)
+
+
+### Features
+
+* **cli:** jhin version command ([3291e2c](https://github.com/dreulavelle/jhin/commit/3291e2ccb4a09dacbb679900ba7b81e641f21586))
+
 ## [0.2.0](https://github.com/dreulavelle/jhin/compare/v0.1.2...v0.2.0) (2026-07-24)
 
 
