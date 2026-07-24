@@ -39,12 +39,21 @@ var (
 	brackets        = [][]string{curly_brackets, square_brackets, parentheses}
 )
 
+// replace_all is ReplaceAllString with an allocation-free fast path: most
+// cleanup regexes match nothing on most titles.
+func replace_all(re *regexp.Regexp, s, repl string) string {
+	if !re.MatchString(s) {
+		return s
+	}
+	return re.ReplaceAllString(s, repl)
+}
+
 func clean_title(rawTitle string) string {
 	title := strings.TrimSpace(rawTitle)
 
 	title = strings.ReplaceAll(title, "_", " ")
-	title = movie_indicator_regex.ReplaceAllString(title, "") // clear movie indication flag
-	title = not_allowed_symbols_at_start_and_end_regex.ReplaceAllString(title, "")
+	title = replace_all(movie_indicator_regex, title, "") // clear movie indication flag
+	title = replace_all(not_allowed_symbols_at_start_and_end_regex, title, "")
 	for _, parts := range russian_cast_regex.FindAllStringSubmatch(title, -1) {
 		for i, mStr := range parts {
 			if i != 0 {
@@ -53,20 +62,20 @@ func clean_title(rawTitle string) string {
 			}
 		}
 	}
-	title = release_group_marking_at_start_regex.ReplaceAllString(title, "$1") // remove release group markings sections from the start
-	title = release_group_marking_at_end_regex.ReplaceAllString(title, "$1")   // remove unneeded markings section at the end if present
-	title = alt_titles_regex.ReplaceAllString(title, "")                       // remove alt language titles
+	title = replace_all(release_group_marking_at_start_regex, title, "$1") // remove release group markings sections from the start
+	title = replace_all(release_group_marking_at_end_regex, title, "$1")   // remove unneeded markings section at the end if present
+	title = replace_all(alt_titles_regex, title, "")                       // remove alt language titles
 	for i, mStr := range not_only_non_english_regex.FindStringSubmatch(title) {
 		if i != 0 {
 			// remove non english chars if they are not the only ones left
 			title = strings.Replace(title, mStr, "", 1)
 		}
 	}
-	title = remaining_not_allowed_symbols_at_start_and_end_regex.ReplaceAllString(title, "")
-	title = empty_brackets_regex.ReplaceAllString(title, "")
-	title = mp3_at_end_regex.ReplaceAllString(title, "")
-	title = parentheses_without_content_regex.ReplaceAllString(title, "")
-	title = special_char_spacing_regex.ReplaceAllString(title, "")
+	title = replace_all(remaining_not_allowed_symbols_at_start_and_end_regex, title, "")
+	title = replace_all(empty_brackets_regex, title, "")
+	title = replace_all(mp3_at_end_regex, title, "")
+	title = replace_all(parentheses_without_content_regex, title, "")
+	title = replace_all(special_char_spacing_regex, title, "")
 
 	for _, b := range brackets {
 		if strings.Count(title, b[0]) != strings.Count(title, b[1]) {
@@ -78,8 +87,8 @@ func clean_title(rawTitle string) string {
 		title = strings.ReplaceAll(title, ".", " ")
 	}
 
-	title = redundant_symbols_at_end.ReplaceAllString(title, "")
-	title = whitespaces_regex.ReplaceAllString(title, " ")
+	title = replace_all(redundant_symbols_at_end, title, "")
+	title = replace_all(whitespaces_regex, title, " ")
 
 	return strings.TrimSpace(title)
 }
@@ -185,9 +194,9 @@ func parse(title string, handlers []handler) (r *Result) {
 		}
 	}()
 
-	title = whitespaces_regex.ReplaceAllString(title, " ")
-	title = underscores_regex.ReplaceAllString(title, " ")
-	result := map[string]*parseMeta{}
+	title = replace_all(whitespaces_regex, title, " ")
+	title = replace_all(underscores_regex, title, " ")
+	result := make(map[string]*parseMeta, 24)
 	// endOfTitle is tracked in RUNES to mirror Python's character indexing —
 	// multibyte titles would otherwise slice at different boundaries
 	endOfTitle := utf8.RuneCountInString(title)
