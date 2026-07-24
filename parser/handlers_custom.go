@@ -145,6 +145,7 @@ var volumes_fallback_regex = regexp.MustCompile(`(?i)\bvol(?:ume)?[. -]*(\d{1,2}
 
 // def handle_volumes: search from the year match onward for a single volume.
 var custom_handle_volumes = handler{
+	Gate:  gate("vol"),
 	Field: "volumes",
 	Process: func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta {
 		if m.value != nil {
@@ -397,13 +398,14 @@ var custom_scene = handler{
 // Matches X when a year appears before it, or no year appears after it.
 var extras_year_regex = regexp.MustCompile(`\b(?:19\d{2}|20\d{2})\b`)
 
-func extras_handler(word *regexp.Regexp, after *regexp.Regexp, val string) handler {
+func extras_handler(word *regexp.Regexp, after *regexp.Regexp, val string, g *gateLits) handler {
 	// python: (?:(?<=\byear\b.*)\bWORD\b|\bWORD\b(?!.*\bAFTER\b))
 	// The context regexes are evaluated against the whole title (so \b sees
 	// real neighbors) and filtered by position.
 	return handler{
 		Field:         "extras",
 		SkipFromTitle: true,
+		Gate:          g,
 		Process: func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta {
 			vs, _ := m.value.(*value_set[any])
 			for _, idxs := range word.FindAllStringIndex(title, -1) {
@@ -439,12 +441,12 @@ func extras_handler(word *regexp.Regexp, after *regexp.Regexp, val string) handl
 
 var (
 	custom_extras_featurette = extras_handler(
-		regexp.MustCompile(`(?i)\bFeaturettes?\b`), extras_year_regex, "Featurette")
+		regexp.MustCompile(`(?i)\bFeaturettes?\b`), extras_year_regex, "Featurette", gate("featurette"))
 	custom_extras_sample = extras_handler(
-		regexp.MustCompile(`(?i)\bSample\b`), extras_year_regex, "Sample")
+		regexp.MustCompile(`(?i)\bSample\b`), extras_year_regex, "Sample", gate("sample"))
 	custom_extras_trailer = extras_handler(
 		regexp.MustCompile(`(?i)\bTrailers?\b`),
-		regexp.MustCompile(`(?i)\b(?:19\d{2}|20\d{2}|.(Park|And))\b`), "Trailer")
+		regexp.MustCompile(`(?i)\b(?:19\d{2}|20\d{2}|.(Park|And))\b`), "Trailer", gate("trailer"))
 )
 
 // trash CAM: \b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\()\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b  (i)
@@ -454,6 +456,7 @@ var (
 )
 
 var custom_trash_cam = handler{
+	Gate:  gate("cam"),
 	Field: "trash",
 	Process: func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta {
 		if m.value != nil {

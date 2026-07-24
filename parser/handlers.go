@@ -26,6 +26,12 @@ type handler struct {
 
 	MatchGroup int // capture group to use as match
 	ValueGroup int // capture group to use as value
+
+	// Gate holds required literals for prefiltering: when none occur in the
+	// title the handler is skipped without running its regex. Derived
+	// automatically from Pattern (see prefilter.go); set explicitly for
+	// Process-based handlers.
+	Gate *gateLits
 }
 
 func validate_or(validators ...hMatchValidator) hMatchValidator {

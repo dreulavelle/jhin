@@ -192,14 +192,24 @@ func parse(title string, handlers []handler) (r *Result) {
 	// multibyte titles would otherwise slice at different boundaries
 	endOfTitle := utf8.RuneCountInString(title)
 
+	lowerTitle := strings.ToLower(title)
 	prevTitle := title
 	for hi, handler := range handlers {
-		if debug_hook != nil && title != prevTitle {
-			debug_hook(hi-1, title)
+		if title != prevTitle {
+			// title mutated: refresh the prefilter haystack (removals can
+			// splice fragments into new substrings)
+			lowerTitle = strings.ToLower(title)
+			if debug_hook != nil {
+				debug_hook(hi-1, title)
+			}
+			prevTitle = title
 		}
-		prevTitle = title
 		field := handler.Field
 		skipFromTitle := handler.SkipFromTitle
+
+		if prefilter_enabled && handler.Gate != nil && !handler.Gate.hit(lowerTitle) {
+			continue
+		}
 
 		m, mFound := result[field]
 
