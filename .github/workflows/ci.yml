@@ -6,29 +6,58 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
-  check:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        # minimum supported (go.mod) and latest stable
-        go: ["1.24.x", "stable"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        go: [oldstable, stable]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go }}
-      - name: Check Format
-        run: test -z "$(gofmt -l . | tee /dev/stderr)"
-      - name: Vet
-        run: go vet ./...
       - name: Test
-        run: go test ./...
-      - name: Test (race)
-        run: go test -race ./...
+        run: go test -race -shuffle=on ./...
+
+  fuzz-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
       - name: Fuzz (smoke)
-        run: go test -run='^$' -fuzz=FuzzPrefilterEquivalence -fuzztime=15s ./parser/
+        run: go test -run='^$' -fuzz=FuzzPrefilterEquivalence -fuzztime=30s ./parser/
       - name: Benchmark (smoke)
         run: go test -bench=. -benchmem -benchtime=1x -run='^$' ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - name: Check Format
+        run: test -z "$(gofmt -l . | tee /dev/stderr)"
+      - name: Lint
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+      - name: Validate GoReleaser Config
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          args: check

@@ -26,11 +26,11 @@ func corpusTitles(t testing.TB) []string {
 // TestPrefilterEquivalence guarantees the literal gate never changes a parse:
 // every corpus title must produce byte-identical results with gating on/off.
 func TestPrefilterEquivalence(t *testing.T) {
-	defer func() { prefilter_enabled = true }()
+	defer func() { prefilterEnabled = true }()
 	for _, title := range corpusTitles(t) {
-		prefilter_enabled = true
+		prefilterEnabled = true
 		gated := Parse(title)
-		prefilter_enabled = false
+		prefilterEnabled = false
 		ungated := Parse(title)
 		if !reflect.DeepEqual(gated, ungated) {
 			g, _ := json.Marshal(gated)
@@ -50,10 +50,10 @@ func FuzzPrefilterEquivalence(f *testing.F) {
 	f.Add("Movie remaſtered uncenſored 720p")
 	f.Add("Kelvin K sign 1080p WEB-DL")
 	f.Fuzz(func(t *testing.T, title string) {
-		defer func() { prefilter_enabled = true }()
-		prefilter_enabled = true
+		defer func() { prefilterEnabled = true }()
+		prefilterEnabled = true
 		gated := Parse(title)
-		prefilter_enabled = false
+		prefilterEnabled = false
 		ungated := Parse(title)
 		if !reflect.DeepEqual(gated, ungated) {
 			t.Errorf("prefilter changed result for %q", title)

@@ -94,8 +94,8 @@ const (
 	AttrSize        Attr = "size"
 )
 
-// quality_attrs maps the parser's Quality values onto attributes.
-var quality_attrs = map[string]Attr{
+// qualityAttrs maps the parser's Quality values onto attributes.
+var qualityAttrs = map[string]Attr{
 	"WEB":          AttrWeb,
 	"WEB-DL":       AttrWebDL,
 	"WEBMux":       AttrWebMux,
@@ -125,13 +125,13 @@ var quality_attrs = map[string]Attr{
 	"PDTV":         AttrPDTV,
 }
 
-// trash_quality_attrs are the sources considered trash by the hard trash veto.
-var trash_quality_attrs = map[Attr]bool{
+// trashQualityAttrs are the sources considered trash by the hard trash veto.
+var trashQualityAttrs = map[Attr]bool{
 	AttrCam: true, AttrTeleCine: true, AttrTeleSync: true,
 	AttrScreener: true, AttrR5: true, AttrPDTV: true,
 }
 
-var codec_attrs = map[string]Attr{
+var codecAttrs = map[string]Attr{
 	"avc":  AttrAVC,
 	"hevc": AttrHEVC,
 	"av1":  AttrAV1,
@@ -139,14 +139,14 @@ var codec_attrs = map[string]Attr{
 	"mpeg": AttrMPEG,
 }
 
-var hdr_attrs = map[string]Attr{
+var hdrAttrs = map[string]Attr{
 	"DV":     AttrDolbyVision,
 	"HDR":    AttrHDR,
 	"HDR10+": AttrHDR10Plus,
 	"SDR":    AttrSDR,
 }
 
-var audio_attrs = map[string]Attr{
+var audioAttrs = map[string]Attr{
 	"AAC":                AttrAAC,
 	"Atmos":              AttrAtmos,
 	"Dolby Digital":      AttrDolbyDigital,
@@ -159,7 +159,7 @@ var audio_attrs = map[string]Attr{
 	"HQ Clean Audio":     AttrCleanAudio,
 }
 
-var channel_attrs = map[string]Attr{
+var channelAttrs = map[string]Attr{
 	"5.1":    AttrSurround,
 	"7.1":    AttrSurround,
 	"2.0":    AttrStereo,
@@ -172,14 +172,14 @@ var channel_attrs = map[string]Attr{
 func attributes(d *parser.Result) []Attr {
 	attrs := make([]Attr, 0, 12)
 
-	if a, ok := quality_attrs[d.Quality]; ok {
+	if a, ok := qualityAttrs[d.Quality]; ok {
 		attrs = append(attrs, a)
 	}
-	if a, ok := codec_attrs[strings.ToLower(d.Codec)]; ok {
+	if a, ok := codecAttrs[strings.ToLower(d.Codec)]; ok {
 		attrs = append(attrs, a)
 	}
 	for _, h := range d.HDR {
-		if a, ok := hdr_attrs[h]; ok {
+		if a, ok := hdrAttrs[h]; ok {
 			attrs = append(attrs, a)
 		}
 	}
@@ -187,12 +187,12 @@ func attributes(d *parser.Result) []Attr {
 		attrs = append(attrs, Attr10Bit)
 	}
 	for _, a := range d.Audio {
-		if attr, ok := audio_attrs[a]; ok {
+		if attr, ok := audioAttrs[a]; ok {
 			attrs = append(attrs, attr)
 		}
 	}
 	for _, c := range d.Channels {
-		if attr, ok := channel_attrs[c]; ok {
+		if attr, ok := channelAttrs[c]; ok {
 			attrs = append(attrs, attr)
 		}
 	}

@@ -1,3 +1,5 @@
+// Package parser extracts release metadata from torrent names using an
+// ordered handler table with a literal prefilter.
 package parser
 
 import (
@@ -9,52 +11,50 @@ import (
 var (
 	// PTT parse.py NON_ENGLISH_CHARS: Japanese, Chinese, CJK compat,
 	// halfwidth Katakana, Cyrillic, Arabic, Kannada, Malayalam, Thai
-	non_english_chars                                    = `\x{3040}-\x{30ff}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{f900}-\x{faff}\x{ff66}-\x{ff9f}\x{0400}-\x{04ff}\x{0600}-\x{06ff}\x{0750}-\x{077f}\x{0c80}-\x{0cff}\x{0d00}-\x{0d7f}\x{0e00}-\x{0e7f}`
-	russian_cast_regex                                   = regexp.MustCompile(`(\([^)]*[\x{0400}-\x{04ff}][^)]*\))$|(?:\/.*?)(\(.*\))$`)
-	alt_titles_regex                                     = regexp.MustCompile(`[^/|(]*[` + non_english_chars + `][^/|]*[/|]|[/|][^/|(]*[` + non_english_chars + `][^/|]*`)
-	not_only_non_english_regex                           = regexp.MustCompile(`(?:[a-zA-Z][^` + non_english_chars + `]+)([` + non_english_chars + `].*[` + non_english_chars + `])|([` + non_english_chars + `].*[` + non_english_chars + `])(?:[^` + non_english_chars + `]+[a-zA-Z])`)
-	not_allowed_symbols_at_start_and_end_regex           = regexp.MustCompile(`^[^\w\p{L}\p{N}` + non_english_chars + `#[【★]+|[ \-:/\\[|{(#$&^]+$`)
-	remaining_not_allowed_symbols_at_start_and_end_regex = regexp.MustCompile(`^[^\w\p{L}\p{N}` + non_english_chars + `#]+|]$`)
-	empty_brackets_regex                                 = regexp.MustCompile(`\(\s*\)|\[\s*\]|\{\s*\}`)
-	parentheses_without_content_regex                    = regexp.MustCompile(`\([^\w\p{L}\p{N}]*\)|\[[^\w\p{L}\p{N}]*\]|\{[^\w\p{L}\p{N}]*\}`)
-	mp3_at_end_regex                                     = regexp.MustCompile(`\bmp3$`)
-	special_char_spacing_regex                           = regexp.MustCompile(`[\-\+\_\{\}\[\]][^\w\p{L}\p{N}]{2,}`)
+	nonEnglishChars                              = `\x{3040}-\x{30ff}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{f900}-\x{faff}\x{ff66}-\x{ff9f}\x{0400}-\x{04ff}\x{0600}-\x{06ff}\x{0750}-\x{077f}\x{0c80}-\x{0cff}\x{0d00}-\x{0d7f}\x{0e00}-\x{0e7f}`
+	russianCastRegex                             = regexp.MustCompile(`(\([^)]*[\x{0400}-\x{04ff}][^)]*\))$|(?:\/.*?)(\(.*\))$`)
+	altTitlesRegex                               = regexp.MustCompile(`[^/|(]*[` + nonEnglishChars + `][^/|]*[/|]|[/|][^/|(]*[` + nonEnglishChars + `][^/|]*`)
+	notOnlyNonEnglishRegex                       = regexp.MustCompile(`(?:[a-zA-Z][^` + nonEnglishChars + `]+)([` + nonEnglishChars + `].*[` + nonEnglishChars + `])|([` + nonEnglishChars + `].*[` + nonEnglishChars + `])(?:[^` + nonEnglishChars + `]+[a-zA-Z])`)
+	notAllowedSymbolsAtStartAndEndRegex          = regexp.MustCompile(`^[^\w\p{L}\p{N}` + nonEnglishChars + `#[【★]+|[ \-:/\\[|{(#$&^]+$`)
+	remainingNotAllowedSymbolsAtStartAndEndRegex = regexp.MustCompile(`^[^\w\p{L}\p{N}` + nonEnglishChars + `#]+|]$`)
+	emptyBracketsRegex                           = regexp.MustCompile(`\(\s*\)|\[\s*\]|\{\s*\}`)
+	parenthesesWithoutContentRegex               = regexp.MustCompile(`\([^\w\p{L}\p{N}]*\)|\[[^\w\p{L}\p{N}]*\]|\{[^\w\p{L}\p{N}]*\}`)
+	mp3AtEndRegex                                = regexp.MustCompile(`\bmp3$`)
+	specialCharSpacingRegex                      = regexp.MustCompile(`[\-\+\_\{\}\[\]][^\w\p{L}\p{N}]{2,}`)
 
-	movie_indicator_regex                = regexp.MustCompile(`(?i)[[(]movie[)\]]`)
-	release_group_marking_at_start_regex = regexp.MustCompile(`^[[【★].*[\]】★][ .]?(.+)`)
-	release_group_marking_at_end_regex   = regexp.MustCompile(`(.+)[ .]?[[【★].*[\]】★]$`)
+	movieIndicatorRegex             = regexp.MustCompile(`(?i)[[(]movie[)\]]`)
+	releaseGroupMarkingAtStartRegex = regexp.MustCompile(`^[[【★].*[\]】★][ .]?(.+)`)
+	releaseGroupMarkingAtEndRegex   = regexp.MustCompile(`(.+)[ .]?[[【★].*[\]】★]$`)
 
-	before_title_regex = regexp.MustCompile(`^\[([^[\]]+)]`)
-	non_digit_regex    = regexp.MustCompile(`\D`)
-	non_digits_regex   = regexp.MustCompile(`\D+`)
-	non_alphas_regex   = regexp.MustCompile(`\W+`)
-	underscores_regex  = regexp.MustCompile(`_+`)
-	whitespaces_regex  = regexp.MustCompile(`\s+`)
+	beforeTitleRegex = regexp.MustCompile(`^\[([^[\]]+)]`)
+	nonDigitsRegex   = regexp.MustCompile(`\D+`)
+	underscoresRegex = regexp.MustCompile(`_+`)
+	whitespacesRegex = regexp.MustCompile(`\s+`)
 
-	redundant_symbols_at_end = regexp.MustCompile(`[ \-:./\\]+$`)
+	redundantSymbolsAtEnd = regexp.MustCompile(`[ \-:./\\]+$`)
 
-	curly_brackets  = []string{"{", "}"}
-	square_brackets = []string{"[", "]"}
-	parentheses     = []string{"(", ")"}
-	brackets        = [][]string{curly_brackets, square_brackets, parentheses}
+	curlyBrackets  = []string{"{", "}"}
+	squareBrackets = []string{"[", "]"}
+	parentheses    = []string{"(", ")"}
+	brackets       = [][]string{curlyBrackets, squareBrackets, parentheses}
 )
 
-// replace_all is ReplaceAllString with an allocation-free fast path: most
+// replaceAll is ReplaceAllString with an allocation-free fast path: most
 // cleanup regexes match nothing on most titles.
-func replace_all(re *regexp.Regexp, s, repl string) string {
+func replaceAll(re *regexp.Regexp, s, repl string) string {
 	if !re.MatchString(s) {
 		return s
 	}
 	return re.ReplaceAllString(s, repl)
 }
 
-func clean_title(rawTitle string) string {
+func cleanTitle(rawTitle string) string {
 	title := strings.TrimSpace(rawTitle)
 
 	title = strings.ReplaceAll(title, "_", " ")
-	title = replace_all(movie_indicator_regex, title, "") // clear movie indication flag
-	title = replace_all(not_allowed_symbols_at_start_and_end_regex, title, "")
-	for _, parts := range russian_cast_regex.FindAllStringSubmatch(title, -1) {
+	title = replaceAll(movieIndicatorRegex, title, "") // clear movie indication flag
+	title = replaceAll(notAllowedSymbolsAtStartAndEndRegex, title, "")
+	for _, parts := range russianCastRegex.FindAllStringSubmatch(title, -1) {
 		for i, mStr := range parts {
 			if i != 0 {
 				// clear russian cast information
@@ -62,20 +62,20 @@ func clean_title(rawTitle string) string {
 			}
 		}
 	}
-	title = replace_all(release_group_marking_at_start_regex, title, "$1") // remove release group markings sections from the start
-	title = replace_all(release_group_marking_at_end_regex, title, "$1")   // remove unneeded markings section at the end if present
-	title = replace_all(alt_titles_regex, title, "")                       // remove alt language titles
-	for i, mStr := range not_only_non_english_regex.FindStringSubmatch(title) {
+	title = replaceAll(releaseGroupMarkingAtStartRegex, title, "$1") // remove release group markings sections from the start
+	title = replaceAll(releaseGroupMarkingAtEndRegex, title, "$1")   // remove unneeded markings section at the end if present
+	title = replaceAll(altTitlesRegex, title, "")                    // remove alt language titles
+	for i, mStr := range notOnlyNonEnglishRegex.FindStringSubmatch(title) {
 		if i != 0 {
 			// remove non english chars if they are not the only ones left
 			title = strings.Replace(title, mStr, "", 1)
 		}
 	}
-	title = replace_all(remaining_not_allowed_symbols_at_start_and_end_regex, title, "")
-	title = replace_all(empty_brackets_regex, title, "")
-	title = replace_all(mp3_at_end_regex, title, "")
-	title = replace_all(parentheses_without_content_regex, title, "")
-	title = replace_all(special_char_spacing_regex, title, "")
+	title = replaceAll(remainingNotAllowedSymbolsAtStartAndEndRegex, title, "")
+	title = replaceAll(emptyBracketsRegex, title, "")
+	title = replaceAll(mp3AtEndRegex, title, "")
+	title = replaceAll(parenthesesWithoutContentRegex, title, "")
+	title = replaceAll(specialCharSpacingRegex, title, "")
 
 	for _, b := range brackets {
 		if strings.Count(title, b[0]) != strings.Count(title, b[1]) {
@@ -87,8 +87,8 @@ func clean_title(rawTitle string) string {
 		title = strings.ReplaceAll(title, ".", " ")
 	}
 
-	title = replace_all(redundant_symbols_at_end, title, "")
-	title = replace_all(whitespaces_regex, title, " ")
+	title = replaceAll(redundantSymbolsAtEnd, title, "")
+	title = replaceAll(whitespacesRegex, title, " ")
 
 	return strings.TrimSpace(title)
 }
@@ -141,8 +141,8 @@ type Result struct {
 	Volumes     []int    `json:"volumes"`
 	Year        string   `json:"year"`
 
-	err           error `json:"-"`
-	is_normalized bool  `json:"-"`
+	err          error `json:"-"`
+	isNormalized bool  `json:"-"`
 }
 
 func (r *Result) Error() error {
@@ -167,8 +167,8 @@ type parseMeta struct {
 	matchedNow bool
 }
 
-func value_set_strings(v any) []string {
-	vs := v.(*value_set[any])
+func valueSetStrings(v any) []string {
+	vs := v.(*valueSet[any])
 	values := make([]string, len(vs.values))
 	for i, v := range vs.values {
 		values[i] = v.(string)
@@ -176,8 +176,8 @@ func value_set_strings(v any) []string {
 	return values
 }
 
-func has_value_set(field string) bool {
-	_, ok := value_set_field_map[field]
+func hasValueSet(field string) bool {
+	_, ok := valueSetFieldMap[field]
 	return ok
 }
 
@@ -194,29 +194,29 @@ func parse(title string, handlers []handler) (r *Result) {
 		}
 	}()
 
-	title = replace_all(whitespaces_regex, title, " ")
-	title = replace_all(underscores_regex, title, " ")
+	title = replaceAll(whitespacesRegex, title, " ")
+	title = replaceAll(underscoresRegex, title, " ")
 	result := make(map[string]*parseMeta, 24)
 	// endOfTitle is tracked in RUNES to mirror Python's character indexing —
 	// multibyte titles would otherwise slice at different boundaries
 	endOfTitle := utf8.RuneCountInString(title)
 
-	lowerTitle := fold_lower(title)
+	lowerTitle := foldLower(title)
 	prevTitle := title
 	for hi, handler := range handlers {
 		if title != prevTitle {
 			// title mutated: refresh the prefilter haystack (removals can
 			// splice fragments into new substrings)
-			lowerTitle = fold_lower(title)
-			if debug_hook != nil {
-				debug_hook(hi-1, title)
+			lowerTitle = foldLower(title)
+			if debugHook != nil {
+				debugHook(hi-1, title)
 			}
 			prevTitle = title
 		}
 		field := handler.Field
 		skipFromTitle := handler.SkipFromTitle
 
-		if prefilter_enabled && handler.Gate != nil && !handler.Gate.hit(lowerTitle) {
+		if prefilterEnabled && handler.Gate != nil && !handler.Gate.hit(lowerTitle) {
 			continue
 		}
 
@@ -318,14 +318,14 @@ func parse(title string, handlers []handler) (r *Result) {
 
 			// PTT compares against the bracket CONTENTS (group 1), not the
 			// full bracketed match
-			if bt := before_title_regex.FindStringSubmatch(title); bt != nil && strings.Contains(bt[1], rawMatchedPart) {
+			if bt := beforeTitleRegex.FindStringSubmatch(title); bt != nil && strings.Contains(bt[1], rawMatchedPart) {
 				skipFromTitle = true
 			}
 
 			if !mFound {
 				m = &parseMeta{}
-				if has_value_set(field) {
-					m.value = &value_set[any]{existMap: map[any]struct{}{}, values: []any{}}
+				if hasValueSet(field) {
+					m.value = &valueSet[any]{existMap: map[any]struct{}{}, values: []any{}}
 				}
 				mFound = true
 				result[field] = m
@@ -335,7 +335,7 @@ func parse(title string, handlers []handler) (r *Result) {
 
 			m.mIndex = idxs[0]
 			m.mValue = rawMatchedPart
-			if !has_value_set(field) {
+			if !hasValueSet(field) {
 				m.value = matchedPart
 			}
 
@@ -401,8 +401,8 @@ func parse(title string, handlers []handler) (r *Result) {
 		mRuneIndex := utf8.RuneCountInString(title[:min(m.mIndex, len(title))])
 		if !skipFromTitle && mRuneIndex > 1 && mRuneIndex < endOfTitle {
 			endOfTitle = mRuneIndex
-			if debug_eot_hook != nil {
-				debug_eot_hook(hi, endOfTitle)
+			if debugEotHook != nil {
+				debugEotHook(hi, endOfTitle)
 			}
 		}
 
@@ -421,13 +421,13 @@ func parse(title string, handlers []handler) (r *Result) {
 		case "adult":
 			r.Adult = v.(bool)
 		case "audio":
-			r.Audio = value_set_strings(v)
+			r.Audio = valueSetStrings(v)
 		case "bitDepth":
 			r.BitDepth = v.(string)
 		case "bitrate":
 			r.Bitrate = v.(string)
 		case "channels":
-			r.Channels = value_set_strings(v)
+			r.Channels = valueSetStrings(v)
 		case "codec":
 			r.Codec = v.(string)
 		case "country":
@@ -455,15 +455,15 @@ func parse(title string, handlers []handler) (r *Result) {
 		case "extension":
 			r.Extension = v.(string)
 		case "extras":
-			r.Extras = value_set_strings(v)
+			r.Extras = valueSetStrings(v)
 		case "group":
 			r.Group = v.(string)
 		case "hardcoded":
 			r.Hardcoded = v.(bool)
 		case "hdr":
-			r.HDR = value_set_strings(v)
+			r.HDR = valueSetStrings(v)
 		case "languages":
-			r.Languages = value_set_strings(v)
+			r.Languages = valueSetStrings(v)
 		case "network":
 			r.Network = v.(string)
 		case "ppv":
@@ -522,7 +522,7 @@ func parse(title string, handlers []handler) (r *Result) {
 		r.Languages = []string{}
 	}
 
-	r.Title = clean_title(rune_prefix(title, endOfTitle))
+	r.Title = cleanTitle(runePrefix(title, endOfTitle))
 
 	return r
 }
@@ -549,16 +549,16 @@ func GetPartialParser(fieldNames []string) func(title string) *Result {
 	}
 }
 
-// debug_hook, when set (tests only), is called with the index of the handler
+// debugHook, when set (tests only), is called with the index of the handler
 // that just mutated the working title. Setting it while parses run
 // concurrently is a data race.
-var debug_hook func(handlerIdx int, title string)
+var debugHook func(handlerIdx int, title string)
 
-// debug_eot_hook (tests only) reports endOfTitle updates.
-var debug_eot_hook func(handlerIdx int, endOfTitle int)
+// debugEotHook (tests only) reports endOfTitle updates.
+var debugEotHook func(handlerIdx int, endOfTitle int)
 
-// rune_prefix returns the first n runes of s (Python-style slicing).
-func rune_prefix(s string, n int) string {
+// runePrefix returns the first n runes of s (Python-style slicing).
+func runePrefix(s string, n int) string {
 	if n <= 0 {
 		return ""
 	}

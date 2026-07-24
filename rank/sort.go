@@ -44,7 +44,7 @@ func Sort(torrents []Torrent, opts ...SortOptions) []Torrent {
 	}
 
 	sort.SliceStable(keep, func(i, j int) bool {
-		bi, bj := resolution_bucket[keep[i].Resolution()], resolution_bucket[keep[j].Resolution()]
+		bi, bj := resolutionBucket[keep[i].Resolution()], resolutionBucket[keep[j].Resolution()]
 		if bi != bj {
 			return bi > bj
 		}

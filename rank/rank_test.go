@@ -21,7 +21,7 @@ func TestDefaultProfileOrdering(t *testing.T) {
 	webdl := r.Rank("The.Matrix.1999.1080p.WEB-DL.DDP5.1.H.264-GRP")
 	cam := r.Rank("The.Matrix.1999.CAM.x264-TRASH")
 
-	if !(remux.Rank > webdl.Rank && webdl.Rank > cam.Rank) {
+	if remux.Rank <= webdl.Rank || webdl.Rank <= cam.Rank {
 		t.Fatalf("expected remux > webdl > cam, got %d / %d / %d", remux.Rank, webdl.Rank, cam.Rank)
 	}
 	if !remux.Fetch || !webdl.Fetch {

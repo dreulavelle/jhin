@@ -6,6 +6,7 @@
 // Each entry's comment preserves the pattern it implements; entries with
 // Process functions emulate lookarounds RE2 cannot express (see
 // handlers_custom.go).
+
 package parser
 
 import (
@@ -13,7 +14,7 @@ import (
 	"strings"
 )
 
-var value_set_field_map = map[string]struct{}{
+var valueSetFieldMap = map[string]struct{}{
 	"audio":     {},
 	"channels":  {},
 	"extras":    {},
@@ -26,7 +27,7 @@ var handlers = []handler{
 	{
 		Field:     "year",
 		Pattern:   regexp.MustCompile(`\b19\d{2}\s?-\s?20\d{2}\b`),
-		Transform: to_first_int_string(),
+		Transform: toFirstIntString(),
 	},
 	// title: 360.Degrees.of.Vision.The.Byakugan'?s.Blind.Spot
 	{
@@ -56,7 +57,7 @@ var handlers = []handler{
 	{
 		Field:     "group",
 		Pattern:   regexp.MustCompile(`-?EDGE2020`),
-		Transform: to_value(`EDGE2020`),
+		Transform: toValue(`EDGE2020`),
 		Remove:    true,
 	},
 	// title: TV Money
@@ -69,85 +70,85 @@ var handlers = []handler{
 	{
 		Field:     "container",
 		Pattern:   regexp.MustCompile(`(?i)\.?[\[(]?\b(MKV|AVI|MP4|WMV|MPG|MPEG)\b[\])]?`),
-		Transform: to_lowercase(),
+		Transform: toLowercase(),
 	},
 	// torrent: \.torrent$
 	{
 		Field:     "torrent",
 		Pattern:   regexp.MustCompile(`\.torrent$`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// adult: \b(XXX|xxx|Xxx)\b
 	{
 		Field:     "adult",
 		Pattern:   regexp.MustCompile(`\b(XXX|xxx|Xxx)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// adult: ['custom:create_adult_pattern']
-	custom_adult,
+	customAdult,
 	// scene: ^(?=.*(\b\d{3,4}p\b).*([_. ]WEB[_. ])(?!DL)\b)|\b(-CAKES|-GGEZ|-GGWP|-GLHF|-GOSSIP|-NAISU|-KOGI|-PECULATE|-SLOT|-EDITH|-ETHEL|-ELEANOR|-B2B|-SPAMnEGGS|-FTP|-DiRT|-SYNCOPY|-BA
-	custom_scene,
+	customScene,
 	// extras: \bNCED\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`\bNCED\b`),
-		Transform: to_value_set(`NCED`),
+		Transform: toValueSet(`NCED`),
 		Remove:    true,
 	},
 	// extras: \bNCOP\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`\bNCOP\b`),
-		Transform: to_value_set(`NCOP`),
+		Transform: toValueSet(`NCOP`),
 		Remove:    true,
 	},
 	// extras: \bNC\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`\bNC\b`),
-		Transform: to_value_set(`NC`),
+		Transform: toValueSet(`NC`),
 		Remove:    true,
 	},
 	// extras: \bOVA\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`(?i)\bOVA\b`),
-		Transform: to_value_set(`OVA`),
+		Transform: toValueSet(`OVA`),
 		Remove:    true,
 	},
 	// extras: \bED(\d?v?\d?)\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`(?i)\bED(\d?v?\d?)\b`),
-		Transform: to_value_set(`ED`),
+		Transform: toValueSet(`ED`),
 		Remove:    true,
 	},
 	// extras: \bOPv?(\d+)?\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`\bOPv?(\d+)?\b`),
-		Transform: to_value_set(`OP`),
+		Transform: toValueSet(`OP`),
 		Remove:    true,
 	},
 	// extras: \b(?:Deleted[ .-]*)?Scene(?:s)?\b
 	{
 		Field:     "extras",
 		Pattern:   regexp.MustCompile(`(?i)\bDeleted.*Scenes?\b`),
-		Transform: to_value_set(`Deleted Scene`),
+		Transform: toValueSet(`Deleted Scene`),
 	},
 	// extras: (?:(?<=\b(?:19\d{2}|20\d{2})\b.*)\b(?:Featurettes?)\b|\bFeaturettes?\b(?!.*\b(?:19\d{2}|20\d{2})\b))
-	custom_extras_featurette,
+	customExtrasFeaturette,
 	// extras: (?:(?<=\b(?:19\d{2}|20\d{2})\b.*)\b(?:Sample)\b|\b(?:Sample)\b(?!.*\b(?:19\d{2}|20\d{2})\b))
-	custom_extras_sample,
+	customExtrasSample,
 	// extras: (?:(?<=\b(?:19\d{2}|20\d{2})\b.*)\b(?:Trailers?)\b|\bTrailers?\b(?!.*\b(?:19\d{2}|20\d{2}|.(Park|And))\b))
-	custom_extras_trailer,
+	customExtrasTrailer,
 	// ppv: \bPPV\b
 	{
 		Field:         "ppv",
 		Pattern:       regexp.MustCompile(`(?i)\bPPV\b`),
-		Transform:     to_boolean(),
+		Transform:     toBoolean(),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -155,7 +156,7 @@ var handlers = []handler{
 	{
 		Field:         "ppv",
 		Pattern:       regexp.MustCompile(`(?i)\b\W?Fight.?Nights?\W?\b`),
-		Transform:     to_boolean(),
+		Transform:     toBoolean(),
 		SkipFromTitle: true,
 	},
 	// site: ^(www?[., ][\w-]+[. ][\w-]+(?:[. ][\w-]+)?)\s+-\s*
@@ -170,299 +171,299 @@ var handlers = []handler{
 	{
 		Field:     "site",
 		Pattern:   regexp.MustCompile(`(?i)\bwww.+rodeo\b`),
-		Transform: to_lowercase(),
+		Transform: toLowercase(),
 		Remove:    true,
 	},
 	// resolution: \[?\]?3840x\d{4}[\])?]?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)\[?\]?3840x\d{4}[\])?]?`),
-		Transform: to_value(`2160p`),
+		Transform: toValue(`2160p`),
 		Remove:    true,
 	},
 	// resolution: \[?\]?1920x\d{3,4}[\])?]?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)\[?\]?1920x\d{3,4}[\])?]?`),
-		Transform: to_value(`1080p`),
+		Transform: toValue(`1080p`),
 		Remove:    true,
 	},
 	// resolution: \[?\]?1280x\d{3}[\])?]?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)\[?\]?1280x\d{3}[\])?]?`),
-		Transform: to_value(`720p`),
+		Transform: toValue(`720p`),
 		Remove:    true,
 	},
 	// resolution: \[?\]?(\d{3,4}x\d{3,4})[\])?]?p?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)\[?\]?(\d{3,4}x\d{3,4})[\])?]?p?`),
-		Transform: to_value_sub(`$1p`),
+		Transform: toValueSub(`$1p`),
 		Remove:    true,
 	},
 	// resolution: (480|720|1080)0[pi]
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(480|720|1080)0[pi]`),
-		Transform: to_value_sub(`$1p`),
+		Transform: toValueSub(`$1p`),
 		Remove:    true,
 	},
 	// resolution: (?:QHD|QuadHD|WQHD|2560(\d+)?x(\d+)?1440p?)
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(?:QHD|QuadHD|WQHD|2560(\d+)?x(\d+)?1440p?)`),
-		Transform: to_value(`1440p`),
+		Transform: toValue(`1440p`),
 		Remove:    true,
 	},
 	// resolution: (?:Full HD|FHD|1920(\d+)?x(\d+)?1080p?)
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(?:Full HD|FHD|1920(\d+)?x(\d+)?1080p?)`),
-		Transform: to_value(`1080p`),
+		Transform: toValue(`1080p`),
 		Remove:    true,
 	},
 	// resolution: (?:BD|HD|M)(2160p?|4k)
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(?:BD|HD|M)(2160p?|4k)`),
-		Transform: to_value(`2160p`),
+		Transform: toValue(`2160p`),
 		Remove:    true,
 	},
 	// resolution: (?:BD|HD|M)1080p?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(?:BD|HD|M)1080p?`),
-		Transform: to_value(`1080p`),
+		Transform: toValue(`1080p`),
 		Remove:    true,
 	},
 	// resolution: (?:BD|HD|M)720p?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(?:BD|HD|M)720p?`),
-		Transform: to_value(`720p`),
+		Transform: toValue(`720p`),
 		Remove:    true,
 	},
 	// resolution: (?:BD|HD|M)480p?
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(?:BD|HD|M)480p?`),
-		Transform: to_value(`480p`),
+		Transform: toValue(`480p`),
 		Remove:    true,
 	},
 	// resolution: \b(?:4k|2160p|1080p|720p|480p)(?!.*\b(?:4k|2160p|1080p|720p|480p)\b)
 	{
 		Field:         "resolution",
 		Pattern:       regexp.MustCompile(`(?i)\b(?:4k|2160p|1080p|720p|480p)`),
-		ValidateMatch: validate_lookahead(`.*\b(?:4k|2160p|1080p|720p|480p)\b`, `i`, false),
-		Transform:     to_transformed_resolution(),
+		ValidateMatch: validateLookahead(`.*\b(?:4k|2160p|1080p|720p|480p)\b`, `i`, false),
+		Transform:     toTransformedResolution(),
 		Remove:        true,
 	},
 	// resolution: \b4k|21600?[pi]\b
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)\b4k|21600?[pi]\b`),
-		Transform: to_value(`2160p`),
+		Transform: toValue(`2160p`),
 		Remove:    true,
 	},
 	// resolution: (\d{3,4})[pi]
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(\d{3,4}[pi])`),
-		Transform: to_lowercase(),
+		Transform: toLowercase(),
 		Remove:    true,
 	},
 	// resolution: (240|360|480|576|720|1080|2160|3840)[pi]
 	{
 		Field:     "resolution",
 		Pattern:   regexp.MustCompile(`(?i)(240|360|480|576|720|1080|2160|3840)[pi]`),
-		Transform: to_lowercase(),
+		Transform: toLowercase(),
 		Remove:    true,
 	},
 	// episode_code: [\[\()]([A-Za-f0-9]{8})[\]\)]
 	{
 		Field:     "episodeCode",
 		Pattern:   regexp.MustCompile(`[\[\()]([A-Fa-f0-9]{8})[\]\)]`),
-		Transform: to_uppercase(),
+		Transform: toUppercase(),
 		Remove:    true,
 	},
 	// episode_code: [\[\()]([0-9]{8})[\]\)]
 	{
 		Field:     "episodeCode",
 		Pattern:   regexp.MustCompile(`[\[\()]([0-9]{8})[\]\)]`),
-		Transform: to_uppercase(),
+		Transform: toUppercase(),
 		Remove:    true,
 	},
 	// trash: \b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\()\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b
-	custom_trash_cam,
+	customTrashCam,
 	// trash: \b(?:H[DQ][ .-]*)?S[ \.\-]print\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:H[DQ][ .-]*)?S[ \.\-]print\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \bPre.?DVD(?:Rip)?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bPre.?DVD(?:Rip)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \bDVB[ .-]*(?:Rip)?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bDVB[ .-]*(?:Rip)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \bSAT[ .-]*Rips?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bSAT[ .-]*Rips?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \bLeaked\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bLeaked\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// trash: threesixtyp
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)threesixtyp`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \bR5|R6\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bR5|R6\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// trash: \b(?:Deleted[ .-]*)?Scene(?:s)?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bDeleted.*Scenes?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// trash: \bHQ.?(Clean)?.?(Aud(io)?)?\b
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)\bHQ.?(Clean)?.?(Aud(io)?)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// date: (?:\W|^)([[(]?(?:19[6-9]|20[012])[0-9]([. \-/\\])(?:0[1-9]|1[012])\2(?:0[1-9]|[12][0-9]|3[01])[])]?)(?:\W|$)
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?:\W|^)([[(]?(?:19[6-9]|20[012])[0-9]([. \-/\\])(?:0[1-9]|1[012])([. \-/\\])(?:0[1-9]|[12][0-9]|3[01])[])]?)(?:\W|$)`),
-		ValidateMatch: validate_matched_groups_are_same(2, 3),
-		Transform:     to_ptt_date(`YYYY MM DD`),
+		ValidateMatch: validateMatchedGroupsAreSame(2, 3),
+		Transform:     toPttDate(`YYYY MM DD`),
 		Remove:        true,
 	},
 	// date: (?:\W|^)(\[?\]?(?:0[1-9]|[12][0-9]|3[01])([. \-/\\])(?:0[1-9]|1[012])\2(?:19[6-9]|20[01])[0-9][\])]?)(?:\W|$)
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?:\W|^)(\[?\]?(?:0[1-9]|[12][0-9]|3[01])([. \-/\\])(?:0[1-9]|1[012])([. \-/\\])(?:19[6-9]|20[01])[0-9][\])]?)(?:\W|$)`),
-		ValidateMatch: validate_matched_groups_are_same(2, 3),
-		Transform:     to_ptt_date(`DD MM YYYY`),
+		ValidateMatch: validateMatchedGroupsAreSame(2, 3),
+		Transform:     toPttDate(`DD MM YYYY`),
 		Remove:        true,
 	},
 	// date: (?:\W)(\[?\]?(?:0[1-9]|1[012])([. \-/\\])(?:0[1-9]|[12][0-9]|3[01])\2(?:[0][1-9]|[0126789][0-9])[\])]?)(?:\W|$)
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?:\W)(\[?\]?(?:0[1-9]|1[012])([. \-/\\])(?:0[1-9]|[12][0-9]|3[01])([. \-/\\])(?:[0][1-9]|[0126789][0-9])[\])]?)(?:\W|$)`),
-		ValidateMatch: validate_matched_groups_are_same(2, 3),
-		Transform:     to_ptt_date(`MM DD YY`),
+		ValidateMatch: validateMatchedGroupsAreSame(2, 3),
+		Transform:     toPttDate(`MM DD YY`),
 		Remove:        true,
 	},
 	// date: (?:\W)(\[?\]?(?:[0][1-9]|[12][0-9]|3[0-9])([. \-/\\])(?:0[1-9]|1[012])\2(?:0[1-9]|[12][0-9])[\])]?)(?:\W|$)
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?:\W)(\[?\]?(?:[0][1-9]|[12][0-9]|3[0-9])([. \-/\\])(?:0[1-9]|1[012])([. \-/\\])(?:0[1-9]|[12][0-9])[\])]?)(?:\W|$)`),
-		ValidateMatch: validate_matched_groups_are_same(2, 3),
-		Transform:     to_ptt_date(`YY MM DD`),
+		ValidateMatch: validateMatchedGroupsAreSame(2, 3),
+		Transform:     toPttDate(`YY MM DD`),
 		Remove:        true,
 	},
 	// date: (?:\W)(\[?\]?(?:0[1-9]|[12][0-9]|3[01])([. \-/\\])(?:0[1-9]|1[012])\2(?:[0][1-9]|[0126789][0-9])[\])]?)(?:\W|$)
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?:\W)(\[?\]?(?:0[1-9]|[12][0-9]|3[01])([. \-/\\])(?:0[1-9]|1[012])([. \-/\\])(?:[0][1-9]|[0126789][0-9])[\])]?)(?:\W|$)`),
-		ValidateMatch: validate_matched_groups_are_same(2, 3),
-		Transform:     to_ptt_date(`DD MM YY`),
+		ValidateMatch: validateMatchedGroupsAreSame(2, 3),
+		Transform:     toPttDate(`DD MM YY`),
 		Remove:        true,
 	},
 	// date: (?:\W|^)([([]?(?:0?[1-9]|[12][0-9]|3[01])[. ]?(?:st|nd|rd|th)?([. \-/\\])(?:feb(?:ruary)?|jan(?:uary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?i)(?:\W|^)([([]?(?:0?[1-9]|[12][0-9]|3[01])[. ]?(?:st|nd|rd|th)?([. \-/\\])(?:feb(?:ruary)?|jan(?:uary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)([. \-/\\])(?:19[7-9]|20[012])[0-9][)\]]?)`),
-		ValidateMatch: validate_and(validate_matched_groups_are_same(2, 3), validate_lookahead(`\W|$`, ``, true)),
-		Transform:     to_ptt_date(`DD MMM YYYY`, `Do MMM YYYY`, `Do MMMM YYYY`),
+		ValidateMatch: validateAnd(validateMatchedGroupsAreSame(2, 3), validateLookahead(`\W|$`, ``, true)),
+		Transform:     toPttDate(`DD MMM YYYY`, `Do MMM YYYY`, `Do MMMM YYYY`),
 		Remove:        true,
 	},
 	// date: (?:\W|^)(\[?\]?(?:0?[1-9]|[12][0-9]|3[01])[. ]?(?:st|nd|rd|th)?([. \-\/\\])(?:feb(?:ruary)?|jan(?:uary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct
 	{
 		Field:         "date",
 		Pattern:       regexp.MustCompile(`(?i)(?:\W|^)(\[?\]?(?:0?[1-9]|[12][0-9]|3[01])[. ]?(?:st|nd|rd|th)?([. \-/\\])(?:feb(?:ruary)?|jan(?:uary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)([. \-/\\])(?:0[1-9]|[0126789][0-9])[\])]?)(?:\W|$)`),
-		ValidateMatch: validate_matched_groups_are_same(2, 3),
-		Transform:     to_ptt_date(`DD MMM YY`),
+		ValidateMatch: validateMatchedGroupsAreSame(2, 3),
+		Transform:     toPttDate(`DD MMM YY`),
 		Remove:        true,
 	},
 	// date: (?:\W|^)(\[?\]?20[012][0-9](?:0[1-9]|1[012])(?:0[1-9]|[12][0-9]|3[01])[\])]?)(?:\W|$)
 	{
 		Field:     "date",
 		Pattern:   regexp.MustCompile(`(?:\W|^)(\[?\]?20[012][0-9](?:0[1-9]|1[012])(?:0[1-9]|[12][0-9]|3[01])[\])]?)(?:\W|$)`),
-		Transform: to_ptt_date(`YYYYMMDD`),
+		Transform: toPttDate(`YYYYMMDD`),
 		Remove:    true,
 	},
 	// complete: \b((?:19\d|20[012])\d[ .]?-[ .]?(?:19\d|20[012])\d)\b
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`\b((?:19\d|20[012])\d[ .]?-[ .]?(?:19\d|20[012])\d)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: [([][ .]?((?:19\d|20[012])\d[ .]?-[ .]?\d{2})[ .]?[)\]]
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`[([][ .]?((?:19\d|20[012])\d[ .]?-[ .]?\d{2})[ .]?[)\]]`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// bitrate: \b\d+[kmg]bps\b
 	{
 		Field:     "bitrate",
 		Pattern:   regexp.MustCompile(`(?i)\b\d+[kmg]bps\b`),
-		Transform: to_lowercase(),
+		Transform: toLowercase(),
 		Remove:    true,
 	},
 	// year: \b(20[0-9]{2}|2100)(?!\D*\d{4}\b)
 	{
 		Field:         "year",
 		Pattern:       regexp.MustCompile(`\b(20[0-9]{2}|2100)`),
-		ValidateMatch: validate_lookahead(`\D*\d{4}\b`, ``, false),
-		Transform:     to_int_string(),
+		ValidateMatch: validateLookahead(`\D*\d{4}\b`, ``, false),
+		Transform:     toIntString(),
 		Remove:        true,
 	},
 	// year: [^SE][([]?(?!^)(?<!\d|Cap[. ]?)((?:19\d|20[012])\d)(?!\d|kbps)[)\]]?
 	{
 		Field: "year",
-		Process: scan_valid("year", regexp.MustCompile(`(?i)[^SE][([]?((?:19\d|20[012])\d)[)\]]?`), func(title string, idxs []int) bool {
-			return !year_prefix_reject_regex.MatchString(title[:idxs[2]]) && !year_suffix_reject_regex.MatchString(title[idxs[3]:])
+		Process: scanValid("year", regexp.MustCompile(`(?i)[^SE][([]?((?:19\d|20[012])\d)[)\]]?`), func(title string, idxs []int) bool {
+			return !yearPrefixRejectRegex.MatchString(title[:idxs[2]]) && !yearSuffixRejectRegex.MatchString(title[idxs[3]:])
 		}, false, false, false),
-		Transform: to_int_string(),
+		Transform: toIntString(),
 		Remove:    true,
 	},
 	// year: (?!^\w{4})^[([]?((?:19\d|20[012])\d)(?!\d|kbps)[)\]]?
@@ -476,394 +477,394 @@ var handlers = []handler{
 			}
 			return len(strings.Trim(mValue, "()[]")) == 4
 		},
-		Transform: to_year(),
+		Transform: toYear(),
 		Remove:    true,
 	},
 	// edition: \b\d{2,3}(th)?[\.\s\-\+_\/(),]Anniversary[\.\s\-\+_\/(),](Edition|Ed)?\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\b\d{2,3}(th)?[\.\s\-\+_\/(),]Anniversary[\.\s\-\+_\/(),](Edition|Ed)?\b`),
-		Transform: to_value(`Anniversary Edition`),
+		Transform: toValue(`Anniversary Edition`),
 		Remove:    true,
 	},
 	// edition: \bUltimate[\.\s\-\+_\/(),]Edition\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bUltimate[\.\s\-\+_\/(),]Edition\b`),
-		Transform: to_value(`Ultimate Edition`),
+		Transform: toValue(`Ultimate Edition`),
 		Remove:    true,
 	},
 	// edition: \bExtended[\.\s\-\+_\/(),]Director(\')?s\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bExtended[\.\s\-\+_\/(),]Director(\')?s\b`),
-		Transform: to_value(`Directors Cut`),
+		Transform: toValue(`Directors Cut`),
 		Remove:    true,
 	},
 	// edition: \b(custom.?)?Extended\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\b(custom.?)?Extended\b`),
-		Transform: to_value(`Extended Edition`),
+		Transform: toValue(`Extended Edition`),
 		Remove:    true,
 	},
 	// edition: \bDirector(\')?s.?Cut\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bDirector(\')?s.?Cut\b`),
-		Transform: to_value(`Directors Cut`),
+		Transform: toValue(`Directors Cut`),
 		Remove:    true,
 	},
 	// edition: \bCollector(\')?s\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bCollector(\')?s\b`),
-		Transform: to_value(`Collectors Edition`),
+		Transform: toValue(`Collectors Edition`),
 		Remove:    true,
 	},
 	// edition: \bTheatrical\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bTheatrical\b`),
-		Transform: to_value(`Theatrical`),
+		Transform: toValue(`Theatrical`),
 		Remove:    true,
 	},
 	// edition: \buncut(?!.gems)\b
 	{
 		Field:         "edition",
 		Pattern:       regexp.MustCompile(`(?i)\buncut(?:.gems)?\b`),
-		ValidateMatch: validate_not_match(regexp.MustCompile(`(?i)(?:.gems)`)),
-		Transform:     to_value("Uncut"),
+		ValidateMatch: validateNotMatch(regexp.MustCompile(`(?i)(?:.gems)`)),
+		Transform:     toValue("Uncut"),
 		Remove:        true,
 	},
 	// edition: \bIMAX\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bIMAX\b`),
-		Transform: to_value(`IMAX`),
+		Transform: toValue(`IMAX`),
 		Remove:    true,
 	},
 	// edition: \b\.Diamond\.\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\b\.Diamond\.\b`),
-		Transform: to_value(`Diamond Edition`),
+		Transform: toValue(`Diamond Edition`),
 		Remove:    true,
 	},
 	// edition: \bRemaster(?:ed)?\b
 	{
 		Field:     "edition",
 		Pattern:   regexp.MustCompile(`(?i)\bRemaster(?:ed)?\b`),
-		Transform: to_value(`Remastered`),
+		Transform: toValue(`Remastered`),
 		Remove:    true,
 	},
 	// upscaled: \b(?:AI.?)?(Upscal(ed?|ing)|Enhanced?)\b
 	{
 		Field:     "upscaled",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:AI.?)?(Upscal(ed?|ing)|Enhanced?)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// upscaled: \b(?:iris2|regrade|ups(uhd|fhd|hd|4k))\b
 	{
 		Field:     "upscaled",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:iris2|regrade|ups(uhd|fhd|hd|4k))\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// upscaled: \b\.AI\.\b
 	{
 		Field:     "upscaled",
 		Pattern:   regexp.MustCompile(`(?i)\b\.AI\.\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// convert: \bCONVERT\b
 	{
 		Field:     "convert",
 		Pattern:   regexp.MustCompile(`\bCONVERT\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// hardcoded: \b(HC|HARDCODED)\b
 	{
 		Field:     "hardcoded",
 		Pattern:   regexp.MustCompile(`\b(HC|HARDCODED)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// proper: \b(?:REAL.)?PROPER\b
 	{
 		Field:     "proper",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:REAL.)?PROPER\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// repack: \bREPACK|RERIP\b
 	{
 		Field:     "repack",
 		Pattern:   regexp.MustCompile(`(?i)\bREPACK|RERIP\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// retail: \bRetail\b
 	{
 		Field:     "retail",
 		Pattern:   regexp.MustCompile(`(?i)\bRetail\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// remastered: \bRemaster(?:ed)?\b
 	{
 		Field:     "remastered",
 		Pattern:   regexp.MustCompile(`(?i)\bRemaster(?:ed)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// documentary: \bDOCU(?:menta?ry)?\b
 	{
 		Field:         "documentary",
 		Pattern:       regexp.MustCompile(`(?i)\bDOCU(?:menta?ry)?\b`),
-		Transform:     to_boolean(),
+		Transform:     toBoolean(),
 		SkipFromTitle: true,
 	},
 	// unrated: \bunrated\b
 	{
 		Field:     "unrated",
 		Pattern:   regexp.MustCompile(`(?i)\bunrated\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// uncensored: \buncensored\b
 	{
 		Field:     "uncensored",
 		Pattern:   regexp.MustCompile(`(?i)\buncensored\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// commentary: \bcommentary\b
 	{
 		Field:     "commentary",
 		Pattern:   regexp.MustCompile(`(?i)\bcommentary\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// region: R\dJ?\b
 	{
 		Field:     "region",
 		Pattern:   regexp.MustCompile(`R\dJ?\b`),
-		Transform: to_uppercase(),
+		Transform: toUppercase(),
 		Remove:    true,
 	},
 	// region: \b(PAL|NTSC|SECAM)\b
 	{
 		Field:     "region",
 		Pattern:   regexp.MustCompile(`(?i)\b(PAL|NTSC|SECAM)\b`),
-		Transform: to_uppercase(),
+		Transform: toUppercase(),
 		Remove:    true,
 	},
 	// quality: \b(?:HD[ .-]*)?T(?:ELE)?S(?:YNC)?(?:Rip)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:HD[ .-]*)?T(?:ELE)?S(?:YNC)?(?:Rip)?\b`),
-		Transform: to_value(`TeleSync`),
+		Transform: toValue(`TeleSync`),
 		Remove:    true,
 	},
 	// quality: \b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`\b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b`),
-		Transform: to_value(`TeleCine`),
+		Transform: toValue(`TeleCine`),
 		Remove:    true,
 	},
 	// quality: \b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b`),
-		Transform: to_value(`SCR`),
+		Transform: toValue(`SCR`),
 		Remove:    true,
 	},
 	// quality: \bP(?:RE)?-?(HD|DVD)(?:Rip)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bP(?:RE)?-?(HD|DVD)(?:Rip)?\b`),
-		Transform: to_value(`SCR`),
+		Transform: toValue(`SCR`),
 		Remove:    true,
 	},
 	// quality: \bBlu[ .-]*Ray\b(?=.*remux)
 	{
 		Field:         "quality",
 		Pattern:       regexp.MustCompile(`(?i)\bBlu[ .-]*Ray\b`),
-		ValidateMatch: validate_lookahead(`.*remux`, `i`, true),
-		Transform:     to_value(`BluRay REMUX`),
+		ValidateMatch: validateLookahead(`.*remux`, `i`, true),
+		Transform:     toValue(`BluRay REMUX`),
 		Remove:        true,
 	},
 	// quality: (?:BD|BR|UHD)[- ]?remux
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)(?:BD|BR|UHD)[- ]?remux`),
-		Transform: to_value(`BluRay REMUX`),
+		Transform: toValue(`BluRay REMUX`),
 		Remove:    true,
 	},
 	// quality: (?<=remux.*)\bBlu[ .-]*Ray\b
 	{
 		Field:         "quality",
 		Pattern:       regexp.MustCompile(`(?i)\bBlu[ .-]*Ray\b`),
-		ValidateMatch: validate_lookbehind(`remux.*`, `i`, true),
-		Transform:     to_value(`BluRay REMUX`),
+		ValidateMatch: validateLookbehind(`remux.*`, `i`, true),
+		Transform:     toValue(`BluRay REMUX`),
 		Remove:        true,
 	},
 	// quality: \bremux\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bremux\b`),
-		Transform: to_value(`REMUX`),
+		Transform: toValue(`REMUX`),
 		Remove:    true,
 	},
 	// quality: \bBlu[ .-]*Ray\b(?![ .-]*Rip)
 	{
 		Field:         "quality",
 		Pattern:       regexp.MustCompile(`(?i)\bBlu[ .-]*Ray\b`),
-		ValidateMatch: validate_lookahead(`[ .-]*Rip`, `i`, false),
-		Transform:     to_value(`BluRay`),
+		ValidateMatch: validateLookahead(`[ .-]*Rip`, `i`, false),
+		Transform:     toValue(`BluRay`),
 		Remove:        true,
 	},
 	// quality: \bUHD[ .-]*Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bUHD[ .-]*Rip\b`),
-		Transform: to_value(`UHDRip`),
+		Transform: toValue(`UHDRip`),
 		Remove:    true,
 	},
 	// quality: \bHD[ .-]*Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bHD[ .-]*Rip\b`),
-		Transform: to_value(`HDRip`),
+		Transform: toValue(`HDRip`),
 		Remove:    true,
 	},
 	// quality: \bMicro[ .-]*HD\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bMicro[ .-]*HD\b`),
-		Transform: to_value(`HDRip`),
+		Transform: toValue(`HDRip`),
 		Remove:    true,
 	},
 	// quality: \b(?:BR|Blu[ .-]*Ray)[ .-]*Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:BR|Blu[ .-]*Ray)[ .-]*Rip\b`),
-		Transform: to_value(`BRRip`),
+		Transform: toValue(`BRRip`),
 		Remove:    true,
 	},
 	// quality: \bBD[ .-]*Rip\b|\bBDR\b|\bBD-RM\b|[[(]BD[\]) .,-]
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bBD[ .-]*Rip\b|\bBDR\b|\bBD-RM\b|[[(]BD[\]) .,-]`),
-		Transform: to_value(`BDRip`),
+		Transform: toValue(`BDRip`),
 		Remove:    true,
 	},
 	// quality: \b(?:HD[ .-]*)?DVD[ .-]*Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:HD[ .-]*)?DVD[ .-]*Rip\b`),
-		Transform: to_value(`DVDRip`),
+		Transform: toValue(`DVDRip`),
 		Remove:    true,
 	},
 	// quality: \bVHS[ .-]*Rip?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bVHS[ .-]*Rip?\b`),
-		Transform: to_value(`VHSRip`),
+		Transform: toValue(`VHSRip`),
 		Remove:    true,
 	},
 	// quality: \bDVD(?:R\d?|.*Mux)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bDVD(?:R\d?|.*Mux)?\b`),
-		Transform: to_value(`DVD`),
+		Transform: toValue(`DVD`),
 		Remove:    true,
 	},
 	// quality: \bVHS\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bVHS\b`),
-		Transform: to_value(`VHS`),
+		Transform: toValue(`VHS`),
 		Remove:    true,
 	},
 	// quality: \bPPVRip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bPPVRip\b`),
-		Transform: to_value(`PPVRip`),
+		Transform: toValue(`PPVRip`),
 		Remove:    true,
 	},
 	// quality: \bHD.?TV.?Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bHD.?TV.?Rip\b`),
-		Transform: to_value(`HDTVRip`),
+		Transform: toValue(`HDTVRip`),
 		Remove:    true,
 	},
 	// quality: \bDVB[ .-]*(?:Rip)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bDVB[ .-]*(?:Rip)?\b`),
-		Transform: to_value(`HDTV`),
+		Transform: toValue(`HDTV`),
 		Remove:    true,
 	},
 	// quality: \bSAT[ .-]*Rips?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bSAT[ .-]*Rips?\b`),
-		Transform: to_value(`SATRip`),
+		Transform: toValue(`SATRip`),
 		Remove:    true,
 	},
 	// quality: \bTVRips?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bTVRips?\b`),
-		Transform: to_value(`TVRip`),
+		Transform: toValue(`TVRip`),
 		Remove:    true,
 	},
 	// quality: \bR5\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bR5\b`),
-		Transform: to_value(`R5`),
+		Transform: toValue(`R5`),
 		Remove:    true,
 	},
 	// quality: \b(?:DL|WEB|BD|BR)MUX\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:DL|WEB|BD|BR)MUX\b`),
-		Transform: to_value(`WEBMux`),
+		Transform: toValue(`WEBMux`),
 		Remove:    true,
 	},
 	// quality: \bWEB[ .-]*Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bWEB[ .-]*Rip\b`),
-		Transform: to_value(`WEBRip`),
+		Transform: toValue(`WEBRip`),
 		Remove:    true,
 	},
 	// quality: \bWEB[ .-]?DL[ .-]?Rip\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bWEB[ .-]?DL[ .-]?Rip\b`),
-		Transform: to_value(`WEB-DLRip`),
+		Transform: toValue(`WEB-DLRip`),
 		Remove:    true,
 	},
 	// quality: \bWEB[ .-]*(DL|.BDrip|.DLRIP)\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bWEB[ .-]*(DL|.BDrip|.DLRIP)\b`),
-		Transform: to_value(`WEB-DL`),
+		Transform: toValue(`WEB-DL`),
 		Remove:    true,
 	},
 	// quality: \b(?<!\w.)WEB\b|\bWEB(?!([ \.\-\(\],]+\d))\b
 	{
 		Field:         "quality",
 		Pattern:       regexp.MustCompile(`(?i)\b(?:\w.)?WEB\b|\bWEB(?:(?:[ \.\-\(\],]+\d))?\b`),
-		ValidateMatch: validate_not_match(regexp.MustCompile(`(?i)\b(?:\w.)WEB\b|\bWEB(?:(?:[ \.\-\(\],]+\d))\b`)),
-		Transform:     to_value("WEB"),
+		ValidateMatch: validateNotMatch(regexp.MustCompile(`(?i)\b(?:\w.)WEB\b|\bWEB(?:(?:[ \.\-\(\],]+\d))\b`)),
+		Transform:     toValue("WEB"),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -871,10 +872,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("cam"),
 		Field: "quality",
-		Process: scan_valid("quality", regexp.MustCompile(`(?i)\b(?:H[DQ][ .-]*)?(CAM)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b`), func(title string, idxs []int) bool {
-			return !trash_cam_reject_regex.MatchString(title[idxs[3]:])
+		Process: scanValid("quality", regexp.MustCompile(`(?i)\b(?:H[DQ][ .-]*)?(CAM)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b`), func(title string, idxs []int) bool {
+			return !trashCamRejectRegex.MatchString(title[idxs[3]:])
 		}, false, false, false),
-		Transform:     to_value(`CAM`),
+		Transform:     toValue(`CAM`),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -882,7 +883,7 @@ var handlers = []handler{
 	{
 		Field:         "quality",
 		Pattern:       regexp.MustCompile(`(?i)\b(?:H[DQ][ .-]*)?S[ \.\-]print`),
-		Transform:     to_value(`CAM`),
+		Transform:     toValue(`CAM`),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -890,49 +891,49 @@ var handlers = []handler{
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bPDTV\b`),
-		Transform: to_value(`PDTV`),
+		Transform: toValue(`PDTV`),
 		Remove:    true,
 	},
 	// quality: \bHD(.?TV)?\b
 	{
 		Field:     "quality",
 		Pattern:   regexp.MustCompile(`(?i)\bHD(.?TV)?\b`),
-		Transform: to_value(`HDTV`),
+		Transform: toValue(`HDTV`),
 		Remove:    true,
 	},
 	// bit_depth: \bhevc\s?10\b
 	{
 		Field:     "bitDepth",
 		Pattern:   regexp.MustCompile(`(?i)\bhevc\s?10\b`),
-		Transform: to_value(`10bit`),
+		Transform: toValue(`10bit`),
 	},
 	// bit_depth: (?:8|10|12)[-\.]?(?=bit\b)
 	{
 		Field:         "bitDepth",
 		Pattern:       regexp.MustCompile(`(?i)(?:8|10|12)[-\.]?`),
-		ValidateMatch: validate_lookahead(`bit\b`, `i`, true),
-		Transform:     to_value_sub(`$1bit`),
+		ValidateMatch: validateLookahead(`bit\b`, `i`, true),
+		Transform:     toValueSub(`$1bit`),
 		Remove:        true,
 	},
 	// bit_depth: \bhdr10\b
 	{
 		Field:     "bitDepth",
 		Pattern:   regexp.MustCompile(`(?i)\bhdr10\b`),
-		Transform: to_value(`10bit`),
+		Transform: toValue(`10bit`),
 	},
 	// bit_depth: \bhi10\b
 	{
 		Field:     "bitDepth",
 		Pattern:   regexp.MustCompile(`(?i)\bhi10\b`),
-		Transform: to_value(`10bit`),
+		Transform: toValue(`10bit`),
 	},
 	// bit_depth: ['custom:handle_bit_depth']
-	custom_handle_bit_depth,
+	customHandleBitDepth,
 	// hdr: \bDV\b|dolby.?vision|\bDoVi\b
 	{
 		Field:        "hdr",
 		Pattern:      regexp.MustCompile(`(?i)\bDV\b|dolby.?vision|\bDoVi\b`),
-		Transform:    to_value_set(`DV`),
+		Transform:    toValueSet(`DV`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -940,7 +941,7 @@ var handlers = []handler{
 	{
 		Field:        "hdr",
 		Pattern:      regexp.MustCompile(`(?i)HDR10(?:\+|[-\.\s]?plus)`),
-		Transform:    to_value_set(`HDR10+`),
+		Transform:    toValueSet(`HDR10+`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -948,7 +949,7 @@ var handlers = []handler{
 	{
 		Field:        "hdr",
 		Pattern:      regexp.MustCompile(`(?i)\bHDR(?:10)?\b`),
-		Transform:    to_value_set(`HDR`),
+		Transform:    toValueSet(`HDR`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -956,7 +957,7 @@ var handlers = []handler{
 	{
 		Field:        "hdr",
 		Pattern:      regexp.MustCompile(`(?i)\bSDR\b`),
-		Transform:    to_value_set(`SDR`),
+		Transform:    toValueSet(`SDR`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -964,21 +965,21 @@ var handlers = []handler{
 	{
 		Field:     "codec",
 		Pattern:   regexp.MustCompile(`(?i)\b[hx][\. \-]?264\b`),
-		Transform: to_value(`avc`),
+		Transform: toValue(`avc`),
 		Remove:    true,
 	},
 	// codec: \b[hx][\. \-]?265\b
 	{
 		Field:     "codec",
 		Pattern:   regexp.MustCompile(`(?i)\b[hx][\. \-]?265\b`),
-		Transform: to_value(`hevc`),
+		Transform: toValue(`hevc`),
 		Remove:    true,
 	},
 	// codec: \b\W264\W\b
 	{
 		Field:         "codec",
 		Pattern:       regexp.MustCompile(`\b\W264\W\b`),
-		Transform:     to_value(`avc`),
+		Transform:     toValue(`avc`),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -986,7 +987,7 @@ var handlers = []handler{
 	{
 		Field:         "codec",
 		Pattern:       regexp.MustCompile(`\b\W265\W\b`),
-		Transform:     to_value(`hevc`),
+		Transform:     toValue(`hevc`),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -994,14 +995,14 @@ var handlers = []handler{
 	{
 		Field:     "codec",
 		Pattern:   regexp.MustCompile(`(?i)\bHEVC10(bit)?\b|\b[xh][\. \-]?265\b`),
-		Transform: to_value(`hevc`),
+		Transform: toValue(`hevc`),
 		Remove:    true,
 	},
 	// codec: \bhevc(?:\s?10)?\b
 	{
 		Field:        "codec",
 		Pattern:      regexp.MustCompile(`(?i)\bhevc(?:\s?10)?\b`),
-		Transform:    to_value(`hevc`),
+		Transform:    toValue(`hevc`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1009,7 +1010,7 @@ var handlers = []handler{
 	{
 		Field:        "codec",
 		Pattern:      regexp.MustCompile(`(?i)\bdivx|xvid\b`),
-		Transform:    to_value(`xvid`),
+		Transform:    toValue(`xvid`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1017,7 +1018,7 @@ var handlers = []handler{
 	{
 		Field:        "codec",
 		Pattern:      regexp.MustCompile(`(?i)\bavc\b`),
-		Transform:    to_value(`avc`),
+		Transform:    toValue(`avc`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1025,7 +1026,7 @@ var handlers = []handler{
 	{
 		Field:        "codec",
 		Pattern:      regexp.MustCompile(`(?i)\bav1\b`),
-		Transform:    to_value(`av1`),
+		Transform:    toValue(`av1`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1033,17 +1034,17 @@ var handlers = []handler{
 	{
 		Field:        "codec",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:mpe?g\d*)\b`),
-		Transform:    to_value(`mpeg`),
+		Transform:    toValue(`mpeg`),
 		Remove:       true,
 		KeepMatching: true,
 	},
 	// codec: ['custom:handle_space_in_codec']
-	custom_handle_space_in_codec,
+	customHandleSpaceInCodec,
 	// channels: 5[\.\s]1(?:ch|-S\d+)?\b
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)5[\.\s]1(?:ch|-S\d+)?\b`),
-		Transform:    to_value_set(`5.1`),
+		Transform:    toValueSet(`5.1`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1051,7 +1052,7 @@ var handlers = []handler{
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:x[2-4]|5[\W]1(?:x[2-4])?)\b`),
-		Transform:    to_value_set(`5.1`),
+		Transform:    toValueSet(`5.1`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1059,7 +1060,7 @@ var handlers = []handler{
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)\b7[\.\- ]1(.?ch(annel)?)?\b`),
-		Transform:    to_value_set(`7.1`),
+		Transform:    toValueSet(`7.1`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1067,7 +1068,7 @@ var handlers = []handler{
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)\+?2[\.\s]0(?:x[2-4])?\b`),
-		Transform:    to_value_set(`2.0`),
+		Transform:    toValueSet(`2.0`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1075,7 +1076,7 @@ var handlers = []handler{
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)\b2\.0\b`),
-		Transform:    to_value_set(`2.0`),
+		Transform:    toValueSet(`2.0`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1083,24 +1084,24 @@ var handlers = []handler{
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:24-bit\s)?stereo\b`),
-		Transform:    to_value_set(`stereo`),
+		Transform:    toValueSet(`stereo`),
 		KeepMatching: true,
 	},
 	// channels: \bmono\b
 	{
 		Field:        "channels",
 		Pattern:      regexp.MustCompile(`(?i)\bmono\b`),
-		Transform:    to_value_set(`mono`),
+		Transform:    toValueSet(`mono`),
 		KeepMatching: true,
 	},
 	// audio: \b(?!.+HR)(DTS.?HD.?Ma(ster)?|DTS.?X)\b
 	{
 		Gate:  gate("dts"),
 		Field: "audio",
-		Process: scan_valid("audio", regexp.MustCompile(`(?i)\b(DTS.?HD.?Ma(?:ster)?|DTS.?X)\b`), func(title string, idxs []int) bool {
-			return !audio_hr_after_regex.MatchString(title[idxs[0]:])
+		Process: scanValid("audio", regexp.MustCompile(`(?i)\b(DTS.?HD.?Ma(?:ster)?|DTS.?X)\b`), func(title string, idxs []int) bool {
+			return !audioHrAfterRegex.MatchString(title[idxs[0]:])
 		}, true, false, true),
-		Transform:    to_value_set(`DTS Lossless`),
+		Transform:    toValueSet(`DTS Lossless`),
 		KeepMatching: true,
 		Remove:       true,
 	},
@@ -1108,8 +1109,8 @@ var handlers = []handler{
 	{
 		Field:         "audio",
 		Pattern:       regexp.MustCompile(`(?i)\bDTS(?:(?:.?HD.?Ma(?:ster)?|.X))?.?(?:HD.?HR|HD)?\b`),
-		ValidateMatch: validate_not_match(regexp.MustCompile(`(?i)DTS(?:.?HD.?Ma(?:ster)?|.X)`)),
-		Transform:     to_value_set("DTS Lossy"),
+		ValidateMatch: validateNotMatch(regexp.MustCompile(`(?i)DTS(?:.?HD.?Ma(?:ster)?|.X)`)),
+		Transform:     toValueSet("DTS Lossy"),
 		Remove:        true,
 		KeepMatching:  true,
 	},
@@ -1117,7 +1118,7 @@ var handlers = []handler{
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\b(Dolby.?)?Atmos\b`),
-		Transform:    to_value_set(`Atmos`),
+		Transform:    toValueSet(`Atmos`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1125,7 +1126,7 @@ var handlers = []handler{
 	{
 		Field:         "audio",
 		Pattern:       regexp.MustCompile(`(?i)\b(True[ .-]?HD|\.True\.)\b`),
-		Transform:     to_value_set(`TrueHD`),
+		Transform:     toValueSet(`TrueHD`),
 		Remove:        true,
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -1134,7 +1135,7 @@ var handlers = []handler{
 	{
 		Field:         "audio",
 		Pattern:       regexp.MustCompile(`\bTRUE\b`),
-		Transform:     to_value_set(`TrueHD`),
+		Transform:     toValueSet(`TrueHD`),
 		Remove:        true,
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -1143,7 +1144,7 @@ var handlers = []handler{
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\bFLAC(?:\d\.\d)?(?:x\d+)?\b`),
-		Transform:    to_value_set(`FLAC`),
+		Transform:    toValueSet(`FLAC`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1151,7 +1152,7 @@ var handlers = []handler{
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`DD2?[\+p]|DD Plus|Dolby Digital Plus|DDP(5[ \.\_]1)?|E-?AC-?3(?:-S\d+)?`),
-		Transform:    to_value_set(`Dolby Digital Plus`),
+		Transform:    toValueSet(`Dolby Digital Plus`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1159,14 +1160,14 @@ var handlers = []handler{
 	{
 		Field:     "audio",
 		Pattern:   regexp.MustCompile(`(?i)\bddp(5.1)?`),
-		Transform: to_value_set(`Dolby Digital Plus`),
+		Transform: toValueSet(`Dolby Digital Plus`),
 		Remove:    true,
 	},
 	// audio: \b(DD|Dolby.?Digital|DolbyD|AC-?3(x2)?(?:-S\d+)?)\b
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\b(DD|Dolby.?Digital|DolbyD|AC-?3(x2)?(?:-S\d+)?)\b`),
-		Transform:    to_value_set(`Dolby Digital`),
+		Transform:    toValueSet(`Dolby Digital`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1174,7 +1175,7 @@ var handlers = []handler{
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\bQ?Q?AAC(x?2)?\b`),
-		Transform:    to_value_set(`AAC`),
+		Transform:    toValueSet(`AAC`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1182,7 +1183,7 @@ var handlers = []handler{
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\bL?PCM\b`),
-		Transform:    to_value_set(`PCM`),
+		Transform:    toValueSet(`PCM`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1190,8 +1191,8 @@ var handlers = []handler{
 	{
 		Field:         "audio",
 		Pattern:       regexp.MustCompile(`\bOPUS(\b|\d)`),
-		ValidateMatch: validate_lookahead(`.*[ ._-](\d{3,4}p)`, ``, false),
-		Transform:     to_value_set(`OPUS`),
+		ValidateMatch: validateLookahead(`.*[ ._-](\d{3,4}p)`, ``, false),
+		Transform:     toValueSet(`OPUS`),
 		Remove:        true,
 		KeepMatching:  true,
 	},
@@ -1199,47 +1200,47 @@ var handlers = []handler{
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\b(H[DQ])?.?(Clean.?Aud(io)?)\b`),
-		Transform:    to_value_set(`HQ Clean Audio`),
+		Transform:    toValueSet(`HQ Clean Audio`),
 		Remove:       true,
 		KeepMatching: true,
 	},
 	// group: - ?(?!\d+$|S\d+|\d+x|ep?\d+|[^[]+]$)([^\-. []+[^\-. [)\]\d][^\-. [)\]]*)(?:\[[\w.-]+])?(?=\.\w{2,4}$|$)
-	custom_group_dash,
+	customGroupDash,
 	// volumes: \bvol(?:s|umes?)?[. -]*(?:\d{1,2}[., +/\\&-]+)+\d{1,2}\b
 	{
 		Field:     "volumes",
 		Pattern:   regexp.MustCompile(`(?i)\bvol(?:s|umes?)?[. -]*(?:\d{1,2}[., +/\\&-]+)+\d{1,2}\b`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// volumes: ['custom:handle_volumes']
-	custom_handle_volumes,
+	customHandleVolumes,
 	// languages: \b(temporadas?|completa)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(temporadas?|completa)\b`),
-		Transform:    to_value_set(`es`),
+		Transform:    toValueSet(`es`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:INT[EÉ]GRALE?)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:INT[EÉ]GRALE?)\b`),
-		Transform:    to_value_set(`fr`),
+		Transform:    toValueSet(`fr`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:Saison)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:Saison)\b`),
-		Transform:    to_value_set(`fr`),
+		Transform:    toValueSet(`fr`),
 		KeepMatching: true,
 	},
 	// complete: \b(?:INTEGRALE?|INTÉGRALE?)\b
 	{
 		Field:        "complete",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:INTEGRALE?|INTÉGRALE?)\b`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1247,7 +1248,7 @@ var handlers = []handler{
 	{
 		Field:        "complete",
 		Pattern:      regexp.MustCompile(`(Movie|Complete).Collection`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1255,7 +1256,7 @@ var handlers = []handler{
 	{
 		Field:        "complete",
 		Pattern:      regexp.MustCompile(`Complete(.\d{1,2})`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1263,556 +1264,556 @@ var handlers = []handler{
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)(?:\bthe\W)?(?:\bcomplete|collection|dvd)?\b[ .]?\bbox[ .-]?set\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: (?:\bthe\W)?(?:\bcomplete|collection|dvd)?\b[ .]?\bmini[ .-]?series\b
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)(?:\bthe\W)?(?:\bcomplete|collection|dvd)?\b[ .]?\bmini[ .-]?series\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// complete: (?:\bthe\W)?(?:\bcomplete|full|all)\b.*\b(?:series|seasons|collection|episodes|set|pack|movies)\b
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)(?:\bthe\W)?(?:\bcomplete\b|\bfull\b|\ball\b)\b.*\b(?:series|seasons|collection|episodes|set|pack|movies)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// complete: (Top\W+)?\d+\W+(movies?|series|seasons?)\W+Collection
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)(Top\W+)?\d+\W+(movies?|series|seasons?)\W+Collection`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: (?:\bthe\W)?\bultimate\b[ .]\bcollection\b
 	{
 		Field:        "complete",
 		Pattern:      regexp.MustCompile(`(?i)(?:\bthe\W)?\bultimate\b[ .]\bcollection\b`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		KeepMatching: true,
 	},
 	// complete: \bcollection\b.*\b(?:set|pack|movies)\b
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)\bcollection\b.*\b(?:set|pack|movies)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 	},
 	// complete: \bcollection(?:(\s\[|\s\())
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)\bcollection(?:(\s\[|\s\())`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: duology|trilogy|quadr[oi]logy|tetralogy|pentalogy|hexalogy|heptalogy|anthology
 	{
 		Field:        "complete",
 		Pattern:      regexp.MustCompile(`(?i)duology|trilogy|quadr[oi]logy|tetralogy|pentalogy|hexalogy|heptalogy|anthology`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		KeepMatching: true,
 	},
 	// complete: \bcompleta\b
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)\bcompleta\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: \bsaga\b
 	{
 		Field:         "complete",
 		Pattern:       regexp.MustCompile(`(?i)\bsaga\b`),
-		Transform:     to_boolean(),
+		Transform:     toBoolean(),
 		SkipFromTitle: true,
 	},
 	// complete: \b\[Complete\]\b
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`(?i)\b\[Complete\]\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: (?<!A.?|The.?)\bComplete\b
 	{
 		Field:         "complete",
 		Pattern:       regexp.MustCompile(`(?i)\bComplete\b`),
-		ValidateMatch: validate_lookbehind(`A.?|The.?`, `i`, false),
-		Transform:     to_boolean(),
+		ValidateMatch: validateLookbehind(`A.?|The.?`, `i`, false),
+		Transform:     toBoolean(),
 		Remove:        true,
 	},
 	// complete: COMPLETE
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`COMPLETE`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// complete: \bkolekcja\b(?:\Wfilm(?:y|ów|ow)?)?
 	{
 		Field:     "complete",
 		Pattern:   regexp.MustCompile(`\bkolekcja\b(?:\Wfilm(?:y|ów|ow)?)?`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// seasons: (?:complete\W|seasons?\W|\W|^)((?:s\d{1,2}[., +/\\&-]+)+s\d{1,2}\b)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:complete\W|seasons?\W|\W|^)((?:s\d{1,2}[., +/\\&-]+)+s\d{1,2}\b)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:complete\W|seasons?\W|\W|^)[([]?(s\d{2,}-\d{2,}\b)[)\]]?
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:complete\W|seasons?\W|\W|^)[([]?(s\d{2,}-\d{2,}\b)[)\]]?`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:complete\W|seasons?\W|\W|^)[([]?(s[1-9]-[2-9])[)\]]?
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:complete\W|seasons?\W|\W|^)[([]?(s[1-9]-[2-9])[)\]]?`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: \d+ª(?:.+)?(?:a.?)?\d+ª(?:(?:.+)?(?:temporadas?))
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)\d+ª(?:.+)?(?:a.?)?\d+ª(?:(?:.+)?(?:temporadas?))`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete\W)?(?:seasons?|[Сс]езони?|temporadas?)[. ]?[-:]?[. ]?[([]?((?:\d{1,2}[., /\\&]+)+\d{1,2}\b)[)\]]?
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete\W)?(?:seasons?|[Сс]езони?|temporadas?)[. ]?[-:]?[. ]?[([]?((?:\d{1,2}[., /\\&]+)+\d{1,2}\b)[)\]]?`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete\W)?(?:seasons?|[Сс]езони?|temporadas?)[. ]?[-:]?[. ]?[([]?((?:\d{1,2}[.-]+)+[1-9]\d?\b)[)\]]?
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete\W)?(?:seasons?|[Сс]езони?|temporadas?)[. ]?[-:]?[. ]?[([]?((?:\d{1,2}[.-]+)+[1-9]\d?\b)[)\]]?`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete\W)?season[. ]?[([]?((?:\d{1,2}[. -]+)+[1-9]\d?\b)[)\]]?(?!.*\.\w{2,4}$)
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete\W)?season[. ]?[([]?((?:\d{1,2}[. -]+)+[1-9]\d?\b)[)\]]?`),
-		ValidateMatch: validate_lookahead(`.*\.\w{2,4}$`, `i`, false),
-		Transform:     to_int_range(),
+		ValidateMatch: validateLookahead(`.*\.\w{2,4}$`, `i`, false),
+		Transform:     toIntRange(),
 		Remove:        true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete\W)?\bseasons?\b[. -]?(\d{1,2}[. -]?(?:to|thru|and|\+|:)[. -]?\d{1,2})\b
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete\W)?\bseasons?\b[. -]?(\d{1,2}[. -]?(?:to|thru|and|\+|:)[. -]?\d{1,2})\b`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete\W)?(?:saison|seizoen|season|series|temp(?:orada)?):?[. ]?(\d{1,2})\b
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete\W)?(?:saison|seizoen|season|series|temp(?:orada)?):?[. ]?(\d{1,2})\b`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: (\d{1,2})(?:-?й)?[. _]?(?:[Сс]езон|sez(?:on)?)(?:\W?\D|$)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(\d{1,2})(?:-?й)?[. _]?(?:[Сс]езон|sez(?:on)?)(?:\W?\D|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 		Remove:    true,
 	},
 	// seasons: [Сс]езон:?[. _]?№?(\d{1,2})(?!\d)
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`(?i)[Сс]езон:?[. _]?№?(\d{1,2})`),
-		ValidateMatch: validate_lookahead(`\d`, `i`, false),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookahead(`\d`, `i`, false),
+		Transform:     toIntArray(),
 		Remove:        true,
 	},
 	// seasons: (?:\D|^)(\d{1,2})Â?[°ºªa]?[. ]*temporada
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:\D|^)(\d{1,2})Â?[°ºªa]?[. ]*temporada`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 		Remove:    true,
 	},
 	// seasons: t(\d{1,3})(?:[ex]+|$)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)t(\d{1,3})(?:[ex]+|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 		Remove:    true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete)?(?<![a-z])\bs(\d{1,3})(?:[\Wex]|\d{2}\b|$)
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete)?(?:[a-z])?\bs(\d{1,3})(?:[\Wex]|\d{2}\b|$)`),
-		ValidateMatch: validate_not_match(regexp.MustCompile(`(?i)(?:[a-z])\bs\d{1,3}`)),
-		Transform:     to_int_array(),
+		ValidateMatch: validateNotMatch(regexp.MustCompile(`(?i)(?:[a-z])\bs\d{1,3}`)),
+		Transform:     toIntArray(),
 		KeepMatching:  true,
 	},
 	// seasons: (?:(?:\bthe\W)?\bcomplete\W)?(?:\W|^)(\d{1,2})[. ]?(?:st|nd|rd|th)[. ]*season
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:(?:\bthe\W)?\bcomplete\W)?(?:\W|^)(\d{1,2})[. ]?(?:st|nd|rd|th)[. ]*season`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: (?<=S)\d{2}(?=E\d+)
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`\d{2}`),
-		ValidateMatch: validate_and(validate_lookbehind(`S`, ``, true), validate_lookahead(`E\d+`, ``, true)),
-		Transform:     to_int_array(),
+		ValidateMatch: validateAnd(validateLookbehind(`S`, ``, true), validateLookahead(`E\d+`, ``, true)),
+		Transform:     toIntArray(),
 		Remove:        true,
 	},
 	// seasons: (?:\D|^)(\d{1,2})[xх]\d{1,3}(?:\D|$)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?:\D|^)(\d{1,2})[xх]\d{1,3}(?:\D|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: \bSn([1-9])(?:\D|$)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`\bSn([1-9])(?:\D|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: [[(](\d{1,2})\.\d{1,3}[)\]]
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`[[(](\d{1,2})\.\d{1,3}[)\]]`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: -\s?(\d{1,2})\.\d{2,3}\s?-
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`-\s?(\d{1,2})\.\d{2,3}\s?-`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: (?:^|\/)(\d{1,2})-\d{2}\b(?!-\d)
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`(?:^|\/)(\d{1,2})-\d{2}\b`),
-		ValidateMatch: validate_lookahead(`-\d`, ``, false),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookahead(`-\d`, ``, false),
+		Transform:     toIntArray(),
 	},
 	// seasons: [^\w-](\d{1,2})-\d{2}(?=\.\w{2,4}$)
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`[^\w-](\d{1,2})-\d{2}`),
-		ValidateMatch: validate_lookahead(`\.\w{2,4}$`, ``, true),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookahead(`\.\w{2,4}$`, ``, true),
+		Transform:     toIntArray(),
 	},
 	// seasons: (?<!\bEp?(?:isode)? ?\d+\b.*)\b(\d{2})[ ._]\d{2}(?:.F)?\.\w{2,4}$
 	{
 		Field:         "seasons",
 		Pattern:       regexp.MustCompile(`\b(\d{2})[ ._]\d{2}(?:.F)?\.\w{2,4}$`),
-		ValidateMatch: validate_lookbehind(`\bEp?(?:isode)? ?\d+\b.*`, ``, false),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookbehind(`\bEp?(?:isode)? ?\d+\b.*`, ``, false),
+		Transform:     toIntArray(),
 	},
 	// seasons: \bEp(?:isode)?\W+(\d{1,2})\.\d{1,3}\b
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)\bEp(?:isode)?\W+(\d{1,2})\.\d{1,3}\b`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: \bSeasons?\b.*\b(\d{1,2}-\d{1,2})\b
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)\bSeasons?\b.*\b(\d{1,2}-\d{1,2})\b`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// seasons: (?:\W|^)(\d{1,2})(?:e|ep)\d{1,3}(?:\W|$)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:\W|^)(\d{1,2})(?:e|ep)\d{1,3}(?:\W|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// seasons: \bs(\d{1,4})
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)\bs(\d{1,4})`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 		Remove:    true,
 	},
 	// seasons: \bТВ-(\d{1,2})\b  (Go \b is ASCII-only; use unicode context)
 	{
 		Field:     "seasons",
 		Pattern:   regexp.MustCompile(`(?i)(?:^|[^\p{L}\p{N}_])ТВ-(\d{1,2})(?:[^\p{L}\p{N}_]|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: (?:[\W\d]|^)e[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|e){1,2}[ .]?\d{1,3})+)(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)e[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|e){1,2}[ .]?\d{1,3})+)(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: (?:[\W\d]|^)ep[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|ep){1,2}[ .]?\d{1,3})+)(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)ep[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|ep){1,2}[ .]?\d{1,3})+)(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: (?:[\W\d]|^)\d+[xх][ .]?[([]?(\d{1,3}(?:[ .]?[xх][ .]?\d{1,3})+)(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)\d+[xх][ .]?[([]?(\d{1,3}(?:[ .]?[xх][ .]?\d{1,3})+)(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: Серии:\s+(\d+)\s+(?:of|из|iz)\s+\d+\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)Серии:\s+(\d+)\s+(?:of|из|iz)\s+\d+\b`),
-		Transform: to_int_range_till(),
+		Transform: toIntRangeTill(),
 	},
 	// episodes: (?:[\W\d]|^)(?:episodes?|[Сс]ерии:?)[ .]?[([]?(\d{1,3}(?:[ .+]*[&+][ .]?\d{1,3})+)(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)(?:episodes?|[Сс]ерии:?)[ .]?[([]?(\d{1,3}(?:[ .+]*[&+][ .]?\d{1,3})+)(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: [([]?(?:\D|^)(\d{1,3}[ .]?ao[ .]?\d{1,3})[)\]]?(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)[([]?(?:\D|^)(\d{1,3}[ .]?ao[ .]?\d{1,3})[)\]]?(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: (?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: (?:\W|^)(\d{1,3}(?:[ .]*~[ .]*\d{1,3})+)(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:\W|^)(\d{1,3}(?:[ .]*~[ .]*\d{1,3})+)(?:\W|$)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: \bE\d{1,4}\s*à\s*E\d{1,4}\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)\bE\d{1,4}\s*à\s*E\d{1,4}\b`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// episodes: [st]\d{1,2}[. ]?[xх-]?[. ]?(?:e|x|х|ep|-|\.)[. ]?(\d{1,4})(?:[abc]|v0?[1-4]|\D|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)[st]\d{1,2}[. ]?[xх-]?[. ]?(?:e|x|х|ep|-|\.)[. ]?(\d{1,4})(?:[abc]|v0?[1-4]|\D|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 		Remove:    true,
 	},
 	// episodes: \b[st]\d{2}(\d{2})\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)\b[st]\d{2}(\d{2})\b`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: -\s(\d{1,3}[ .]*-[ .]*\d{1,3})(?!-\d)(?:\W|$)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)-\s(\d{1,3}[ .]*-[ .]*\d{1,3})(?:-\d*)?(?:\W|$)`),
-		ValidateMatch: validate_not_match(regexp.MustCompile(`(?i)-\s(\d{1,3}[ .]*-[ .]*\d{1,3})(?:-\d*)`)),
-		Transform:     to_int_range(),
+		ValidateMatch: validateNotMatch(regexp.MustCompile(`(?i)-\s(\d{1,3}[ .]*-[ .]*\d{1,3})(?:-\d*)`)),
+		Transform:     toIntRange(),
 	},
 	// episodes: s\d{1,2}\s?\((\d{1,3}[ .]*-[ .]*\d{1,3})\)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)s\d{1,2}\s?\((\d{1,3}[ .]*-[ .]*\d{1,3})\)`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: (?:^|\/)\d{1,2}-(\d{2})\b(?!-\d)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?:^|\/)\d{1,2}-(\d{2})\b`),
-		ValidateMatch: validate_lookahead(`-\d`, ``, false),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookahead(`-\d`, ``, false),
+		Transform:     toIntArray(),
 	},
 	// episodes: (?<!\d-)\b\d{1,2}-(\d{2})(?=\.\w{2,4}$)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`\b\d{1,2}-(\d{2})`),
-		ValidateMatch: validate_and(validate_lookbehind(`\d-`, ``, false), validate_lookahead(`\.\w{2,4}$`, ``, true)),
-		Transform:     to_int_array(),
+		ValidateMatch: validateAnd(validateLookbehind(`\d-`, ``, false), validateLookahead(`\.\w{2,4}$`, ``, true)),
+		Transform:     toIntArray(),
 	},
 	// episodes: (?<=^\[.+].+)[. ]+-[. ]+(\d{1,4})[. ]+(?=\W)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)[. ]+-[. ]+(\d{1,4})[. ]+`),
-		ValidateMatch: validate_and(validate_lookbehind(`^\[.+].+`, `i`, true), validate_lookahead(`\W`, `i`, true)),
-		Transform:     to_int_array(),
+		ValidateMatch: validateAnd(validateLookbehind(`^\[.+].+`, `i`, true), validateLookahead(`\W`, `i`, true)),
+		Transform:     toIntArray(),
 		Remove:        true,
 	},
 	// episodes: (?<!(?:seasons?|[Сс]езони?)\W*)(?:[ .([-]|^)(\d{1,3}(?:[ .]?[,&+~][ .]?\d{1,3})+)(?:[ .)\]-]|$)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)(?:[ .([-]|^)(\d{1,3}(?:[ .]?[,&+~][ .]?\d{1,3})+)(?:[ .)\]-]|$)`),
-		ValidateMatch: validate_lookbehind(`(?:seasons?|[Сс]езони?)\W*`, `i`, false),
-		Transform:     to_int_range(),
+		ValidateMatch: validateLookbehind(`(?:seasons?|[Сс]езони?)\W*`, `i`, false),
+		Transform:     toIntRange(),
 	},
 	// episodes: (?<!(?:seasons?|[Сс]езони?)\W*)(?:[ .([-]|^)(\d{1,3}(?:-\d{1,3})+)(?:[ .)(\]]|-\D|$)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)(?:[ .([-]|^)(\d{1,3}(?:-\d{1,3})+)(?:[ .)(\]]|-\D|$)`),
-		ValidateMatch: validate_lookbehind(`(?:seasons?|[Сс]езони?)\W*`, `i`, false),
-		Transform:     to_int_range(),
+		ValidateMatch: validateLookbehind(`(?:seasons?|[Сс]езони?)\W*`, `i`, false),
+		Transform:     toIntRange(),
 	},
 	// episodes: \bEp(?:isode)?\W+\d{1,2}\.(\d{1,3})\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)\bEp(?:isode)?\W+\d{1,2}\.(\d{1,3})\b`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: Ep.\d+.-.\d+
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)Ep.\d+.-.\d+`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// episodes: (?:\b[ée]p?(?:isode)?|[Ээ]пизод|[Сс]ер(?:ии|ия|\.)?|cap(?:itulo)?|epis[oó]dio)[. ]?[-:#№]?[. ]?(\d{1,4})(?:[abc]|v0?[1-4]|\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:\b[ée]p?(?:isode)?|[Ээ]пизод|[Сс]ер(?:ии|ия|\.)?|cap(?:itulo)?|epis[oó]dio)[. ]?[-:#№]?[. ]?(\d{1,4})(?:[abc]|v0?[1-4]|\W|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: \b(\d{1,3})(?:-?я)?[ ._-]*(?:ser(?:i?[iyj]a|\b)|[Сс]ер(?:ии|ия|\.)?)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)\b(\d{1,3})(?:-?я)?[ ._-]*(?:ser(?:i?[iyj]a|\b)|[Сс]ер(?:ии|ия|\.)?)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: (?:\D|^)\d{1,2}[. ]?[xх][. ]?(\d{1,3})(?:[abc]|v0?[1-4]|\D|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?:\D|^)\d{1,2}[. ]?[xх][. ]?(\d{1,3})(?:[abc]|v0?[1-4]|\D|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: (?<=S\d{2}E)\d+
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)\d+`),
-		ValidateMatch: validate_lookbehind(`S\d{2}E`, `i`, true),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookbehind(`S\d{2}E`, `i`, true),
+		Transform:     toIntArray(),
 	},
 	// episodes: [[(]\d{1,2}\.(\d{1,3})[)\]]
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`[[(]\d{1,2}\.(\d{1,3})[)\]]`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: \b[Ss]\d{1,2}[ .](\d{1,2})\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`\b[Ss]\d{1,2}[ .](\d{1,2})\b`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: -\s?\d{1,2}\.(\d{2,3})\s?-
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`-\s?\d{1,2}\.(\d{2,3})\s?-`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: (?:\[|\()(\d+)\s(?:of|из|iz)\s\d+(?:\]|\))
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:\[|\()(\d+)\s(?:of|из|iz)\s\d+(?:\]|\))`),
-		Transform: to_int_range_till(),
+		Transform: toIntRangeTill(),
 	},
 	// episodes: (?<=\D|^)(\d{1,3})[. ]?(?:of|из|iz)[. ]?\d{1,3}(?=\D|$)
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)(\d{1,3})[. ]?(?:of|из|iz)[. ]?\d{1,3}`),
-		ValidateMatch: validate_and(validate_lookbehind(`\D|^`, `i`, true), validate_lookahead(`\D|$`, `i`, true)),
-		Transform:     to_int_array(),
+		ValidateMatch: validateAnd(validateLookbehind(`\D|^`, `i`, true), validateLookahead(`\D|$`, `i`, true)),
+		Transform:     toIntArray(),
 	},
 	// episodes: \b\d{2}[ ._-](\d{2})(?:.F)?\.\w{2,4}$
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`\b\d{2}[ ._-](\d{2})(?:.F)?\.\w{2,4}$`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: (?<!^)\[(?!720|1080)([\.\-\s\W]\d{2,3}[\.\-\s\W])](?!(?:\.\w{2,4})?$)
 	{
 		Field:   "episodes",
 		Pattern: regexp.MustCompile(`\[([^\w\p{L}\p{N}]\d{2,3}[^\w\p{L}\p{N}])]`),
-		ValidateMatch: validate_and(
-			validate_not_at_start(),
-			validate_lookahead(`(?:\.\w{2,4})?$`, ``, false),
+		ValidateMatch: validateAnd(
+			validateNotAtStart(),
+			validateLookahead(`(?:\.\w{2,4})?$`, ``, false),
 		),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: (\d+)(?=.?\[([A-Z0-9]{8})])
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)(\d+)`),
-		ValidateMatch: validate_lookahead(`.?\[([A-Z0-9]{8})]`, `i`, true),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookahead(`.?\[([A-Z0-9]{8})]`, `i`, true),
+		Transform:     toIntArray(),
 	},
 	// episodes: (?<![xh])\b264\b|\b265\b
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`(?i)\b264\b|\b265\b`),
-		ValidateMatch: validate_lookbehind(`[xh]`, `i`, false),
-		Transform:     to_int_array(),
+		ValidateMatch: validateLookbehind(`[xh]`, `i`, false),
+		Transform:     toIntArray(),
 		Remove:        true,
 	},
 	// episodes: (?<!\bMovie\s-\s)(?<=\s-\s)\d+(?=\s[-(\s])
 	{
 		Field:         "episodes",
 		Pattern:       regexp.MustCompile(`\s-\s(\d+)`),
-		ValidateMatch: validate_and(validate_lookbehind(`\bMovie`, ``, false), validate_lookahead(`\s[-(\s]`, ``, true)),
+		ValidateMatch: validateAnd(validateLookbehind(`\bMovie`, ``, false), validateLookahead(`\s[-(\s]`, ``, true)),
 		MatchGroup:    1,
-		Transform:     to_int_array(),
+		Transform:     toIntArray(),
 		Remove:        true,
 	},
 	// episodes: (?:\W|^)(?:\d+)?(?:e|ep)(\d{1,3})(?:\W|$)
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)(?:\W|^)(?:\d+)?(?:e|ep)(\d{1,3})(?:\W|$)`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 		Remove:    true,
 	},
 	// episodes: \d+.-.\d+TV
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)\d+.-.\d+TV`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 		Remove:    true,
 	},
 	// episodes: E(\d+)\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)E(\d+)\b`),
-		Transform: to_int_array(),
+		Transform: toIntArray(),
 	},
 	// episodes: \b\d{1,4}-\d{1,4}\b
 	{
 		Field:     "episodes",
 		Pattern:   regexp.MustCompile(`(?i)\b\d{1,4}-\d{1,4}\b`),
-		Transform: to_int_range(),
+		Transform: toIntRange(),
 	},
 	// episodes: ['custom:handle_episodes']
-	custom_handle_episodes,
+	customHandleEpisodes,
 	// episodes: ['custom:handle_anime_eps']
-	custom_handle_anime_eps,
+	customHandleAnimeEps,
 	// country: \b(US|UK|AU|NZ|CA)\b
 	{
 		Field:     "country",
 		Pattern:   regexp.MustCompile(`\b(US|UK|AU|NZ|CA)\b`),
-		Transform: to_value_sub(`$1`),
+		Transform: toValueSub(`$1`),
 	},
 	// languages: \bengl?(?:sub[A-Z]*)?\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bengl?(?:sub[A-Z]*)?\b`),
-		Transform:    to_value_set(`en`),
+		Transform:    toValueSet(`en`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1820,21 +1821,21 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\beng?sub[A-Z]*\b`),
-		Transform:    to_value_set(`en`),
+		Transform:    toValueSet(`en`),
 		KeepMatching: true,
 	},
 	// languages: \bing(?:l[eéê]s)?\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bing(?:l[eéê]s)?\b`),
-		Transform:    to_value_set(`en`),
+		Transform:    toValueSet(`en`),
 		KeepMatching: true,
 	},
 	// languages: \besub\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\besub\b`),
-		Transform:    to_value_set(`en`),
+		Transform:    toValueSet(`en`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1842,14 +1843,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\benglish\W+(?:subs?|sdh|hi)\b`),
-		Transform:    to_value_set(`en`),
+		Transform:    toValueSet(`en`),
 		KeepMatching: true,
 	},
 	// languages: \beng?\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\beng?\b`),
-		Transform:     to_value_set(`en`),
+		Transform:     toValueSet(`en`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -1857,7 +1858,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\benglish?\b`),
-		Transform:    to_value_set(`en`),
+		Transform:    toValueSet(`en`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -1865,14 +1866,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:JP|JAP|JPN)\b`),
-		Transform:    to_value_set(`ja`),
+		Transform:    toValueSet(`ja`),
 		KeepMatching: true,
 	},
 	// languages: \b(japanese|japon[eê]s)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(japanese|japon[eê]s)\b`),
-		Transform:    to_value_set(`ja`),
+		Transform:    toValueSet(`ja`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -1880,14 +1881,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:KOR|kor[ .-]?sub)\b`),
-		Transform:    to_value_set(`ko`),
+		Transform:    toValueSet(`ko`),
 		KeepMatching: true,
 	},
 	// languages: \b(korean|coreano)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(korean|coreano)\b`),
-		Transform:    to_value_set(`ko`),
+		Transform:    toValueSet(`ko`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -1895,7 +1896,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:traditional\W*chinese|chinese\W*traditional)(?:\Wchi)?\b`),
-		Transform:    to_value_set(`zh`),
+		Transform:    toValueSet(`zh`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1903,22 +1904,22 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bzh-hant\b`),
-		Transform:    to_value_set(`zh`),
+		Transform:    toValueSet(`zh`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:mand[ae]rin|ch[sn])\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:mand[ae]rin|ch[sn])\b`),
-		Transform:    to_value_set(`zh`),
+		Transform:    toValueSet(`zh`),
 		KeepMatching: true,
 	},
 	// languages: (?<!shang-?)\bCH(?:I|T)\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bCH(?:I|T)\b`),
-		ValidateMatch: validate_lookbehind(`shang-?`, `i`, false),
-		Transform:     to_value_set(`zh`),
+		ValidateMatch: validateLookbehind(`shang-?`, `i`, false),
+		Transform:     toValueSet(`zh`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -1926,7 +1927,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(chinese|chin[eê]s)\b`),
-		Transform:    to_value_set(`zh`),
+		Transform:    toValueSet(`zh`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -1934,14 +1935,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bzh-hans\b`),
-		Transform:    to_value_set(`zh`),
+		Transform:    toValueSet(`zh`),
 		KeepMatching: true,
 	},
 	// languages: \bFR(?:a|e|anc[eê]s|VF[FQIB2]?)\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bFR(?:a|e|anc[eê]s|VF[FQIB2]?)\b`),
-		Transform:     to_value_set(`fr`),
+		Transform:     toValueSet(`fr`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -1949,7 +1950,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`\b\[?(VF[FQRIB2]?\]?\b|(VOST)?FR2?)\b`),
-		Transform:    to_value_set(`fr`),
+		Transform:    toValueSet(`fr`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1957,7 +1958,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`\b(TRUE|SUB).?FRENCH\b|\bFRENCH\b|\bFre?\b`),
-		Transform:    to_value_set(`fr`),
+		Transform:    toValueSet(`fr`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -1965,21 +1966,21 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(VOST(?:FR?|A)?)\b`),
-		Transform:    to_value_set(`fr`),
+		Transform:    toValueSet(`fr`),
 		KeepMatching: true,
 	},
 	// languages: \b(VF[FQIB2]?|(TRUE|SUB).?FRENCH|(VOST)?FR2?)\b
 	{
 		Field:     "languages",
 		Pattern:   regexp.MustCompile(`(?i)\b(VF[FQIB2]?|(TRUE|SUB).?FRENCH|(VOST)?FR2?)\b`),
-		Transform: to_value_set(`fr`),
+		Transform: toValueSet(`fr`),
 		Remove:    true,
 	},
 	// languages: \bspanish\W?latin|american\W*(?:spa|esp?)
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bspanish\W?latin|american\W*(?:spa|esp?)`),
-		Transform:     to_value_set(`la`),
+		Transform:     toValueSet(`la`),
 		Remove:        true,
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -1988,7 +1989,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(?:\bla\b.+(?:cia\b))`),
-		Transform:     to_value_set(`es`),
+		Transform:     toValueSet(`es`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -1996,24 +1997,24 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:audio.)?lat(?:in?|ino)?\b`),
-		Transform:    to_value_set(`la`),
+		Transform:    toValueSet(`la`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:audio.)?(?:ESP?|spa|(en[ .]+)?espa[nñ]ola?|castellano)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:audio.)?(?:ESP?|spa|(en[ .]+)?espa[nñ]ola?|castellano)\b`),
-		Transform:    to_value_set(`es`),
+		Transform:    toValueSet(`es`),
 		KeepMatching: true,
 	},
 	// languages: \bes(?=[ .,/-]+(?:[A-Z]{2}[ .,/-]+){2,})\b
 	{
 		Gate:  gate("es"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bes\b`), func(title string, idxs []int) bool {
-			return lang_codes2_suffix.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bes\b`), func(title string, idxs []int) bool {
+			return langCodes2Suffix.MatchString(title[idxs[1]:])
 		}, true, false, true),
-		Transform:     to_value_set(`es`),
+		Transform:     toValueSet(`es`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2021,10 +2022,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("es"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bes\b`), func(title string, idxs []int) bool {
-			return lang_codes2_prefix.MatchString(title[:idxs[0]])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bes\b`), func(title string, idxs []int) bool {
+			return langCodes2Prefix.MatchString(title[:idxs[0]])
 		}, true, false, true),
-		Transform:     to_value_set(`es`),
+		Transform:     toValueSet(`es`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2032,10 +2033,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("es"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bes\b`), func(title string, idxs []int) bool {
-			return lang_code1_prefix.MatchString(title[:idxs[0]]) && lang_code1_suffix.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bes\b`), func(title string, idxs []int) bool {
+			return langCode1Prefix.MatchString(title[:idxs[0]]) && langCode1Suffix.MatchString(title[idxs[1]:])
 		}, true, false, true),
-		Transform:     to_value_set(`es`),
+		Transform:     toValueSet(`es`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2043,8 +2044,8 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bes`),
-		ValidateMatch: validate_lookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
-		Transform:     to_value_set(`es`),
+		ValidateMatch: validateLookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
+		Transform:     toValueSet(`es`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2052,14 +2053,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bspanish\W+subs?\b`),
-		Transform:    to_value_set(`es`),
+		Transform:    toValueSet(`es`),
 		KeepMatching: true,
 	},
 	// languages: \b(spanish|espanhol)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(spanish|espanhol)\b`),
-		Transform:    to_value_set(`es`),
+		Transform:    toValueSet(`es`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2067,7 +2068,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b[\.\s\[]?Sp[\.\s\]]?\b`),
-		Transform:    to_value_set(`es`),
+		Transform:    toValueSet(`es`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2075,7 +2076,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:p[rt]|en|port)[. (\\/-]*BR\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2083,7 +2084,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bbr(?:a|azil|azilian)\W+(?:pt|por)\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2091,36 +2092,36 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:leg(?:endado|endas?)?|dub(?:lado)?|portugu[eèê]se?)[. -]*BR\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		KeepMatching: true,
 	},
 	// languages: \bleg(?:endado|endas?)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bleg(?:endado|endas?)\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		KeepMatching: true,
 	},
 	// languages: \bportugu[eèê]s[ea]?\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bportugu[eèê]s[ea]?\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		KeepMatching: true,
 	},
 	// languages: \bPT[. -]*(?:PT|ENG?|sub(?:s|titles?))\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bPT[. -]*(?:PT|ENG?|sub(?:s|titles?))\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		KeepMatching: true,
 	},
 	// languages: \bpt(?=\.(?:ass|ssa|srt|sub|idx)$)
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bpt`),
-		ValidateMatch: validate_lookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
-		Transform:     to_value_set(`pt`),
+		ValidateMatch: validateLookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
+		Transform:     toValueSet(`pt`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2128,7 +2129,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bPT\b`),
-		Transform:    to_value_set(`pt`),
+		Transform:    toValueSet(`pt`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2136,7 +2137,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bpor\b`),
-		Transform:     to_value_set(`pt`),
+		Transform:     toValueSet(`pt`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2144,7 +2145,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b-?ITA\b`),
-		Transform:    to_value_set(`it`),
+		Transform:    toValueSet(`it`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2152,10 +2153,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("it"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`\bIT\b`), func(title string, idxs []int) bool {
-			return !lang_www_cs.MatchString(title[:idxs[0]]) && lang_it_codes_cs.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`\bIT\b`), func(title string, idxs []int) bool {
+			return !langWwwCs.MatchString(title[:idxs[0]]) && langItCodesCs.MatchString(title[idxs[1]:])
 		}, true, false, true),
-		Transform:     to_value_set(`it`),
+		Transform:     toValueSet(`it`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2163,8 +2164,8 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bit`),
-		ValidateMatch: validate_lookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
-		Transform:     to_value_set(`it`),
+		ValidateMatch: validateLookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
+		Transform:     toValueSet(`it`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2172,7 +2173,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bitaliano?\b`),
-		Transform:    to_value_set(`it`),
+		Transform:    toValueSet(`it`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2180,7 +2181,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bgreek[ .-]*(?:audio|lang(?:uage)?|subs?(?:titles?)?)?\b`),
-		Transform:    to_value_set(`el`),
+		Transform:    toValueSet(`el`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2188,7 +2189,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(?:GER|DEU)\b`),
-		Transform:     to_value_set(`de`),
+		Transform:     toValueSet(`de`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2196,10 +2197,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("de"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bde\b`), func(title string, idxs []int) bool {
-			return lang_codes2_suffix.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bde\b`), func(title string, idxs []int) bool {
+			return langCodes2Suffix.MatchString(title[idxs[1]:])
 		}, true, false, true),
-		Transform:     to_value_set(`de`),
+		Transform:     toValueSet(`de`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2207,10 +2208,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("de"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bde\b`), func(title string, idxs []int) bool {
-			return lang_codes2_prefix.MatchString(title[:idxs[0]])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bde\b`), func(title string, idxs []int) bool {
+			return langCodes2Prefix.MatchString(title[:idxs[0]])
 		}, true, false, true),
-		Transform:     to_value_set(`de`),
+		Transform:     toValueSet(`de`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2218,10 +2219,10 @@ var handlers = []handler{
 	{
 		Gate:  gate("de"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bde\b`), func(title string, idxs []int) bool {
-			return lang_code1_prefix.MatchString(title[:idxs[0]]) && lang_code1_suffix.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bde\b`), func(title string, idxs []int) bool {
+			return langCode1Prefix.MatchString(title[:idxs[0]]) && langCode1Suffix.MatchString(title[idxs[1]:])
 		}, true, false, true),
-		Transform:     to_value_set(`de`),
+		Transform:     toValueSet(`de`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2229,8 +2230,8 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bde`),
-		ValidateMatch: validate_lookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
-		Transform:     to_value_set(`de`),
+		ValidateMatch: validateLookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
+		Transform:     toValueSet(`de`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2238,7 +2239,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(german|alem[aã]o)\b`),
-		Transform:    to_value_set(`de`),
+		Transform:    toValueSet(`de`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2246,14 +2247,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bRUS?\b`),
-		Transform:    to_value_set(`ru`),
+		Transform:    toValueSet(`ru`),
 		KeepMatching: true,
 	},
 	// languages: \b(russian|russo)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(russian|russo)\b`),
-		Transform:    to_value_set(`ru`),
+		Transform:    toValueSet(`ru`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2261,14 +2262,14 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bUKR\b`),
-		Transform:    to_value_set(`uk`),
+		Transform:    toValueSet(`uk`),
 		KeepMatching: true,
 	},
 	// languages: \bukrainian\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bukrainian\b`),
-		Transform:    to_value_set(`uk`),
+		Transform:    toValueSet(`uk`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2276,17 +2277,17 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bhin(?:di)?\b`),
-		Transform:    to_value_set(`hi`),
+		Transform:    toValueSet(`hi`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:(?<!w{3}\.\w+\.)tel(?!\W*aviv)|telugu)\b
 	{
 		Gate:  gate("tel", "telugu"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\b(?:tel|telugu)\b`), lang_abbr_valid(map[string]bool{"telugu": true}, func(title string, idxs []int) bool {
-			return !lang_te_aviv.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\b(?:tel|telugu)\b`), langAbbrValid(map[string]bool{"telugu": true}, func(title string, idxs []int) bool {
+			return !langTeAviv.MatchString(title[idxs[1]:])
 		}), true, false, true),
-		Transform:    to_value_set(`te`),
+		Transform:    toValueSet(`te`),
 		KeepMatching: true,
 		Remove:       true,
 	},
@@ -2294,7 +2295,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bt[aâ]m(?:il)?\b`),
-		Transform:    to_value_set(`ta`),
+		Transform:    toValueSet(`ta`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2302,8 +2303,8 @@ var handlers = []handler{
 	{
 		Gate:         gate("mal", "malayalam"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:MAL(?:ay)?|malayalam)\b`), lang_abbr_valid(map[string]bool{"malayalam": true}, nil), true, true, true),
-		Transform:    to_value_set(`ml`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:MAL(?:ay)?|malayalam)\b`), langAbbrValid(map[string]bool{"malayalam": true}, nil), true, true, true),
+		Transform:    toValueSet(`ml`),
 		KeepMatching: true,
 		Remove:       true,
 	},
@@ -2311,8 +2312,8 @@ var handlers = []handler{
 	{
 		Gate:         gate("kan", "kannada"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:KAN(?:nada)?|kannada)\b`), lang_abbr_valid(map[string]bool{"kannada": true}, nil), true, false, true),
-		Transform:    to_value_set(`kn`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:KAN(?:nada)?|kannada)\b`), langAbbrValid(map[string]bool{"kannada": true}, nil), true, false, true),
+		Transform:    toValueSet(`kn`),
 		KeepMatching: true,
 		Remove:       true,
 	},
@@ -2320,47 +2321,47 @@ var handlers = []handler{
 	{
 		Gate:         gate("mar", "marathi"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:MAR(?:a(?:thi)?)?|marathi)\b`), lang_abbr_valid(map[string]bool{"marathi": true}, nil), true, false, true),
-		Transform:    to_value_set(`mr`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:MAR(?:a(?:thi)?)?|marathi)\b`), langAbbrValid(map[string]bool{"marathi": true}, nil), true, false, true),
+		Transform:    toValueSet(`mr`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:(?<!w{3}\.\w+\.)GUJ(?:arati)?|gujarati)\b
 	{
 		Gate:         gate("guj", "gujarati"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:GUJ(?:arati)?|gujarati)\b`), lang_abbr_valid(map[string]bool{"gujarati": true}, nil), true, false, true),
-		Transform:    to_value_set(`gu`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:GUJ(?:arati)?|gujarati)\b`), langAbbrValid(map[string]bool{"gujarati": true}, nil), true, false, true),
+		Transform:    toValueSet(`gu`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:(?<!w{3}\.\w+\.)PUN(?:jabi)?|punjabi)\b
 	{
 		Gate:         gate("pun", "punjabi"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:PUN(?:jabi)?|punjabi)\b`), lang_abbr_valid(map[string]bool{"punjabi": true}, nil), true, false, true),
-		Transform:    to_value_set(`pa`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:PUN(?:jabi)?|punjabi)\b`), langAbbrValid(map[string]bool{"punjabi": true}, nil), true, false, true),
+		Transform:    toValueSet(`pa`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:(?<!w{3}\.\w+\.)BEN(?!.\bThe|and|of\b)(?:gali)?|bengali)\b
 	{
 		Gate:  gate("ben", "bengali"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\b(?:BEN(?:gali)?|bengali)\b`), lang_abbr_valid(map[string]bool{"bengali": true}, func(title string, idxs []int) bool {
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\b(?:BEN(?:gali)?|bengali)\b`), langAbbrValid(map[string]bool{"bengali": true}, func(title string, idxs []int) bool {
 			if strings.EqualFold(title[idxs[0]:idxs[1]], "ben") {
-				return !lang_bn_reject.MatchString(title[idxs[1]:])
+				return !langBnReject.MatchString(title[idxs[1]:])
 			}
 			return true
 		}), true, true, true),
-		Transform:    to_value_set(`bn`),
+		Transform:    toValueSet(`bn`),
 		KeepMatching: true,
 	},
 	// languages: \b(?<!YTS\.)LT\b
 	{
 		Gate:  gate("lt"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`\bLT\b`), func(title string, idxs []int) bool {
-			return !lang_yts_prefix.MatchString(title[:idxs[0]])
+		Process: scanValid("languages", regexp.MustCompile(`\bLT\b`), func(title string, idxs []int) bool {
+			return !langYtsPrefix.MatchString(title[:idxs[0]])
 		}, true, false, true),
-		Transform:     to_value_set(`lt`),
+		Transform:     toValueSet(`lt`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2368,7 +2369,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\blithuanian\b`),
-		Transform:    to_value_set(`lt`),
+		Transform:    toValueSet(`lt`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2376,7 +2377,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\blatvian\b`),
-		Transform:    to_value_set(`lv`),
+		Transform:    toValueSet(`lv`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2384,7 +2385,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bestonian\b`),
-		Transform:    to_value_set(`et`),
+		Transform:    toValueSet(`et`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2392,15 +2393,15 @@ var handlers = []handler{
 	{
 		Gate:         gate("pl", "pol"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:PL|pol)\b`), lang_abbr_valid(map[string]bool{"pol": true}, nil), true, false, true),
-		Transform:    to_value_set(`pl`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:PL|pol)\b`), langAbbrValid(map[string]bool{"pol": true}, nil), true, false, true),
+		Transform:    toValueSet(`pl`),
 		KeepMatching: true,
 	},
 	// languages: \b(polish|polon[eê]s|polaco)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(polish|polon[eê]s|polaco)\b`),
-		Transform:    to_value_set(`pl`),
+		Transform:    toValueSet(`pl`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2408,7 +2409,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(PLDUB|PLSUB|DUBPL|DubbingPL|LekPL|LektorPL)\b`),
-		Transform:    to_value_set(`pl`),
+		Transform:    toValueSet(`pl`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2416,7 +2417,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bCZ[EH]?\b`),
-		Transform:    to_value_set(`cs`),
+		Transform:    toValueSet(`cs`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2424,7 +2425,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bczech\b`),
-		Transform:    to_value_set(`cs`),
+		Transform:    toValueSet(`cs`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2432,7 +2433,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bslo(?:vak|vakian|subs|[\]_)]?\.\w{2,4}$)\b`),
-		Transform:     to_value_set(`sk`),
+		Transform:     toValueSet(`sk`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2440,7 +2441,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`\bHU\b`),
-		Transform:     to_value_set(`hu`),
+		Transform:     toValueSet(`hu`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2448,7 +2449,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bHUN(?:garian)?\b`),
-		Transform:     to_value_set(`hu`),
+		Transform:     toValueSet(`hu`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2456,7 +2457,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bROM(?:anian)?\b`),
-		Transform:     to_value_set(`ro`),
+		Transform:     toValueSet(`ro`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2464,15 +2465,15 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bRO`),
-		ValidateMatch: validate_lookahead(`[ .,/-]*(?:[A-Z]{2}[ .,/-]+)*sub`, `i`, true),
-		Transform:     to_value_set(`ro`),
+		ValidateMatch: validateLookahead(`[ .,/-]*(?:[A-Z]{2}[ .,/-]+)*sub`, `i`, true),
+		Transform:     toValueSet(`ro`),
 		KeepMatching:  true,
 	},
 	// languages: \bbul(?:garian)?\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bbul(?:garian)?\b`),
-		Transform:     to_value_set(`bg`),
+		Transform:     toValueSet(`bg`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2480,31 +2481,31 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:srp|serbian)\b`),
-		Transform:    to_value_set(`sr`),
+		Transform:    toValueSet(`sr`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:HRV|croatian)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:HRV|croatian)\b`),
-		Transform:    to_value_set(`hr`),
+		Transform:    toValueSet(`hr`),
 		KeepMatching: true,
 	},
 	// languages: \bHR(?=[ .,/-]*(?:[A-Z]{2}[ .,/-]+)*sub)\b
 	{
 		Gate:  gate("hr"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\bHR\b`), func(title string, idxs []int) bool {
-			return lang_hr_sub_suffix.MatchString(title[idxs[1]:])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\bHR\b`), func(title string, idxs []int) bool {
+			return langHrSubSuffix.MatchString(title[idxs[1]:])
 		}, true, false, true),
-		Transform:    to_value_set(`hr`),
+		Transform:    toValueSet(`hr`),
 		KeepMatching: true,
 	},
 	// languages: \bslovenian\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bslovenian\b`),
-		Transform:     to_value_set(`sl`),
+		Transform:     toValueSet(`sl`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2512,15 +2513,15 @@ var handlers = []handler{
 	{
 		Gate:         gate("nl", "dut", "holand"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:NL|dut|holand[eê]s)\b`), lang_abbr_valid(map[string]bool{"dut": true, "holandes": true, "holandês": true}, nil), true, false, true),
-		Transform:    to_value_set(`nl`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:NL|dut|holand[eê]s)\b`), langAbbrValid(map[string]bool{"dut": true, "holandes": true, "holandês": true}, nil), true, false, true),
+		Transform:    toValueSet(`nl`),
 		KeepMatching: true,
 	},
 	// languages: \bdutch\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bdutch\b`),
-		Transform:     to_value_set(`nl`),
+		Transform:     toValueSet(`nl`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2528,21 +2529,21 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\bflemish\b`),
-		Transform:    to_value_set(`nl`),
+		Transform:    toValueSet(`nl`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:DK|danska|dansub|nordic)\b
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:DK|danska|dansub|nordic)\b`),
-		Transform:    to_value_set(`da`),
+		Transform:    toValueSet(`da`),
 		KeepMatching: true,
 	},
 	// languages: \b(danish|dinamarqu[eê]s)\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(danish|dinamarqu[eê]s)\b`),
-		Transform:     to_value_set(`da`),
+		Transform:     toValueSet(`da`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2550,8 +2551,8 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bdan\b`),
-		ValidateMatch: validate_lookahead(`.*\.(?:srt|vtt|ssa|ass|sub|idx)$`, `i`, true),
-		Transform:     to_value_set(`da`),
+		ValidateMatch: validateLookahead(`.*\.(?:srt|vtt|ssa|ass|sub|idx)$`, `i`, true),
+		Transform:     toValueSet(`da`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2559,17 +2560,17 @@ var handlers = []handler{
 	{
 		Gate:  gate("fi", "finsk", "finsub", "nordic"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\b(?:FI|finsk|finsub|nordic)\b`), lang_abbr_valid(map[string]bool{"finsk": true, "finsub": true, "nordic": true}, func(title string, idxs []int) bool {
-			return !lang_sci_i.MatchString(title[:idxs[0]])
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\b(?:FI|finsk|finsub|nordic)\b`), langAbbrValid(map[string]bool{"finsk": true, "finsub": true, "nordic": true}, func(title string, idxs []int) bool {
+			return !langSciI.MatchString(title[:idxs[0]])
 		}), true, false, true),
-		Transform:    to_value_set(`fi`),
+		Transform:    toValueSet(`fi`),
 		KeepMatching: true,
 	},
 	// languages: \bfinnish\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bfinnish\b`),
-		Transform:     to_value_set(`fi`),
+		Transform:     toValueSet(`fi`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2577,15 +2578,15 @@ var handlers = []handler{
 	{
 		Gate:         gate("se", "swe", "sv", "nordic"),
 		Field:        "languages",
-		Process:      scan_valid("languages", regexp.MustCompile(`(?i)\b(?:SE|swe|swesubs?|sv(?:ensk)?|nordic)\b`), lang_abbr_valid(map[string]bool{"swe": true, "swesub": true, "swesubs": true, "sv": true, "svensk": true, "nordic": true}, nil), true, false, true),
-		Transform:    to_value_set(`sv`),
+		Process:      scanValid("languages", regexp.MustCompile(`(?i)\b(?:SE|swe|swesubs?|sv(?:ensk)?|nordic)\b`), langAbbrValid(map[string]bool{"swe": true, "swesub": true, "swesubs": true, "sv": true, "svensk": true, "nordic": true}, nil), true, false, true),
+		Transform:    toValueSet(`sv`),
 		KeepMatching: true,
 	},
 	// languages: \b(swedish|sueco)\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(swedish|sueco)\b`),
-		Transform:     to_value_set(`sv`),
+		Transform:     toValueSet(`sv`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2593,20 +2594,20 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:NOR|norsk|norsub|nordic)\b`),
-		Transform:    to_value_set(`no`),
+		Transform:    toValueSet(`no`),
 		KeepMatching: true,
 	},
 	// languages: \b(norwegian|noruegu[eê]s|bokm[aå]l|nob|nor(?=[\]_)]?\.\w{2,4}$))\b
 	{
 		Gate:  gate("nor", "noruegu", "bokm", "nob"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\b(?:norwegian|noruegu[eê]s|bokm[aå]l|nob|nor)\b`), func(title string, idxs []int) bool {
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\b(?:norwegian|noruegu[eê]s|bokm[aå]l|nob|nor)\b`), func(title string, idxs []int) bool {
 			if strings.EqualFold(title[idxs[0]:idxs[1]], "nor") {
-				return lang_ext_suffix.MatchString(title[idxs[1]:])
+				return langExtSuffix.MatchString(title[idxs[1]:])
 			}
 			return true
 		}, true, false, true),
-		Transform:     to_value_set(`no`),
+		Transform:     toValueSet(`no`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2614,7 +2615,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:arabic|[aá]rabe|ara)\b`),
-		Transform:    to_value_set(`ar`),
+		Transform:    toValueSet(`ar`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2622,7 +2623,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\barab.*(?:audio|lang(?:uage)?|sub(?:s|titles?)?)\b`),
-		Transform:     to_value_set(`ar`),
+		Transform:     toValueSet(`ar`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2630,8 +2631,8 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bar`),
-		ValidateMatch: validate_lookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
-		Transform:     to_value_set(`ar`),
+		ValidateMatch: validateLookahead(`\.(?:ass|ssa|srt|sub|idx)$`, `i`, true),
+		Transform:     toValueSet(`ar`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2639,7 +2640,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(?:turkish|tur(?:co)?)\b`),
-		Transform:     to_value_set(`tr`),
+		Transform:     toValueSet(`tr`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2647,7 +2648,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(TİVİBU|tivibu|bitturk(.net)?|turktorrent)\b`),
-		Transform:     to_value_set(`tr`),
+		Transform:     toValueSet(`tr`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2655,13 +2656,13 @@ var handlers = []handler{
 	{
 		Gate:  gate("vie"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\b(?:vietnamese\b|vie)`), func(title string, idxs []int) bool {
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\b(?:vietnamese\b|vie)`), func(title string, idxs []int) bool {
 			if strings.EqualFold(title[idxs[0]:idxs[1]], "vie") {
-				return lang_ext_suffix.MatchString(title[idxs[1]:])
+				return langExtSuffix.MatchString(title[idxs[1]:])
 			}
 			return true
 		}, true, false, true),
-		Transform:     to_value_set(`vi`),
+		Transform:     toValueSet(`vi`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2669,7 +2670,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bind(?:onesian)?\b`),
-		Transform:     to_value_set(`id`),
+		Transform:     toValueSet(`id`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2677,7 +2678,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(thai|tailand[eê]s)\b`),
-		Transform:    to_value_set(`th`),
+		Transform:    toValueSet(`th`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
@@ -2685,7 +2686,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`\b(THA|tha)\b`),
-		Transform:     to_value_set(`th`),
+		Transform:     toValueSet(`th`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2693,20 +2694,20 @@ var handlers = []handler{
 	{
 		Gate:  gate("malay", "may"),
 		Field: "languages",
-		Process: scan_valid("languages", regexp.MustCompile(`(?i)\b(?:malay|may)\b`), func(title string, idxs []int) bool {
+		Process: scanValid("languages", regexp.MustCompile(`(?i)\b(?:malay|may)\b`), func(title string, idxs []int) bool {
 			if strings.EqualFold(title[idxs[0]:idxs[1]], "may") {
-				return lang_ext_suffix.MatchString(title[idxs[1]:]) || lang_subs_paren.MatchString(title[:idxs[0]])
+				return langExtSuffix.MatchString(title[idxs[1]:]) || langSubsParen.MatchString(title[:idxs[0]])
 			}
 			return true
 		}, true, true, true),
-		Transform:    to_value_set(`ms`),
+		Transform:    toValueSet(`ms`),
 		KeepMatching: true,
 	},
 	// languages: \bheb(?:rew|raico)?\b
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bheb(?:rew|raico)?\b`),
-		Transform:     to_value_set(`he`),
+		Transform:     toValueSet(`he`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2714,7 +2715,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\b(persian|persa)\b`),
-		Transform:     to_value_set(`fa`),
+		Transform:     toValueSet(`fa`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2722,7 +2723,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{3040}-\x{30ff}]+`),
-		Transform:     to_value_set(`ja`),
+		Transform:     toValueSet(`ja`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2730,7 +2731,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{3400}-\x{4dbf}]+`),
-		Transform:     to_value_set(`zh`),
+		Transform:     toValueSet(`zh`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2738,7 +2739,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{4e00}-\x{9fff}]+`),
-		Transform:     to_value_set(`zh`),
+		Transform:     toValueSet(`zh`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2746,7 +2747,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{f900}-\x{faff}]+`),
-		Transform:     to_value_set(`zh`),
+		Transform:     toValueSet(`zh`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2754,7 +2755,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{ff66}-\x{ff9f}]+`),
-		Transform:     to_value_set(`ja`),
+		Transform:     toValueSet(`ja`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2762,7 +2763,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0400}-\x{04ff}]+`),
-		Transform:     to_value_set(`ru`),
+		Transform:     toValueSet(`ru`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2770,7 +2771,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0600}-\x{06ff}]+`),
-		Transform:     to_value_set(`ar`),
+		Transform:     toValueSet(`ar`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2778,7 +2779,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0750}-\x{077f}]+`),
-		Transform:     to_value_set(`ar`),
+		Transform:     toValueSet(`ar`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2786,7 +2787,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0c80}-\x{0cff}]+`),
-		Transform:     to_value_set(`kn`),
+		Transform:     toValueSet(`kn`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2794,7 +2795,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0d00}-\x{0d7f}]+`),
-		Transform:     to_value_set(`ml`),
+		Transform:     toValueSet(`ml`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2802,7 +2803,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0e00}-\x{0e7f}]+`),
-		Transform:     to_value_set(`th`),
+		Transform:     toValueSet(`th`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2810,7 +2811,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0900}-\x{097f}]+`),
-		Transform:     to_value_set(`hi`),
+		Transform:     toValueSet(`hi`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2818,7 +2819,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0980}-\x{09ff}]+`),
-		Transform:     to_value_set(`bn`),
+		Transform:     toValueSet(`bn`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
@@ -2826,31 +2827,31 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)[\x{0a00}-\x{0a7f}]+`),
-		Transform:     to_value_set(`gu`),
+		Transform:     toValueSet(`gu`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
 	// languages: ['custom:infer_language_based_on_naming']
-	custom_infer_language_based_on_naming,
+	customInferLanguageBasedOnNaming,
 	// subbed: \bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub
 	{
 		Field:     "subbed",
 		Pattern:   regexp.MustCompile(`(?i)\bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// subbed: \b(?:Official.*?|Dual-?)?sub(s|bed)?\b
 	{
 		Field:     "subbed",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:Official.*?|Dual-?)?sub(s|bed)?\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// dubbed: [\[(\s]?\bmulti(?:ple)?[ .-]*(?:lang(?:uages?)?|audio|VF2)\b\][\[(\s]?
 	{
 		Field:        "dubbed",
 		Pattern:      regexp.MustCompile(`(?i)[\[(\s]?\bmulti(?:ple)?[ .-]*(?:lang(?:uages?)?|audio|VF2)\b\][\[(\s]?`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -2858,29 +2859,29 @@ var handlers = []handler{
 	{
 		Field:        "dubbed",
 		Pattern:      regexp.MustCompile(`(?i)\btri(?:ple)?[ .-]*(?:audio|dub\w*)\b`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		KeepMatching: true,
 	},
 	// dubbed: \bdual[ .-]*(?:au?$|[aá]udio|line)\b
 	{
 		Field:        "dubbed",
 		Pattern:      regexp.MustCompile(`(?i)\bdual[ .-]*(?:au?$|[aá]udio|line)\b`),
-		Transform:    to_boolean(),
+		Transform:    toBoolean(),
 		KeepMatching: true,
 	},
 	// dubbed: \bdual\b(?![ .-]*sub)
 	{
 		Field:         "dubbed",
 		Pattern:       regexp.MustCompile(`(?i)\bdual\b`),
-		ValidateMatch: validate_lookahead(`[ .-]*sub`, `i`, false),
-		Transform:     to_boolean(),
+		ValidateMatch: validateLookahead(`[ .-]*sub`, `i`, false),
+		Transform:     toBoolean(),
 		KeepMatching:  true,
 	},
 	// dubbed: \b(fan\s?dub)\b
 	{
 		Field:         "dubbed",
 		Pattern:       regexp.MustCompile(`(?i)\b(fan\s?dub)\b`),
-		Transform:     to_boolean(),
+		Transform:     toBoolean(),
 		Remove:        true,
 		SkipFromTitle: true,
 	},
@@ -2888,69 +2889,69 @@ var handlers = []handler{
 	{
 		Field:     "dubbed",
 		Pattern:   regexp.MustCompile(`(?i)\b(Fan.*)?(?:DUBBED|dublado|dubbing|DUBS?)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// dubbed: \b(?!.*\bsub(s|bed)?\b)([ _\-\[(\.])?(dual|multi)([ _\-\[(\.])?(audio)\b
 	{
 		Gate:  gate("audio"),
 		Field: "dubbed",
-		Process: scan_valid("dubbed", regexp.MustCompile(`(?i)(?:[ _\-\[(\.])?(?:dual|multi)(?:[ _\-\[(\.])?audio\b`), func(title string, idxs []int) bool {
-			return !dubbed_subs_after.MatchString(title[idxs[0]:])
+		Process: scanValid("dubbed", regexp.MustCompile(`(?i)(?:[ _\-\[(\.])?(?:dual|multi)(?:[ _\-\[(\.])?audio\b`), func(title string, idxs []int) bool {
+			return !dubbedSubsAfter.MatchString(title[idxs[0]:])
 		}, false, false, false),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// dubbed: \b(JAP?(anese)?|ZH)\+ENG?(lish)?|ENG?(lish)?\+(JAP?(anese)?|ZH)\b
 	{
 		Field:     "dubbed",
 		Pattern:   regexp.MustCompile(`(?i)\b(JAP?(anese)?|ZH)\+ENG?(lish)?|ENG?(lish)?\+(JAP?(anese)?|ZH)\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// dubbed: \bMULTi\b
 	{
 		Field:     "dubbed",
 		Pattern:   regexp.MustCompile(`(?i)\bMULTi\b`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// group: ['custom:handle_group']
-	custom_handle_group,
+	customHandleGroup,
 	// 3d: (?<=\b[12]\d{3}\b).*\b(3d|sbs|half[ .-]ou|half[ .-]sbs)\b
 	{
 		Field:         "threeD",
 		Pattern:       regexp.MustCompile(`(?i).*\b(3d|sbs|half[ .-]ou|half[ .-]sbs)\b`),
-		ValidateMatch: validate_lookbehind(`\b[12]\d{3}\b`, `i`, true),
-		Transform:     to_boolean(),
+		ValidateMatch: validateLookbehind(`\b[12]\d{3}\b`, `i`, true),
+		Transform:     toBoolean(),
 		SkipIfFirst:   true,
 	},
 	// 3d: \b((Half.)?SBS|HSBS)\b
 	{
 		Field:       "threeD",
 		Pattern:     regexp.MustCompile(`(?i)\b((Half.)?SBS|HSBS)\b`),
-		Transform:   to_boolean(),
+		Transform:   toBoolean(),
 		SkipIfFirst: true,
 	},
 	// 3d: \bBluRay3D\b
 	{
 		Field:       "threeD",
 		Pattern:     regexp.MustCompile(`(?i)\bBluRay3D\b`),
-		Transform:   to_boolean(),
+		Transform:   toBoolean(),
 		SkipIfFirst: true,
 	},
 	// 3d: \bBD3D\b
 	{
 		Field:       "threeD",
 		Pattern:     regexp.MustCompile(`(?i)\bBD3D\b`),
-		Transform:   to_boolean(),
+		Transform:   toBoolean(),
 		SkipIfFirst: true,
 	},
 	// 3d: \b3D\b
 	{
 		Field:       "threeD",
 		Pattern:     regexp.MustCompile(`(?i)\b3D\b`),
-		Transform:   to_boolean(),
+		Transform:   toBoolean(),
 		SkipIfFirst: true,
 	},
 	// size: \b(\d+(\.\d+)?\s?(MB|GB|TB))\b
@@ -2963,162 +2964,162 @@ var handlers = []handler{
 	{
 		Field:     "site",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:www?.?)?(?:\w+\-)?\w+[\.\s](?:com|org|net|ms|tv|mx|co|\.party|vip|nu|pics)\b`),
-		Transform: to_value_sub(`$1`),
+		Transform: toValueSub(`$1`),
 		Remove:    true,
 	},
 	// site: rarbg|torrentleech|(?:the)?piratebay
 	{
 		Field:     "site",
 		Pattern:   regexp.MustCompile(`(?i)rarbg|torrentleech|(?:the)?piratebay`),
-		Transform: to_value_sub(`$1`),
+		Transform: toValueSub(`$1`),
 		Remove:    true,
 	},
 	// site: \[([^\]]+\.[^\]]+)\](?=\.\w{2,4}$|\s)
 	{
 		Field:         "site",
 		Pattern:       regexp.MustCompile(`(?i)\[([^\]]+\.[^\]]+)\]`),
-		ValidateMatch: validate_lookahead(`\.\w{2,4}$|\s`, `i`, true),
-		Transform:     to_value_sub(`$1`),
+		ValidateMatch: validateLookahead(`\.\w{2,4}$|\s`, `i`, true),
+		Transform:     toValueSub(`$1`),
 		Remove:        true,
 	},
 	// network: \bATVP?\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bATVP?\b`),
-		Transform: to_value(`Apple TV`),
+		Transform: toValue(`Apple TV`),
 		Remove:    true,
 	},
 	// network: \bAMZN\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bAMZN\b`),
-		Transform: to_value(`Amazon`),
+		Transform: toValue(`Amazon`),
 		Remove:    true,
 	},
 	// network: \bNF|Netflix\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bNF|Netflix\b`),
-		Transform: to_value(`Netflix`),
+		Transform: toValue(`Netflix`),
 		Remove:    true,
 	},
 	// network: \bNICK(elodeon)?\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bNICK(elodeon)?\b`),
-		Transform: to_value(`Nickelodeon`),
+		Transform: toValue(`Nickelodeon`),
 		Remove:    true,
 	},
 	// network: \bDSNY?P?\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bDSNY?P?\b`),
-		Transform: to_value(`Disney`),
+		Transform: toValue(`Disney`),
 		Remove:    true,
 	},
 	// network: \bH(MAX|BO)\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bH(MAX|BO)\b`),
-		Transform: to_value(`HBO`),
+		Transform: toValue(`HBO`),
 		Remove:    true,
 	},
 	// network: \bHULU\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bHULU\b`),
-		Transform: to_value(`Hulu`),
+		Transform: toValue(`Hulu`),
 		Remove:    true,
 	},
 	// network: \bCBS\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bCBS\b`),
-		Transform: to_value(`CBS`),
+		Transform: toValue(`CBS`),
 		Remove:    true,
 	},
 	// network: \bNBC\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bNBC\b`),
-		Transform: to_value(`NBC`),
+		Transform: toValue(`NBC`),
 		Remove:    true,
 	},
 	// network: \bAMC\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bAMC\b`),
-		Transform: to_value(`AMC`),
+		Transform: toValue(`AMC`),
 		Remove:    true,
 	},
 	// network: \bPBS\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bPBS\b`),
-		Transform: to_value(`PBS`),
+		Transform: toValue(`PBS`),
 		Remove:    true,
 	},
 	// network: \b(Crunchyroll|[. -]CR[. -])\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\b(Crunchyroll|[. -]CR[. -])\b`),
-		Transform: to_value(`Crunchyroll`),
+		Transform: toValue(`Crunchyroll`),
 		Remove:    true,
 	},
 	// network: \bVICE\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`\bVICE\b`),
-		Transform: to_value(`VICE`),
+		Transform: toValue(`VICE`),
 		Remove:    true,
 	},
 	// network: \bSony\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bSony\b`),
-		Transform: to_value(`Sony`),
+		Transform: toValue(`Sony`),
 		Remove:    true,
 	},
 	// network: \bHallmark\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bHallmark\b`),
-		Transform: to_value(`Hallmark`),
+		Transform: toValue(`Hallmark`),
 		Remove:    true,
 	},
 	// network: \bAdult.?Swim\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bAdult.?Swim\b`),
-		Transform: to_value(`Adult Swim`),
+		Transform: toValue(`Adult Swim`),
 		Remove:    true,
 	},
 	// network: \bAnimal.?Planet|ANPL\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bAnimal.?Planet|ANPL\b`),
-		Transform: to_value(`Animal Planet`),
+		Transform: toValue(`Animal Planet`),
 		Remove:    true,
 	},
 	// network: \bCartoon.?Network(.TOONAMI.BROADCAST)?\b
 	{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bCartoon.?Network(.TOONAMI.BROADCAST)?\b`),
-		Transform: to_value(`Cartoon Network`),
+		Transform: toValue(`Cartoon Network`),
 		Remove:    true,
 	},
 	// extension: \.(3g2|3gp|avi|flv|mkv|mk3d|mov|mp2|mp4|m4v|mpe|mpeg|mpg|mpv|webm|wmv|ogm|divx|ts|m2ts|iso|vob|sub|idx|ttxt|txt|smi|srt|ssa|ass|vtt|nfo|html)$
 	{
 		Field:     "extension",
 		Pattern:   regexp.MustCompile(`(?i)\.(3g2|3gp|avi|flv|mkv|mk3d|mov|mp2|mp4|m4v|mpe|mpeg|mpg|mpv|webm|wmv|ogm|divx|ts|m2ts|iso|vob|sub|idx|ttxt|txt|smi|srt|ssa|ass|vtt|nfo|html)$`),
-		Transform: to_lowercase(),
+		Transform: toLowercase(),
 		Remove:    true,
 	},
 	// audio: \bMP3\b
 	{
 		Field:        "audio",
 		Pattern:      regexp.MustCompile(`(?i)\bMP3\b`),
-		Transform:    to_value_set(`MP3`),
+		Transform:    toValueSet(`MP3`),
 		Remove:       true,
 		KeepMatching: true,
 	},
@@ -3131,14 +3132,14 @@ var handlers = []handler{
 	{
 		Field:     "group",
 		Pattern:   regexp.MustCompile(`\b(INFLATE|DEFLATE)\b`),
-		Transform: to_value_sub(`$1`),
+		Transform: toValueSub(`$1`),
 		Remove:    true,
 	},
 	// group: \b(?:Erai-raws|Erai-raws\.com)\b
 	{
 		Field:     "group",
 		Pattern:   regexp.MustCompile(`(?i)\b(?:Erai-raws|Erai-raws\.com)\b`),
-		Transform: to_value(`Erai-raws`),
+		Transform: toValue(`Erai-raws`),
 		Remove:    true,
 	},
 	// group: ^\[([^[\]]+)]
@@ -3147,12 +3148,12 @@ var handlers = []handler{
 		Pattern: regexp.MustCompile(`^\[([^[\]]+)]`),
 	},
 	// group: ['custom:handle_group_exclusion']
-	custom_handle_group_exclusion,
+	customHandleGroupExclusion,
 	// trash: acesse o original
 	{
 		Field:     "trash",
 		Pattern:   regexp.MustCompile(`(?i)acesse o original`),
-		Transform: to_boolean(),
+		Transform: toBoolean(),
 		Remove:    true,
 	},
 	// title: \bHigh.?Quality\b

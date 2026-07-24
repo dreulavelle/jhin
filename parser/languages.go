@@ -2,9 +2,9 @@ package parser
 
 // Language code helpers (PTT's translate_languages surface).
 
-// language_names maps the ISO 639-1 codes the parser emits to English
+// languageNames maps the ISO 639-1 codes the parser emits to English
 // language names (PTT parse.py LANGUAGES_TRANSLATION_TABLE).
-var language_names = map[string]string{
+var languageNames = map[string]string{
 	"en": "English", "ja": "Japanese", "zh": "Chinese", "ru": "Russian",
 	"ar": "Arabic", "pt": "Portuguese", "es": "Spanish", "fr": "French",
 	"de": "German", "it": "Italian", "ko": "Korean", "hi": "Hindi",
@@ -22,7 +22,7 @@ var language_names = map[string]string{
 // LanguageName returns the English name for a language code the parser
 // emits, or "" when unknown.
 func LanguageName(code string) string {
-	return language_names[code]
+	return languageNames[code]
 }
 
 // TranslateLanguages converts language codes to English names, dropping
@@ -30,7 +30,7 @@ func LanguageName(code string) string {
 func TranslateLanguages(codes []string) []string {
 	out := make([]string, 0, len(codes))
 	for _, c := range codes {
-		if name, ok := language_names[c]; ok {
+		if name, ok := languageNames[c]; ok {
 			out = append(out, name)
 		}
 	}

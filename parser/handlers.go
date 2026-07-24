@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type hProcessor func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta
@@ -34,18 +33,7 @@ type handler struct {
 	Gate *gateLits
 }
 
-func validate_or(validators ...hMatchValidator) hMatchValidator {
-	return func(input string, idxs []int) bool {
-		for _, validator := range validators {
-			if validator(input, idxs) {
-				return true
-			}
-		}
-		return false
-	}
-}
-
-func validate_and(validators ...hMatchValidator) hMatchValidator {
+func validateAnd(validators ...hMatchValidator) hMatchValidator {
 	return func(input string, idxs []int) bool {
 		for _, validator := range validators {
 			if !validator(input, idxs) {
@@ -56,18 +44,12 @@ func validate_and(validators ...hMatchValidator) hMatchValidator {
 	}
 }
 
-func validate_not_at_start() hMatchValidator {
+func validateNotAtStart() hMatchValidator {
 	return func(input string, match []int) bool {
 		return match[0] != 0
 	}
 }
-func validate_not_at_end() hMatchValidator {
-	return func(input string, match []int) bool {
-		return match[1] != len(input)
-	}
-}
-
-func validate_lookbehind(pattern, flags string, polarity bool) hMatchValidator {
+func validateLookbehind(pattern, flags string, polarity bool) hMatchValidator {
 	re := regexp.MustCompile("(?" + flags + ")(?:" + pattern + ")$")
 	return func(input string, match []int) bool {
 		rv := input[:match[0]]
@@ -78,7 +60,7 @@ func validate_lookbehind(pattern, flags string, polarity bool) hMatchValidator {
 	}
 }
 
-func validate_lookahead(pattern, flags string, polarity bool) hMatchValidator {
+func validateLookahead(pattern, flags string, polarity bool) hMatchValidator {
 	re := regexp.MustCompile("(?" + flags + ")^(?:" + pattern + ")")
 	return func(input string, match []int) bool {
 		rv := input[match[1]:]
@@ -89,21 +71,14 @@ func validate_lookahead(pattern, flags string, polarity bool) hMatchValidator {
 	}
 }
 
-func validate_not_match(re *regexp.Regexp) hMatchValidator {
+func validateNotMatch(re *regexp.Regexp) hMatchValidator {
 	return func(input string, match []int) bool {
 		rv := input[match[0]:match[1]]
 		return !re.MatchString(rv)
 	}
 }
 
-func validate_match(re *regexp.Regexp) hMatchValidator {
-	return func(input string, match []int) bool {
-		rv := input[match[0]:match[1]]
-		return re.MatchString(rv)
-	}
-}
-
-func validate_matched_groups_are_same(indices ...int) hMatchValidator {
+func validateMatchedGroupsAreSame(indices ...int) hMatchValidator {
 	return func(input string, match []int) bool {
 		first := input[match[indices[0]*2]:match[indices[0]*2+1]]
 		for _, index := range indices[1:] {
@@ -116,71 +91,32 @@ func validate_matched_groups_are_same(indices ...int) hMatchValidator {
 	}
 }
 
-func to_value(value string) hTransformer {
+func toValue(value string) hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		m.value = value
 	}
 }
 
-func to_lowercase() hTransformer {
+func toLowercase() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		m.value = strings.ToLower(m.value.(string))
 	}
 }
 
-func to_uppercase() hTransformer {
+func toUppercase() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		m.value = strings.ToUpper(m.value.(string))
 	}
 }
 
-func to_trimmed() hTransformer {
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		m.value = strings.TrimSpace(m.value.(string))
-	}
-}
-
-func to_clean_date() hTransformer {
-	re := regexp.MustCompile(`(\d+)(?:st|nd|rd|th)`)
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if v, ok := m.value.(string); ok {
-			m.value = re.ReplaceAllString(v, "$1")
-		}
-	}
-}
-
-func to_clean_month() hTransformer {
-	re := regexp.MustCompile(`(?i)(?:feb(?:ruary)?|jan(?:uary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)`)
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if v, ok := m.value.(string); ok {
-			m.value = re.ReplaceAllStringFunc(v, func(str string) string {
-				return str[0:3]
-			})
-		}
-	}
-}
-
-func to_date(format string) hTransformer {
-	seperatorRe := regexp.MustCompile(`[.\-/\\]`)
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if v, ok := m.value.(string); ok {
-			if t, err := time.Parse(format, seperatorRe.ReplaceAllString(v, " ")); err == nil {
-				m.value = t.Format("2006-01-02")
-				return
-			}
-		}
-		m.value = ""
-	}
-}
-
-func to_year() hTransformer {
+func toYear() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		vstr, ok := m.value.(string)
 		if !ok {
 			m.value = ""
 			return
 		}
-		parts := non_digits_regex.Split(vstr, -1)
+		parts := nonDigitsRegex.Split(vstr, -1)
 		if len(parts) == 1 {
 			m.value = parts[0]
 			return
@@ -207,14 +143,14 @@ func to_year() hTransformer {
 	}
 }
 
-func to_int_range() hTransformer {
+func toIntRange() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		v, ok := m.value.(string)
 		if !ok {
 			m.value = nil
 			return
 		}
-		parts := strings.Split(strings.Trim(non_digits_regex.ReplaceAllString(v, " "), " "), " ")
+		parts := strings.Split(strings.Trim(nonDigitsRegex.ReplaceAllString(v, " "), " "), " ")
 		nums := make([]int, len(parts))
 		for i, part := range parts {
 			if num, err := strconv.Atoi(part); err == nil {
@@ -222,7 +158,7 @@ func to_int_range() hTransformer {
 			}
 		}
 		if len(nums) == 2 && nums[0] < nums[1] {
-			if nums[1]-nums[0]+1 > max_range_till {
+			if nums[1]-nums[0]+1 > maxRangeTill {
 				m.value = nil
 				return
 			}
@@ -242,25 +178,25 @@ func to_int_range() hTransformer {
 	}
 }
 
-// max_range_till bounds 1..N episode expansion; titles are untrusted input
+// maxRangeTill bounds 1..N episode expansion; titles are untrusted input
 // and an uncapped N is a memory-exhaustion vector. The largest legitimate
 // episode count in the wild is ~2000.
-const max_range_till = 10000
+const maxRangeTill = 10000
 
-func to_int_range_till() hTransformer {
+func toIntRangeTill() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		v, ok := m.value.(string)
 		if !ok {
 			m.value = nil
 			return
 		}
-		parts := strings.Split(strings.Trim(non_digits_regex.ReplaceAllString(v, " "), " "), " ")
+		parts := strings.Split(strings.Trim(nonDigitsRegex.ReplaceAllString(v, " "), " "), " ")
 		if len(parts) == 0 {
 			m.value = nil
 			return
 		}
 		if num, err := strconv.Atoi(parts[0]); err == nil {
-			if num > max_range_till {
+			if num > maxRangeTill {
 				m.value = nil
 				return
 			}
@@ -274,28 +210,18 @@ func to_int_range_till() hTransformer {
 	}
 }
 
-func to_with_suffix(suffix string) hTransformer {
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if v, ok := m.value.(string); ok {
-			m.value = v + suffix
-		} else {
-			m.value = ""
-		}
-	}
-}
-
-func to_boolean() hTransformer {
+func toBoolean() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		m.value = true
 	}
 }
 
-type value_set[T comparable] struct {
+type valueSet[T comparable] struct {
 	existMap map[T]struct{}
 	values   []T
 }
 
-func (vs *value_set[any]) append(v any) *value_set[any] {
+func (vs *valueSet[any]) append(v any) *valueSet[any] {
 	if _, found := vs.existMap[v]; !found {
 		vs.existMap[v] = struct{}{}
 		vs.values = append(vs.values, v)
@@ -303,86 +229,27 @@ func (vs *value_set[any]) append(v any) *value_set[any] {
 	return vs
 }
 
-func (vs *value_set[any]) exists(v any) bool {
+func (vs *valueSet[any]) exists(v any) bool {
 	_, found := vs.existMap[v]
 	return found
 }
 
-func to_value_set(v any) hTransformer {
+func toValueSet(v any) hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if val, ok := m.value.(*value_set[any]); ok {
+		if val, ok := m.value.(*valueSet[any]); ok {
 			m.value = val.append(v)
 		}
 	}
 }
 
-func to_value_set_with_transform(to_v func(v string) any) hTransformer {
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if val, ok := m.value.(*value_set[any]); ok {
-			m.value = val.append(to_v(m.mValue))
-		}
-	}
-}
-
-func to_value_set_multi_with_transform(to_v func(v string) []any) hTransformer {
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
-		if val, ok := m.value.(*value_set[any]); ok {
-			for _, v := range to_v(m.mValue) {
-				m.value = val.append(v)
-			}
-		}
-	}
-}
-
-func to_int_array() hTransformer {
+func toIntArray() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		if v, ok := m.value.(string); ok {
-			if num, err := strconv.Atoi(strip_non_digits(v)); err == nil {
+			if num, err := strconv.Atoi(stripNonDigits(v)); err == nil {
 				m.value = []int{num}
 				return
 			}
 		}
 		m.value = []int{}
-	}
-}
-
-func remove_from_value(re *regexp.Regexp) hProcessor {
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) *parseMeta {
-		if v, ok := m.value.(string); ok && v != "" {
-			m.value = re.ReplaceAllString(v, "")
-		}
-		return m
-	}
-}
-
-func regex_match_until_valid(re *regexp.Regexp, validator hMatchValidator) hProcessor {
-	return func(title string, m *parseMeta, _ map[string]*parseMeta) *parseMeta {
-		offset := 0
-		for offset < len(title) {
-			idxs := re.FindStringSubmatchIndex(title[offset:])
-			if idxs == nil {
-				return m
-			}
-			for i := range idxs {
-				if idxs[i] >= 0 {
-					idxs[i] += offset
-				}
-			}
-			if validator(title, idxs) {
-				m.mIndex = idxs[0]
-				m.mValue = title[idxs[0]:idxs[1]]
-				if len(idxs) >= 4 && idxs[2] >= 0 && idxs[3] >= 0 {
-					m.value = title[idxs[2]:idxs[3]]
-				} else {
-					m.value = m.mValue
-				}
-				return m
-			}
-			offset = idxs[1]
-			if offset == idxs[0] {
-				offset++
-			}
-		}
-		return m
 	}
 }

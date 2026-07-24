@@ -39,7 +39,7 @@ type Torrent struct {
 
 // Resolution returns the release's resolution bucket.
 func (t *Torrent) Resolution() Resolution {
-	return normalize_resolution(t.Data.Resolution)
+	return normalizeResolution(t.Data.Resolution)
 }
 
 // Ranker evaluates releases under a compiled Profile. Safe for concurrent
@@ -63,19 +63,19 @@ type Ranker struct {
 func New(p Profile) (*Ranker, error) {
 	r := &Ranker{profile: p}
 	var err error
-	if r.require, err = compile_patterns(p.Require); err != nil {
+	if r.require, err = compilePatterns(p.Require); err != nil {
 		return nil, fmt.Errorf("require: %w", err)
 	}
-	if r.exclude, err = compile_patterns(p.Exclude); err != nil {
+	if r.exclude, err = compilePatterns(p.Exclude); err != nil {
 		return nil, fmt.Errorf("exclude: %w", err)
 	}
-	if r.preferred, err = compile_patterns(p.Preferred); err != nil {
+	if r.preferred, err = compilePatterns(p.Preferred); err != nil {
 		return nil, fmt.Errorf("preferred: %w", err)
 	}
-	r.requiredLangs = expand_langs(p.Languages.Required)
-	r.allowedLangs = expand_langs(p.Languages.Allowed)
-	r.excludeLangs = expand_langs(p.Languages.Exclude)
-	r.preferredLangs = expand_langs(p.Languages.Preferred)
+	r.requiredLangs = expandLangs(p.Languages.Required)
+	r.allowedLangs = expandLangs(p.Languages.Allowed)
+	r.excludeLangs = expandLangs(p.Languages.Exclude)
+	r.preferredLangs = expandLangs(p.Languages.Preferred)
 
 	if t := p.Options.TitleThreshold; math.IsNaN(t) || t < 0 || t > 1 {
 		return nil, fmt.Errorf("options: title threshold %v outside [0,1]", t)
@@ -108,15 +108,15 @@ func (r *Ranker) policy(a Attr) Policy {
 	return Policy{Fetch: true}
 }
 
-// compile_patterns treats "/pat/" as case-sensitive and anything else as
+// compilePatterns treats "/pat/" as case-sensitive and anything else as
 // case-insensitive.
-func compile_patterns(patterns []string) ([]*regexp.Regexp, error) {
+func compilePatterns(patterns []string) ([]*regexp.Regexp, error) {
 	out := make([]*regexp.Regexp, 0, len(patterns))
 	for _, p := range patterns {
 		if p == "" {
 			continue
 		}
-		src := p
+		var src string
 		if strings.HasPrefix(p, "/") && strings.HasSuffix(p, "/") && len(p) > 2 {
 			src = p[1 : len(p)-1]
 		} else {
@@ -233,10 +233,10 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 	for _, a := range attrs {
 		rank += r.policy(a).Rank
 	}
-	if len(r.preferred) > 0 && match_any(r.preferred, t.Raw) {
+	if len(r.preferred) > 0 && matchAny(r.preferred, t.Raw) {
 		rank += o.PreferredBonus
 	}
-	if len(r.preferredLangs) > 0 && lang_overlap(d.Languages, r.preferredLangs) {
+	if len(r.preferredLangs) > 0 && langOverlap(d.Languages, r.preferredLangs) {
 		rank += o.PreferredBonus
 	}
 	t.Rank = rank
@@ -264,7 +264,7 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 			reject("trash")
 		} else {
 			for _, a := range attrs {
-				if trash_quality_attrs[a] || a == AttrCleanAudio {
+				if trashQualityAttrs[a] || a == AttrCleanAudio {
 					reject("trash:" + string(a))
 					break
 				}
@@ -277,19 +277,19 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 
 	// a require match short-circuits the remaining vetoes (trash/adult/title
 	// still apply)
-	if len(r.require) > 0 && match_any(r.require, t.Raw) {
+	if len(r.require) > 0 && matchAny(r.require, t.Raw) {
 		t.Fetch = len(t.Rejections) == 0
 		return
 	}
 
-	if match_first(r.exclude, t.Raw, reject) {
+	if matchFirst(r.exclude, t.Raw, reject) {
 		t.Fetch = false
 		return
 	}
 
-	r.check_languages(d.Languages, reject)
+	r.checkLanguages(d.Languages, reject)
 
-	if res := normalize_resolution(d.Resolution); r.resolutions != nil {
+	if res := normalizeResolution(d.Resolution); r.resolutions != nil {
 		if enabled, ok := r.resolutions[res]; ok && !enabled {
 			reject("resolution:" + string(res))
 		}
@@ -308,7 +308,7 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 	t.Fetch = len(t.Rejections) == 0
 }
 
-func (r *Ranker) check_languages(langs []string, reject func(string)) {
+func (r *Ranker) checkLanguages(langs []string, reject func(string)) {
 	if len(langs) == 0 {
 		if r.profile.Options.RemoveUnknownLanguages {
 			reject("language:unknown")
@@ -317,7 +317,7 @@ func (r *Ranker) check_languages(langs []string, reject func(string)) {
 		}
 		return
 	}
-	if len(r.requiredLangs) > 0 && !lang_overlap(langs, r.requiredLangs) {
+	if len(r.requiredLangs) > 0 && !langOverlap(langs, r.requiredLangs) {
 		reject("language:missing_required")
 		return
 	}
@@ -328,7 +328,7 @@ func (r *Ranker) check_languages(langs []string, reject func(string)) {
 			}
 		}
 	}
-	if len(r.allowedLangs) > 0 && lang_overlap(langs, r.allowedLangs) {
+	if len(r.allowedLangs) > 0 && langOverlap(langs, r.allowedLangs) {
 		return
 	}
 	for _, l := range langs {
@@ -338,7 +338,7 @@ func (r *Ranker) check_languages(langs []string, reject func(string)) {
 	}
 }
 
-func lang_overlap(langs []string, set map[string]bool) bool {
+func langOverlap(langs []string, set map[string]bool) bool {
 	for _, l := range langs {
 		if set[l] {
 			return true
@@ -347,7 +347,7 @@ func lang_overlap(langs []string, set map[string]bool) bool {
 	return false
 }
 
-func match_any(patterns []*regexp.Regexp, s string) bool {
+func matchAny(patterns []*regexp.Regexp, s string) bool {
 	for _, re := range patterns {
 		if re.MatchString(s) {
 			return true
@@ -356,7 +356,7 @@ func match_any(patterns []*regexp.Regexp, s string) bool {
 	return false
 }
 
-func match_first(patterns []*regexp.Regexp, s string, reject func(string)) bool {
+func matchFirst(patterns []*regexp.Regexp, s string, reject func(string)) bool {
 	for _, re := range patterns {
 		if re.MatchString(s) {
 			reject("exclude:" + re.String())

@@ -13,6 +13,8 @@ builds:
   - main: ./cmd/jhin
     env:
       - CGO_ENABLED=0
+    flags:
+      - -trimpath
     goos:
       - darwin
       - linux
@@ -30,3 +32,4 @@ changelog:
 
 release:
   mode: keep-existing
+  use_existing_draft: true

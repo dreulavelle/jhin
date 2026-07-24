@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-var accent_fold = map[rune]string{
+var accentFold = map[rune]string{
 	'ā': "a", 'ă': "a", 'ą': "a", 'ǎ': "a", 'ǻ': "a", 'à': "a", 'á': "a", 'â': "a", 'ã': "a", 'ä': "a", 'å': "a",
 	'ć': "c", 'č': "c", 'ç': "c", 'ĉ': "c", 'ċ': "c",
 	'ď': "d", 'đ': "d",
@@ -39,7 +39,7 @@ func Normalize(title string) string {
 	var b strings.Builder
 	b.Grow(len(title))
 	for _, r := range strings.ToLower(title) {
-		if repl, ok := accent_fold[r]; ok {
+		if repl, ok := accentFold[r]; ok {
 			b.WriteString(repl)
 			continue
 		}
@@ -53,7 +53,7 @@ func Normalize(title string) string {
 // Similarity returns the indel ratio in [0,1] between two already-raw titles
 // after normalization: 1 - indel_distance/(len(a)+len(b)).
 func Similarity(a, b string) float64 {
-	return indel_ratio([]rune(Normalize(a)), []rune(Normalize(b)))
+	return indelRatio([]rune(Normalize(a)), []rune(Normalize(b)))
 }
 
 // TitleMatch reports whether two titles are the same release title at the
@@ -70,25 +70,25 @@ func TitleMatch(correctTitle, parsedTitle string, threshold float64, aliases ...
 // correct title or any alias.
 func BestSimilarity(correctTitle, parsedTitle string, aliases ...string) float64 {
 	parsed := []rune(Normalize(parsedTitle))
-	best := indel_ratio([]rune(Normalize(correctTitle)), parsed)
+	best := indelRatio([]rune(Normalize(correctTitle)), parsed)
 	for _, alias := range aliases {
-		if r := indel_ratio([]rune(Normalize(alias)), parsed); r > best {
+		if r := indelRatio([]rune(Normalize(alias)), parsed); r > best {
 			best = r
 		}
 	}
 	return best
 }
 
-// indel_ratio computes 1 - D/(m+n) where D is the minimum number of
+// indelRatio computes 1 - D/(m+n) where D is the minimum number of
 // insertions+deletions transforming a into b (substitution costs 2, i.e.
 // LCS-based distance).
-func indel_ratio(a, b []rune) float64 {
+func indelRatio(a, b []rune) float64 {
 	if len(a) == 0 && len(b) == 0 {
 		return 1
 	}
 	total := len(a) + len(b)
 	if len(a) == 0 || len(b) == 0 {
-		return float64(total-total) / float64(total) // 0
+		return 0
 	}
 	// D = m + n - 2*LCS(a,b)
 	prev := make([]int, len(b)+1)

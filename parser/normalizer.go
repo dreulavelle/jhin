@@ -2,7 +2,7 @@ package parser
 
 import "strings"
 
-func normalize_audio(audio []string) []string {
+func normalizeAudio(audio []string) []string {
 	isChanged := false
 	for i := range audio {
 		switch audio[i] {
@@ -28,7 +28,7 @@ func normalize_audio(audio []string) []string {
 	return nAudio
 }
 
-func normalize_codec(codec string) string {
+func normalizeCodec(codec string) string {
 	codec = strings.ToLower(codec)
 	switch codec {
 	case "avc", "h264", "x264":
@@ -46,7 +46,7 @@ func normalize_codec(codec string) string {
 	}
 }
 
-func normalize_resolution(resolution string) string {
+func normalizeResolution(resolution string) string {
 	resolution = strings.ToLower(resolution)
 	switch resolution {
 	case "2160p":
@@ -62,11 +62,11 @@ func (r *Result) Normalize() *Result {
 	if r.Error() != nil {
 		return r
 	}
-	if !r.is_normalized {
-		r.Audio = normalize_audio(r.Audio)
-		r.Codec = normalize_codec(r.Codec)
-		r.Resolution = normalize_resolution(r.Resolution)
-		r.is_normalized = true
+	if !r.isNormalized {
+		r.Audio = normalizeAudio(r.Audio)
+		r.Codec = normalizeCodec(r.Codec)
+		r.Resolution = normalizeResolution(r.Resolution)
+		r.isNormalized = true
 	}
 	return r
 }

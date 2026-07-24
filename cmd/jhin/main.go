@@ -29,8 +29,8 @@ func main() {
 					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					torrent_title := cmd.Args().First()
-					r := jhin.Parse(torrent_title)
+					torrentTitle := cmd.Args().First()
+					r := jhin.Parse(torrentTitle)
 					if err := r.Error(); err != nil {
 						return err
 					}

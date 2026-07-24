@@ -30,15 +30,15 @@ const (
 	ResUnknown Resolution = "unknown"
 )
 
-// resolution_bucket orders resolutions for sorting (higher = better).
-var resolution_bucket = map[Resolution]int{
+// resolutionBucket orders resolutions for sorting (higher = better).
+var resolutionBucket = map[Resolution]int{
 	Res2160p: 9, Res1440p: 8, Res1080p: 7, Res720p: 6,
 	Res576p: 5, Res480p: 4, Res360p: 3, Res240p: 2, ResUnknown: 1,
 }
 
-// normalize_resolution maps parser output (either raw "2160p" style or
+// normalizeResolution maps parser output (either raw "2160p" style or
 // Normalize()d "4k"/"2k") onto a Resolution.
-func normalize_resolution(s string) Resolution {
+func normalizeResolution(s string) Resolution {
 	switch s {
 	case "2160p", "4k":
 		return Res2160p
@@ -244,7 +244,7 @@ func Load(path string) (Profile, error) {
 }
 
 // language groups usable as aliases in Languages lists.
-var language_groups = map[string][]string{
+var languageGroups = map[string][]string{
 	"anime": {"ja", "zh", "ko"},
 	"non_anime": {
 		"de", "es", "hi", "ta", "ru", "ua", "th", "it", "ar", "pt", "fr",
@@ -255,19 +255,19 @@ var language_groups = map[string][]string{
 	"common": {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh", "ar", "fr"},
 }
 
-// expand_langs resolves group aliases into a lookup set.
-func expand_langs(codes []string) map[string]bool {
+// expandLangs resolves group aliases into a lookup set.
+func expandLangs(codes []string) map[string]bool {
 	out := make(map[string]bool, len(codes))
 	for _, c := range codes {
 		if c == "all" {
 			for _, g := range [2]string{"anime", "non_anime"} {
-				for _, l := range language_groups[g] {
+				for _, l := range languageGroups[g] {
 					out[l] = true
 				}
 			}
 			continue
 		}
-		if group, ok := language_groups[c]; ok {
+		if group, ok := languageGroups[c]; ok {
 			for _, l := range group {
 				out[l] = true
 			}
