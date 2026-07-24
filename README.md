@@ -91,6 +91,7 @@ func main() {
 	}
 
 	// Index-aligned with the input — nothing is reordered or dropped.
+	// (rank.Entry + ranker.RankEntries carries per-release infohashes.)
 	torrents := ranker.RankAll(titles)
 	for _, t := range torrents {
 		fmt.Printf("%6d fetch=%-5v %v %s\n", t.Rank, t.Fetch, t.Rejections, t.Raw)
