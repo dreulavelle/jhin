@@ -19,22 +19,32 @@ func build_adult_pattern() *regexp.Regexp {
 	lines := strings.Split(adult_keywords_raw, "\n")
 	escaped := make([]string, 0, len(lines))
 	for _, line := range lines {
-		kw := strings.TrimSpace(line)
+		kw := strings.ToLower(strings.TrimSpace(line))
 		if kw == "" {
 			continue
 		}
 		escaped = append(escaped, regexp.QuoteMeta(kw))
 	}
-	return regexp.MustCompile(`(?i)\b(` + strings.Join(escaped, "|") + `)\b`)
+	// substring containment (no word boundaries): any keyword occurring
+	// anywhere in the lowercased title marks it adult
+	return regexp.MustCompile(`(?i)` + strings.Join(escaped, "|"))
 }
 
-// custom_adult: parser.add_handler("adult", create_adult_pattern(), boolean, ...)
+var adult_keywords_regex = build_adult_pattern()
+
+// def is_adult_content: keyword containment; sets adult without touching the
+// title or match bookkeeping
 var custom_adult = handler{
-	Field:         "adult",
-	Pattern:       build_adult_pattern(),
-	Transform:     to_boolean(),
-	Remove:        true,
-	SkipFromTitle: true,
+	Field: "adult",
+	Process: func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta {
+		if v, ok := m.value.(bool); ok && v {
+			return m
+		}
+		if adult_keywords_regex.MatchString(title) {
+			m.value = true
+		}
+		return m
+	},
 }
 
 // ---------------------------------------------------------------------------
@@ -530,13 +540,23 @@ var custom_group_dash = handler{
 func to_int_string() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		if v, ok := m.value.(string); ok {
-			if num, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+			if num, err := strconv.Atoi(strip_non_digits(v)); err == nil {
 				m.value = strconv.Itoa(num)
 				return
 			}
 		}
 		m.value = nil
 	}
+}
+
+func strip_non_digits(s string) string {
+	b := make([]byte, 0, len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] >= '0' && s[i] <= '9' {
+			b = append(b, s[i])
+		}
+	}
+	return string(b)
 }
 
 // to_first_int_string implements PTT's first_integer for string-typed fields.
@@ -690,6 +710,8 @@ func to_ptt_date(formats ...string) hTransformer {
 			l.golayout = "1 2 06"
 		case "DD MM YY":
 			l.golayout = "2 1 06"
+		case "YY MM DD":
+			l.golayout = "06 1 2"
 		case "DD MMM YYYY":
 			l.golayout = "2 Jan 2006"
 		case "Do MMM YYYY":

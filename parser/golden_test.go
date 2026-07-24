@@ -1,8 +1,8 @@
 package parser
 
 // Golden corpus test: testdata/golden.json was produced by running Python
-// PTT v1.6.16 over every title in its test suite. It is the accuracy
-// contract: jhin must keep producing byte-identical fields.
+// PTT 1.8.5 (main@88429bb90ace) over every title in its test suite. It is the
+// accuracy contract: jhin must keep producing byte-identical fields.
 
 import (
 	"encoding/json"

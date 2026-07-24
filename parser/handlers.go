@@ -324,7 +324,7 @@ func to_value_set_multi_with_transform(to_v func(v string) []any) hTransformer {
 func to_int_array() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		if v, ok := m.value.(string); ok {
-			if num, err := strconv.Atoi(v); err == nil {
+			if num, err := strconv.Atoi(strip_non_digits(v)); err == nil {
 				m.value = []int{num}
 				return
 			}

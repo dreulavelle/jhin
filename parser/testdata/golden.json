@@ -1,14 +1,5 @@
 [
 {
-"title": " instead of ",
-"result": {
-"episodes": [],
-"seasons": [],
-"languages": [],
-"title": "instead of"
-}
-},
-{
 "title": " not to be present for ",
 "result": {
 "episodes": [],
@@ -2685,6 +2676,35 @@
 }
 },
 {
+"title": "CSI Crime Scene Investigation",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "CSI Crime Scene Investigation"
+}
+},
+{
+"title": "CSI Crime Scene Investigation S01 720p WEB DL DD5 1 H 264 LiebeIst[rartv]",
+"result": {
+"resolution": "720p",
+"quality": "WEB-DL",
+"codec": "avc",
+"channels": [
+"5.1"
+],
+"audio": [
+"Dolby Digital"
+],
+"seasons": [
+1
+],
+"episodes": [],
+"languages": [],
+"title": "CSI Crime Scene Investigation"
+}
+},
+{
 "title": "Capitao.America.2.TS.BrunoG",
 "result": {
 "trash": true,
@@ -3721,6 +3741,20 @@
 }
 },
 {
+"title": "Dorcel.25.09.03.Joe.Blogs.XXX.2160p.MP4-P2P",
+"result": {
+"container": "mp4",
+"adult": true,
+"resolution": "2160p",
+"date": "2025-09-03",
+"group": "P2P",
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Dorcel"
+}
+},
+{
 "title": "Dragon Ball Super S01 E23 French 1080p HDTV H264-Kesni",
 "result": {
 "resolution": "1080p",
@@ -3750,6 +3784,29 @@
 "extension": "mkv",
 "languages": [],
 "title": "Dragon Ball Super"
+}
+},
+{
+"title": "Dragon Ball Z",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Dragon Ball Z"
+}
+},
+{
+"title": "Dragon Ball Z (Complete Series) [1080p] [MP4] [English Audio]",
+"result": {
+"container": "mp4",
+"resolution": "1080p",
+"complete": true,
+"languages": [
+"en"
+],
+"episodes": [],
+"seasons": [],
+"title": "Dragon Ball Z"
 }
 },
 {
@@ -4160,6 +4217,15 @@
 "seasons": [],
 "languages": [],
 "title": "Expected"
+}
+},
+{
+"title": "Expected 'adult' detection to be ",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Expected 'adult' detection to be"
 }
 },
 {
@@ -4583,6 +4649,26 @@
 ],
 "languages": [],
 "title": "Food Wars! Shokugeki No Souma"
+}
+},
+{
+"title": "Formula1.S2025E86.Italy.Grand.Prix.1080i.HDTV.MPA2.0.H.264-playTV",
+"result": {
+"resolution": "1080i",
+"quality": "HDTV",
+"codec": "avc",
+"channels": [
+"2.0"
+],
+"group": "playTV",
+"seasons": [
+2025
+],
+"episodes": [
+86
+],
+"languages": [],
+"title": "Formula1"
 }
 },
 {
@@ -5297,6 +5383,38 @@
 "episodes": [],
 "seasons": [],
 "title": "Genova"
+}
+},
+{
+"title": "Georgie and Mandys First Marriage",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Georgie and Mandys First Marriage"
+}
+},
+{
+"title": "Georgie and Mandys First Marriage S01E18 TV Money 720p AMZN WEB DL DDP5 1 H 264 FLUX EZTV",
+"result": {
+"title": "Georgie and Mandys First Marriage",
+"resolution": "720p",
+"quality": "WEB-DL",
+"codec": "avc",
+"channels": [
+"5.1"
+],
+"audio": [
+"Dolby Digital Plus"
+],
+"seasons": [
+1
+],
+"episodes": [
+18
+],
+"network": "Amazon",
+"languages": []
 }
 },
 {
@@ -6414,6 +6532,27 @@
 }
 },
 {
+"title": "Interstellar 2014 1080p BluRay DDP 5 1 x265-EDGE2020 mkv",
+"result": {
+"group": "EDGE2020",
+"container": "mkv",
+"resolution": "1080p",
+"year": 2014,
+"quality": "BluRay",
+"codec": "hevc",
+"channels": [
+"5.1"
+],
+"audio": [
+"Dolby Digital Plus"
+],
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Interstellar"
+}
+},
+{
 "title": "Into the Badlands S02E07 PROPER 720p HDTV x264-W4F",
 "result": {
 "resolution": "720p",
@@ -6556,6 +6695,34 @@
 "extension": "avi",
 "languages": [],
 "title": "Iron-Fist"
+}
+},
+{
+"title": "Jack-of-All-Trades Party Of None",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Jack-of-All-Trades Party Of None"
+}
+},
+{
+"title": "Jack-of-All-Trades Party Of None S01E01 DUBBED 1080p WEB H264-SKYANiME",
+"result": {
+"scene": true,
+"resolution": "1080p",
+"quality": "WEB",
+"codec": "avc",
+"group": "SKYANiME",
+"seasons": [
+1
+],
+"episodes": [
+1
+],
+"dubbed": true,
+"languages": [],
+"title": "Jack-of-All-Trades Party Of None"
 }
 },
 {
@@ -7828,6 +7995,36 @@
 "sk"
 ],
 "title": "Ministri"
+}
+},
+{
+"title": "Mission Impossible Dead Reckoning Part One",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Mission Impossible Dead Reckoning Part One"
+}
+},
+{
+"title": "Mission Impossible Dead Reckoning Part One 2023 1080p BluRay DDP 7 1 x265-EDGE2020 mkv",
+"result": {
+"group": "EDGE2020",
+"container": "mkv",
+"resolution": "1080p",
+"year": 2023,
+"quality": "BluRay",
+"codec": "hevc",
+"channels": [
+"7.1"
+],
+"audio": [
+"Dolby Digital Plus"
+],
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Mission Impossible Dead Reckoning Part One"
 }
 },
 {
@@ -9804,6 +10001,17 @@
 }
 },
 {
+"title": "Redhead Nami from One Piece Rough Fucks and Deepthroats in Tight Jeans 2160p",
+"result": {
+"adult": true,
+"resolution": "2160p",
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "Redhead Nami from One Piece Rough Fucks and Deepthroats in Tight Jeans"
+}
+},
+{
 "title": "Region should not be detected in ",
 "result": {
 "episodes": [],
@@ -10141,16 +10349,13 @@
 "title": "Seizoen 22 - Zon & Maan Ultra Legendes/afl.18 Je ogen op de bal houden!.mp4",
 "result": {
 "container": "mp4",
-"extras": [
-"OP"
-],
 "seasons": [
 22
 ],
 "extension": "mp4",
 "episodes": [],
 "languages": [],
-"title": "Seizoen 22 - Zon & Maan Ultra Legendes/afl.18 Je ogen"
+"title": "Seizoen 22 - Zon & Maan Ultra Legendes/afl.18 Je ogen op de bal houden!"
 }
 },
 {
@@ -10193,6 +10398,20 @@
 "episodes": [],
 "seasons": [],
 "title": "Shinjuku Swan"
+}
+},
+{
+"title": "Show Something [.01.] 720p.mkv",
+"result": {
+"container": "mkv",
+"resolution": "720p",
+"episodes": [
+1
+],
+"extension": "mkv",
+"seasons": [],
+"languages": [],
+"title": "Show Something"
 }
 },
 {
@@ -11551,6 +11770,37 @@
 }
 },
 {
+"title": "The Dark Knight",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "The Dark Knight"
+}
+},
+{
+"title": "The Dark Knight 2008 IMAX 1080p BluRay DDP 5 1 H 265-EDGE2020 mkv",
+"result": {
+"group": "EDGE2020",
+"container": "mkv",
+"resolution": "1080p",
+"year": 2008,
+"edition": "IMAX",
+"quality": "BluRay",
+"codec": "hevc",
+"channels": [
+"5.1"
+],
+"audio": [
+"Dolby Digital Plus"
+],
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "The Dark Knight"
+}
+},
+{
 "title": "The Ed Show 10-19-12.mp4",
 "result": {
 "container": "mp4",
@@ -11616,6 +11866,36 @@
 "episodes": [],
 "languages": [],
 "title": "The Expanse"
+}
+},
+{
+"title": "The Fairly OddParents Fairly Odder",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "The Fairly OddParents Fairly Odder"
+}
+},
+{
+"title": "The Fairly OddParents Fairly Odder S01 720p PMTP WEBRip DDP5 1 x264 TEPES rartv ORARBG",
+"result": {
+"resolution": "720p",
+"quality": "WEBRip",
+"codec": "avc",
+"channels": [
+"5.1"
+],
+"audio": [
+"Dolby Digital Plus"
+],
+"seasons": [
+1
+],
+"site": "RARBG",
+"episodes": [],
+"languages": [],
+"title": "The Fairly OddParents Fairly Odder"
 }
 },
 {
@@ -11830,7 +12110,7 @@
 "subbed": true,
 "episodes": [],
 "seasons": [],
-"title": "The Insider*"
+"title": "The Insider"
 }
 },
 {
@@ -12124,6 +12404,27 @@
 {
 "title": "The Shawshank Redemption",
 "result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "The Shawshank Redemption"
+}
+},
+{
+"title": "The Shawshank Redemption 1994 1080p BluRay DDP 5 1 x265-EDGE2020 mkv",
+"result": {
+"group": "EDGE2020",
+"container": "mkv",
+"resolution": "1080p",
+"year": 1994,
+"quality": "BluRay",
+"codec": "hevc",
+"channels": [
+"5.1"
+],
+"audio": [
+"Dolby Digital Plus"
+],
 "episodes": [],
 "seasons": [],
 "languages": [],
@@ -13046,7 +13347,6 @@
 {
 "title": "The.Mexican.2001 - Arabic Subs Hardcoded",
 "result": {
-"site": "The.Mexican.2001",
 "year": 2001,
 "languages": [
 "ar"
@@ -13715,7 +14015,7 @@
 "title": "UFC 187 PPV 720i HDTV X264-KYR",
 "result": {
 "ppv": true,
-"resolution": "720p",
+"resolution": "720i",
 "quality": "HDTV",
 "codec": "avc",
 "group": "KYR",
@@ -14232,7 +14532,7 @@
 "result": {
 "adult": true,
 "resolution": "1080p",
-"date": "2023-02-24",
+"date": "2024-02-23",
 "codec": "hevc",
 "episodes": [],
 "seasons": [],
@@ -14246,7 +14546,7 @@
 "container": "mp4",
 "adult": true,
 "resolution": "1080p",
-"date": "2001-11-24",
+"date": "2024-11-01",
 "codec": "hevc",
 "extension": "mp4",
 "episodes": [],
@@ -16982,26 +17282,6 @@
 }
 },
 {
-"title": "[KTKJ]_[BLEACH]_[DVDRIP]_[116]_[x264_640x480_aac].mkv",
-"result": {
-"container": "mkv",
-"resolution": "640x480p",
-"quality": "DVDRip",
-"codec": "avc",
-"audio": [
-"AAC"
-],
-"episodes": [
-116
-],
-"extension": "mkv",
-"group": "KTKJ",
-"seasons": [],
-"languages": [],
-"title": "BLEACH"
-}
-},
-{
 "title": "[Kaerizaki-Fansub] One Piece 1098 VOSTFR FHD (1920x1080).mp4",
 "result": {
 "container": "mp4",
@@ -17033,6 +17313,23 @@
 "seasons": [],
 "languages": [],
 "title": "Tsuredure Children"
+}
+},
+{
+"title": "[LostYears] takt op.Destiny (WEB 1080p x264 AAC) [Dual-Audio]",
+"result": {
+"resolution": "1080p",
+"quality": "WEB",
+"codec": "avc",
+"audio": [
+"AAC"
+],
+"dubbed": true,
+"group": "LostYears",
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "takt op.Destiny"
 }
 },
 {
@@ -18204,12 +18501,12 @@
 }
 },
 {
-"title": "release_name, expected_adult, expected_title",
+"title": "release_name, expected_adult",
 "result": {
 "episodes": [],
 "seasons": [],
 "languages": [],
-"title": "release name, expected adult, expected title"
+"title": "release name, expected adult"
 }
 },
 {
@@ -18554,6 +18851,15 @@
 ],
 "languages": [],
 "title": "sons of anarchy"
+}
+},
+{
+"title": "takt op.Destiny",
+"result": {
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "takt op.Destiny"
 }
 },
 {
@@ -19277,11 +19583,10 @@
 {
 "title": "www.Tamilblasters.party",
 "result": {
-"site": "www.Tamilblasters.party",
 "episodes": [],
 "seasons": [],
 "languages": [],
-"title": ""
+"title": "www Tamilblasters party"
 }
 },
 {
@@ -19356,6 +19661,27 @@
 "seasons": [],
 "languages": [],
 "title": ""
+}
+},
+{
+"title": "xXx.2002.15th.Anniversary.Edition.1080p.BluRay.Remux.AVC.DTS-HD.MA.5.1-FraMeSToR",
+"result": {
+"resolution": "1080p",
+"year": 2002,
+"edition": "Anniversary Edition",
+"quality": "BluRay REMUX",
+"codec": "avc",
+"channels": [
+"5.1"
+],
+"audio": [
+"DTS Lossless"
+],
+"group": "FraMeSToR",
+"episodes": [],
+"seasons": [],
+"languages": [],
+"title": "xXx"
 }
 },
 {
@@ -19488,7 +19814,7 @@
 }
 },
 {
-"title": "Викинги / Vikings / Сезон: 5 / Серии: 1 [2017, WEB-DL 1080p] MVO",
+"title": "Викинги / Vikings / Сезон: 5 / Серии: 5 из 20 [2017, WEB-DL 1080p] MVO",
 "result": {
 "resolution": "1080p",
 "year": 2017,
@@ -19497,7 +19823,11 @@
 5
 ],
 "episodes": [
-1
+1,
+2,
+3,
+4,
+5
 ],
 "languages": [
 "ru"
@@ -19506,7 +19836,7 @@
 }
 },
 {
-"title": "Викинги / Vikings / Сезон: 5 / Серии: 1 из 20 [2017, WEB-DL 1080p] MVO",
+"title": "Викинги / Vikings / Сезон: 5 / Серия: 1 [2017, WEB-DL 1080p] MVO",
 "result": {
 "resolution": "1080p",
 "year": 2017,
@@ -19740,6 +20070,52 @@
 ],
 "extension": "avi",
 "title": "Интерны"
+}
+},
+{
+"title": "Клинок, рассекающий демонов (ТВ-1) / Kimetsu no Yaiba / Demon Slayer [TV] [26 из 26] [RUS(ext), ENG, JAP+Sub] [2019, BDRip] [1080p]",
+"result": {
+"resolution": "1080p",
+"year": 2019,
+"quality": "BDRip",
+"seasons": [
+1
+],
+"episodes": [
+1,
+2,
+3,
+4,
+5,
+6,
+7,
+8,
+9,
+10,
+11,
+12,
+13,
+14,
+15,
+16,
+17,
+18,
+19,
+20,
+21,
+22,
+23,
+24,
+25,
+26
+],
+"languages": [
+"en",
+"ja",
+"ru"
+],
+"subbed": true,
+"title": "Клинок, рассекающий демонов"
 }
 },
 {
