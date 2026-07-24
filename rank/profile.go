@@ -223,17 +223,6 @@ var DefaultPolicies = map[Attr]Policy{
 	AttrSize:        {Fetch: false, Rank: -10000},
 }
 
-// policy resolves an attribute's effective policy for this profile.
-func (p *Profile) policy(a Attr) Policy {
-	if pol, ok := p.Attributes[a]; ok {
-		return pol
-	}
-	if pol, ok := DefaultPolicies[a]; ok {
-		return pol
-	}
-	return Policy{Fetch: true}
-}
-
 // Save writes the profile as JSON.
 func (p Profile) Save(path string) error {
 	blob, err := json.MarshalIndent(p, "", "  ")

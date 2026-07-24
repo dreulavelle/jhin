@@ -6,6 +6,7 @@ package rank
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"runtime"
 	"strings"
@@ -42,12 +43,15 @@ func (t *Torrent) Resolution() Resolution {
 }
 
 // Ranker evaluates releases under a compiled Profile. Safe for concurrent
-// use.
+// use; the profile is snapshotted at construction, so later mutation of the
+// caller's Profile has no effect.
 type Ranker struct {
-	profile   Profile
-	require   []*regexp.Regexp
-	exclude   []*regexp.Regexp
-	preferred []*regexp.Regexp
+	profile     Profile
+	policies    map[Attr]Policy
+	resolutions map[Resolution]bool
+	require     []*regexp.Regexp
+	exclude     []*regexp.Regexp
+	preferred   []*regexp.Regexp
 
 	requiredLangs  map[string]bool
 	allowedLangs   map[string]bool
@@ -72,7 +76,36 @@ func New(p Profile) (*Ranker, error) {
 	r.allowedLangs = expand_langs(p.Languages.Allowed)
 	r.excludeLangs = expand_langs(p.Languages.Exclude)
 	r.preferredLangs = expand_langs(p.Languages.Preferred)
+
+	if t := p.Options.TitleThreshold; math.IsNaN(t) || t < 0 || t > 1 {
+		return nil, fmt.Errorf("options: title threshold %v outside [0,1]", t)
+	}
+
+	// snapshot the effective policy for every known attribute and any the
+	// profile adds, so evaluation never touches caller-owned maps
+	r.policies = make(map[Attr]Policy, len(DefaultPolicies)+len(p.Attributes))
+	for a, pol := range DefaultPolicies {
+		r.policies[a] = pol
+	}
+	for a, pol := range p.Attributes {
+		r.policies[a] = pol
+	}
+	if p.Resolutions != nil {
+		r.resolutions = make(map[Resolution]bool, len(p.Resolutions))
+		for res, enabled := range p.Resolutions {
+			r.resolutions[res] = enabled
+		}
+	}
 	return r, nil
+}
+
+// policy resolves an attribute's effective policy from the construction-time
+// snapshot.
+func (r *Ranker) policy(a Attr) Policy {
+	if pol, ok := r.policies[a]; ok {
+		return pol
+	}
+	return Policy{Fetch: true}
 }
 
 // compile_patterns treats "/pat/" as case-sensitive and anything else as
@@ -121,8 +154,46 @@ func (r *Ranker) Rank(raw string, opts ...RankOptions) Torrent {
 	return t
 }
 
+// Entry is one release in a batch, carrying its own identity.
+type Entry struct {
+	Title    string
+	Infohash string
+}
+
+// RankEntries evaluates a batch in parallel, preserving each entry's
+// infohash. The result slice is index-aligned with the input.
+func (r *Ranker) RankEntries(entries []Entry, opts ...RankOptions) []Torrent {
+	var opt RankOptions
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+	out := make([]Torrent, len(entries))
+	workers := min(runtime.GOMAXPROCS(0), max(1, len(entries)))
+	var wg sync.WaitGroup
+	ch := make(chan int, workers*2)
+	for range workers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := range ch {
+				data := parser.Parse(entries[i].Title)
+				out[i] = Torrent{Raw: entries[i].Title, Infohash: entries[i].Infohash, Data: data}
+				r.evaluate(&out[i], &opt)
+			}
+		}()
+	}
+	for i := range entries {
+		ch <- i
+	}
+	close(ch)
+	wg.Wait()
+	return out
+}
+
 // RankAll evaluates a batch in parallel. The result slice is index-aligned
-// with the input: out[i] is titles[i].
+// with the input: out[i] is titles[i]. RankOptions.Infohash is ignored here
+// (one hash cannot describe many releases) — use RankEntries to carry
+// per-release infohashes.
 func (r *Ranker) RankAll(titles []string, opts ...RankOptions) []Torrent {
 	var opt RankOptions
 	if len(opts) > 0 {
@@ -160,7 +231,7 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 	// --- score (always computed) ---
 	rank := 0
 	for _, a := range attrs {
-		rank += r.profile.policy(a).Rank
+		rank += r.policy(a).Rank
 	}
 	if len(r.preferred) > 0 && match_any(r.preferred, t.Raw) {
 		rank += o.PreferredBonus
@@ -218,14 +289,14 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 
 	r.check_languages(d.Languages, reject)
 
-	if res := normalize_resolution(d.Resolution); r.profile.Resolutions != nil {
-		if enabled, ok := r.profile.Resolutions[res]; ok && !enabled {
+	if res := normalize_resolution(d.Resolution); r.resolutions != nil {
+		if enabled, ok := r.resolutions[res]; ok && !enabled {
 			reject("resolution:" + string(res))
 		}
 	}
 
 	for _, a := range attrs {
-		if !r.profile.policy(a).Fetch {
+		if !r.policy(a).Fetch {
 			reject("attribute:" + string(a))
 		}
 	}

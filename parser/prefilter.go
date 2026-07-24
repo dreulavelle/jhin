@@ -206,7 +206,10 @@ func concat_literals(subs []*syntax.Regexp) *litInfo {
 			continue
 		}
 		if len(run.lits)*len(info.lits) > gate_merge_cap {
+			// the run no longer covers the whole concatenation; its literals
+			// stay valid as a gate but must not be treated as exact text
 			flush()
+			runAll = false
 			run = &litInfo{lits: info.lits, exact: true}
 			continue
 		}

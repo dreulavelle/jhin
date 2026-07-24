@@ -41,3 +41,33 @@ func TestEdgeCases(t *testing.T) {
 		t.Fatalf("abc-empty similarity: %f", got)
 	}
 }
+
+func TestCodexFindings(t *testing.T) {
+	// threshold validation
+	bad := Default()
+	bad.Options.TitleThreshold = 1.5
+	if _, err := New(bad); err == nil {
+		t.Fatal("threshold > 1 should error")
+	}
+
+	// profile mutation after New must not affect the ranker
+	p := Default()
+	p.Attributes = map[Attr]Policy{AttrRemux: {Fetch: true, Rank: 123}}
+	r := mustRanker(t, p)
+	before := r.Rank("Movie.2020.1080p.BluRay.REMUX-GRP").Rank
+	p.Attributes[AttrRemux] = Policy{Fetch: false, Rank: -999}
+	p.Resolutions[Res1080p] = false
+	after := r.Rank("Movie.2020.1080p.BluRay.REMUX-GRP")
+	if after.Rank != before || !after.Fetch {
+		t.Fatalf("ranker must snapshot the profile: before=%d after=%+v", before, after)
+	}
+
+	// per-entry infohash batch
+	out := r.RankEntries([]Entry{
+		{Title: "Movie.A.2020.1080p.WEB-DL", Infohash: "aaa"},
+		{Title: "Movie.B.2021.720p.WEB-DL", Infohash: "bbb"},
+	})
+	if out[0].Infohash != "aaa" || out[1].Infohash != "bbb" {
+		t.Fatalf("infohash not carried: %+v", out)
+	}
+}

@@ -222,6 +222,10 @@ func to_int_range() hTransformer {
 			}
 		}
 		if len(nums) == 2 && nums[0] < nums[1] {
+			if nums[1]-nums[0]+1 > max_range_till {
+				m.value = nil
+				return
+			}
 			seq := make([]int, nums[1]-nums[0]+1)
 			for i := range seq {
 				seq[i] = nums[0] + i
