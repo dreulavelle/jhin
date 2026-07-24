@@ -59,16 +59,16 @@ const (
 	Attr10Bit       Attr = "10bit"
 
 	// audio
-	AttrAAC             Attr = "aac"
-	AttrAtmos           Attr = "atmos"
-	AttrDolbyDigital    Attr = "dolby_digital"
+	AttrAAC              Attr = "aac"
+	AttrAtmos            Attr = "atmos"
+	AttrDolbyDigital     Attr = "dolby_digital"
 	AttrDolbyDigitalPlus Attr = "dolby_digital_plus"
-	AttrDTSLossy        Attr = "dts_lossy"
-	AttrDTSLossless     Attr = "dts_lossless"
-	AttrFLAC            Attr = "flac"
-	AttrMP3             Attr = "mp3"
-	AttrTrueHD          Attr = "truehd"
-	AttrCleanAudio      Attr = "clean_audio"
+	AttrDTSLossy         Attr = "dts_lossy"
+	AttrDTSLossless      Attr = "dts_lossless"
+	AttrFLAC             Attr = "flac"
+	AttrMP3              Attr = "mp3"
+	AttrTrueHD           Attr = "truehd"
+	AttrCleanAudio       Attr = "clean_audio"
 
 	// channels
 	AttrSurround Attr = "surround"
