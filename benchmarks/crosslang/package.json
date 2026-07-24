@@ -1,0 +1,7 @@
+{
+  "name": "jhin-crosslang-bench",
+  "private": true,
+  "dependencies": {
+    "parse-torrent-title": "3.0.1"
+  }
+}
