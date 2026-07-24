@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/dreulavelle/jhin/compare/v0.3.0...v0.3.1) (2026-07-24)
+
+
+### Performance Improvements
+
+* **parser:** 2.5x faster parsing via Aho-Corasick prefilter ([3035606](https://github.com/dreulavelle/jhin/commit/303560644c7f93351f172e13cc8224a99a403a30))
+* **parser:** multi-factor gates and tighter TELE literals ([d753780](https://github.com/dreulavelle/jhin/commit/d7537809eafa5dfacf6f5428e3d0600e02095f5c))
+
 ## [0.3.0](https://github.com/dreulavelle/jhin/compare/v0.2.0...v0.3.0) (2026-07-24)
 
 
