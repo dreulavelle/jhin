@@ -21,6 +21,8 @@ jobs:
       - name: Check Format
         run: test -z "$(gofmt -l . | tee /dev/stderr)"
       - name: Lint
-        run: go vet
+        run: go vet ./...
       - name: Test
-        run: go test -v ./...
+        run: go test ./...
+      - name: Benchmark (smoke)
+        run: go test -bench=. -benchmem -benchtime=1x -run='^$' ./parser/

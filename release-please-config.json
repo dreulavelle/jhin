@@ -10,16 +10,10 @@
       "exclude-paths": [
         ".gitignore",
         ".release-please-manifest.json",
-        "release-please-config.json",
-        "packages"
+        "release-please-config.json"
       ],
       "extra-files": ["version.go"],
       "pull-request-title-pattern": "chore: release ${version}"
-    },
-    "packages/js": {
-      "component": "js",
-      "release-type": "node",
-      "pull-request-title-pattern": "chore(js): release ${version}"
     }
   }
 }

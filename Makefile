@@ -1,20 +1,18 @@
-.PHONY: all fmt test build build-proto-gen
+.PHONY: all fmt lint test bench build
 
-all: fmt vet test
+all: fmt lint test
 
 fmt:
 	go fmt ./...
 
 lint:
-	go vet
+	go vet ./...
 
 test:
-	go test -v ./...
+	go test ./...
 
-build: build-proto-gen
-	go build -o bin/ptt cmd/ptt/main.go
+bench:
+	go test -bench=. -benchmem -run='^$$' ./parser/
 
-build-proto-gen:
-	protoc --go_out=. --go_opt=paths=source_relative \
-		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		cmd/ptt/server/proto/ptt.proto
+build:
+	go build -o bin/jhin cmd/jhin/main.go

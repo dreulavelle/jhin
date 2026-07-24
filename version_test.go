@@ -1,4 +1,4 @@
-package ptt
+package jhin
 
 import (
 	"testing"
