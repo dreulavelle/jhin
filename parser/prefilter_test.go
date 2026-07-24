@@ -46,6 +46,9 @@ func FuzzPrefilterEquivalence(f *testing.F) {
 	f.Add("[SubsPlease] Sousou no Frieren - 28 (1080p) [F1FF71EB].mkv")
 	f.Add("Мстители: Война бесконечности / Avengers: Infinity War (2018) BDRip 1080p")
 	f.Add("AEW DARK 4th December 2020 WEBRip h264-TJ")
+	f.Add("Show hardſub 1080p WEBRip")
+	f.Add("Movie remaſtered uncenſored 720p")
+	f.Add("Kelvin K sign 1080p WEB-DL")
 	f.Fuzz(func(t *testing.T, title string) {
 		defer func() { prefilter_enabled = true }()
 		prefilter_enabled = true

@@ -238,6 +238,11 @@ func to_int_range() hTransformer {
 	}
 }
 
+// max_range_till bounds 1..N episode expansion; titles are untrusted input
+// and an uncapped N is a memory-exhaustion vector. The largest legitimate
+// episode count in the wild is ~2000.
+const max_range_till = 10000
+
 func to_int_range_till() hTransformer {
 	return func(title string, m *parseMeta, _ map[string]*parseMeta) {
 		v, ok := m.value.(string)
@@ -251,6 +256,10 @@ func to_int_range_till() hTransformer {
 			return
 		}
 		if num, err := strconv.Atoi(parts[0]); err == nil {
+			if num > max_range_till {
+				m.value = nil
+				return
+			}
 			nums := make([]int, num)
 			for i := range num {
 				nums[i] = i + 1

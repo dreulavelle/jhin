@@ -201,13 +201,13 @@ func parse(title string, handlers []handler) (r *Result) {
 	// multibyte titles would otherwise slice at different boundaries
 	endOfTitle := utf8.RuneCountInString(title)
 
-	lowerTitle := strings.ToLower(title)
+	lowerTitle := fold_lower(title)
 	prevTitle := title
 	for hi, handler := range handlers {
 		if title != prevTitle {
 			// title mutated: refresh the prefilter haystack (removals can
 			// splice fragments into new substrings)
-			lowerTitle = strings.ToLower(title)
+			lowerTitle = fold_lower(title)
 			if debug_hook != nil {
 				debug_hook(hi-1, title)
 			}
@@ -550,7 +550,8 @@ func GetPartialParser(fieldNames []string) func(title string) *Result {
 }
 
 // debug_hook, when set (tests only), is called with the index of the handler
-// that just mutated the working title.
+// that just mutated the working title. Setting it while parses run
+// concurrently is a data race.
 var debug_hook func(handlerIdx int, title string)
 
 // debug_eot_hook (tests only) reports endOfTitle updates.

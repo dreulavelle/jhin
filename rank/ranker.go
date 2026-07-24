@@ -180,6 +180,10 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 		t.Rejections = append(t.Rejections, reason)
 	}
 
+	if d.Error() != nil {
+		reject("parse_error")
+	}
+
 	if opt.TargetTitle != "" && t.TitleRatio < o.TitleThreshold {
 		reject("title_mismatch")
 	}

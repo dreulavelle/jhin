@@ -8,10 +8,10 @@ package parser
 // Correctness invariants:
 //   - gate literals are derived from the handler's own pattern via
 //     regexp/syntax as REQUIRED literals: if none occur (case-insensitively)
-//     in the title, the regex cannot match. All literals are lowercased and
-//     checked against a lowercased copy — "lower(title) contains lower(lit)"
-//     is implied by "title contains lit", so the gate stays a necessary
-//     condition even for case-sensitive patterns.
+//     in the title, the regex cannot match. Literals are lowercased and
+//     checked against a haystack lowered with fold_lower, which applies the
+//     same simple case folding RE2 uses for (?i) — so the gate stays a
+//     necessary condition for both case-sensitive and case-folded matches.
 //   - regexes always run against the original (current) title; the lowercased
 //     copy exists only for the Contains check.
 //   - the haystack is recomputed whenever a handler mutates the title, since
@@ -23,11 +23,44 @@ package parser
 import (
 	"regexp/syntax"
 	"strings"
+	"unicode"
 )
 
 // prefilter_enabled is a test hook: the equivalence test compares parses with
-// gating on and off.
+// gating on and off. Toggling it while parses run concurrently is a data
+// race — tests must only flip it between serial parses.
 var prefilter_enabled = true
+
+// fold_lower lowercases for the gate haystack using the same simple case
+// folding RE2 applies for (?i): runes whose fold orbit contains an ASCII
+// letter (e.g. ſ, K) map to that letter, so a gate literal never misses a
+// title its regex would match.
+func fold_lower(s string) string {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 0x80 {
+			return strings.Map(fold_lower_rune, s)
+		}
+	}
+	return strings.ToLower(s)
+}
+
+func fold_lower_rune(r rune) rune {
+	if r < 0x80 {
+		if 'A' <= r && r <= 'Z' {
+			return r + 32
+		}
+		return r
+	}
+	for f := unicode.SimpleFold(r); f != r; f = unicode.SimpleFold(f) {
+		if f < 0x80 {
+			if 'A' <= f && f <= 'Z' {
+				return f + 32
+			}
+			return f
+		}
+	}
+	return unicode.ToLower(r)
+}
 
 const (
 	gate_max_alternatives = 12
