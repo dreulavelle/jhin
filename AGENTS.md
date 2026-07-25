@@ -17,8 +17,8 @@ dependencies. Accuracy is contractual, speed is a feature, slop is a bug.
   `handlers*.go`, run:
   `go test -run 'TestGoldenCorpus|TestPrefilterEquivalence' ./parser` and a
   fuzz smoke `go test -run '^$' -fuzz FuzzPrefilterEquivalence -fuzztime 30s ./parser`.
-- **Zero runtime dependencies** in the library. Competitor and benchmark deps
-  live only in `benchmarks/`, a separate Go module invisible to consumers.
+- **Zero runtime dependencies**, library and CLI alike. Anything needing a
+  third-party package belongs in a separate module, not this one.
 - **Libraries don't log.** Failures come back as errors or data
   (`Result.Error()`, `Torrent.Rejections`, `Explain()`). Logging belongs to
   `cmd/jhin` only.
@@ -28,8 +28,8 @@ dependencies. Accuracy is contractual, speed is a feature, slop is a bug.
 - Comments state constraints the code can't express — never narration,
   provenance, or a restatement of the next line. Match the file's density.
 - No filler in docs: no marketing adjectives, no "simply", no emoji.
-- Benchmark numbers in READMEs come from `benchmarks/` runs with raw output
-  committed under `benchmarks/results/<date>/`. Never hand-edit a number.
+- Benchmark numbers live in `docs/benchmark.md` and come from a recorded run
+  on a stated machine. Never hand-edit a number; re-measure and say when.
 
 ## Workflow
 
