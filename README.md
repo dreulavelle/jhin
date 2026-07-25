@@ -171,7 +171,7 @@ jhin version                                              # installed version
 
 ## Performance
 
-Benchmarked on a Ryzen 9 5900HX (see `benchmarks/`):
+Benchmarked on a Ryzen 9 5900HX (see [`docs/benchmark.md`](docs/benchmark.md)):
 
 | Operation | Time | Notes |
 |---|---|---|
@@ -197,10 +197,10 @@ regression fails CI.
 
 ## How it compares
 
-Measured 2026-07-24 on the 1,156-title corpus; full methodology, raw
-results, disclosure, and reproduction steps in
-[`benchmarks/`](benchmarks/README.md). Accuracy is scored per field, only on
-the 9 fields every library claims, after neutral vocabulary normalization.
+Measured 2026-07-24 on the 1,156-title corpus; full methodology, disclosure,
+and reproduction steps in [`docs/benchmark.md`](docs/benchmark.md). Accuracy
+is scored per field, only on the 9 fields every library claims, after neutral
+vocabulary normalization.
 
 | Library | Accuracy (9 shared fields) | Speed (per title, serial) | Fields |
 |---|---|---|---|

@@ -12,7 +12,7 @@ test:
 	go test ./...
 
 bench:
-	go test -bench=. -benchmem -run='^$$' ./parser/
+	go test -bench=. -benchmem -run='^$$' ./parser/ ./rank/
 
 build:
 	go build -o bin/jhin cmd/jhin/main.go
