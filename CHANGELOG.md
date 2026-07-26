@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/dreulavelle/jhin/compare/v0.3.2...v0.3.3) (2026-07-26)
+
+
+### Bug Fixes
+
+* reduce WxH resolutions to their height when normalizing ([#16](https://github.com/dreulavelle/jhin/issues/16)) ([1db4997](https://github.com/dreulavelle/jhin/commit/1db49970378fa0560bac11d057bb6c5a25227d6b))
+
 ## [0.3.2](https://github.com/dreulavelle/jhin/compare/v0.3.1...v0.3.2) (2026-07-26)
 
 
