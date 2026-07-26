@@ -46,15 +46,33 @@ func normalizeCodec(codec string) string {
 	}
 }
 
-func normalizeResolution(resolution string) string {
+// ResolutionHeight reduces a WxH resolution to its height. Titles that spell
+// out both dimensions parse to the full pair ("720x480p"), which callers
+// matching on tiers would otherwise key off the width. Values that are not
+// WxH are returned lowercased and unchanged.
+func ResolutionHeight(resolution string) string {
 	resolution = strings.ToLower(resolution)
-	switch resolution {
+	i := strings.LastIndex(resolution, "x")
+	if i <= 0 || i+1 >= len(resolution) {
+		return resolution
+	}
+	for _, c := range resolution[:i] {
+		if c < '0' || c > '9' {
+			return resolution
+		}
+	}
+	return resolution[i+1:]
+}
+
+func normalizeResolution(resolution string) string {
+	height := ResolutionHeight(resolution)
+	switch height {
 	case "2160p":
 		return "4k"
 	case "1440p":
 		return "2k"
 	default:
-		return resolution
+		return height
 	}
 }
 

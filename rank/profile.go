@@ -5,6 +5,8 @@ package rank
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/dreulavelle/jhin/parser"
 )
 
 // Policy controls a single attribute: whether releases carrying it may be
@@ -44,9 +46,11 @@ var resolutionBucket = map[Resolution]int{
 }
 
 // normalizeResolution maps parser output (either raw "2160p" style or
-// Normalize()d "4k"/"2k") onto a Resolution.
+// Normalize()d "4k"/"2k") onto a Resolution. Full WxH values are reduced to
+// their height first, so a 480p release that spelled out both dimensions is
+// gated as 480p rather than escaping into ResUnknown.
 func normalizeResolution(s string) Resolution {
-	switch s {
+	switch parser.ResolutionHeight(s) {
 	case "2160p", "4k":
 		return Res2160p
 	case "1440p", "2k":
