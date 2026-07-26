@@ -12,13 +12,13 @@ type ver struct {
 
 var v = ver{
 	// x-release-please-start-version
-	v: "0.4.0",
+	v: "0.5.0",
 	// x-release-please-end
 	// x-release-please-start-major
 	major: "0",
 	// x-release-please-end
 	// x-release-please-start-minor
-	minor: "4",
+	minor: "5",
 	// x-release-please-end
 	// x-release-please-start-patch
 	patch: "0",
