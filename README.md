@@ -121,8 +121,10 @@ p.Attributes = map[rank.Attr]rank.Policy{
 }
 
 // Regex gates against the raw title ("/pat/" = case-sensitive).
+// Require is conjunctive — every pattern must match, so use alternation
+// within one pattern for "any of these".
 p.Require = []string{`\b(2160p|1080p)\b`}
-p.Exclude = []string{`\bHDCAM\b`}
+p.Exclude = []string{`\bHDCAM\b`}   // any match rejects
 p.Preferred = []string{`\bIMAX\b`} // matching adds Options.PreferredBonus
 
 // Resolution and language rules. Default enables 4K/1440p/1080p/720p;

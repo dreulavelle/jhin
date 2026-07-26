@@ -277,12 +277,7 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 		reject("adult")
 	}
 
-	// a require match short-circuits the remaining vetoes (trash/adult/title
-	// still apply)
-	if len(r.require) > 0 && matchAny(r.require, t.Raw) {
-		t.Fetch = len(t.Rejections) == 0
-		return
-	}
+	rejectUnmatched(r.require, t.Raw, reject)
 
 	if matchFirst(r.exclude, t.Raw, reject) {
 		t.Fetch = false
@@ -356,6 +351,20 @@ func matchAny(patterns []*regexp.Regexp, s string) bool {
 		}
 	}
 	return false
+}
+
+// rejectUnmatched rejects once per Require pattern the title does not match.
+// Require is conjunctive: alternation inside a single pattern already
+// expresses "any of these", while RE2's lack of lookahead leaves "all of
+// these" unreachable in one pattern, so the list is what carries it. Every
+// missing requirement is reported rather than just the first, so Explain can
+// show all of them.
+func rejectUnmatched(patterns []*regexp.Regexp, s string, reject func(string)) {
+	for _, re := range patterns {
+		if !re.MatchString(s) {
+			reject("require:" + re.String())
+		}
+	}
 }
 
 func matchFirst(patterns []*regexp.Regexp, s string, reject func(string)) bool {
