@@ -117,8 +117,15 @@ type Options struct {
 type Profile struct {
 	Name string `json:"name,omitempty"`
 
-	Require   []string `json:"require,omitempty"`
-	Exclude   []string `json:"exclude,omitempty"`
+	// Require gates on the raw title: every pattern must match or the
+	// release is rejected. The list is conjunctive because alternation
+	// inside one pattern already expresses "any of these", while RE2 has no
+	// lookahead to express "all of these".
+	Require []string `json:"require,omitempty"`
+	// Exclude rejects a release when any pattern matches.
+	Exclude []string `json:"exclude,omitempty"`
+	// Preferred adds Options.PreferredBonus once when any pattern matches.
+	// It never rejects.
 	Preferred []string `json:"preferred,omitempty"`
 
 	// PatternRanks add their Rank (positive or negative) to every release

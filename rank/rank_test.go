@@ -97,17 +97,65 @@ func TestRequireExcludePreferred(t *testing.T) {
 		t.Errorf("preferred bonus not applied: %d vs %d", pref.Rank, plain.Rank)
 	}
 
-	// require short-circuits attribute vetoes (xvid is unfetchable by
-	// default) but not the trash veto
+	// require is a gate: matching it grants no exemption from the other
+	// vetoes, and failing it rejects on its own
 	p2 := Default()
 	p2.Require = []string{`\bWANTED\b`}
 	r2 := mustRanker(t, p2)
-	tor := r2.Rank("Movie.2020.1080p.WEB-DL.XviD.WANTED-GRP")
-	if !tor.Fetch {
-		t.Errorf("require match should bypass attribute vetoes: %+v", tor.Rejections)
+
+	if tor := r2.Rank("Movie.2020.1080p.WEB-DL.WANTED-GRP"); !tor.Fetch {
+		t.Errorf("require match should be fetchable: %+v", tor.Rejections)
+	}
+	if tor := r2.Rank("Movie.2020.1080p.WEB-DL-GRP"); tor.Fetch {
+		t.Error("missing the required pattern should reject")
+	}
+	// xvid is unfetchable by default; a require match must not excuse it
+	if tor := r2.Rank("Movie.2020.1080p.WEB-DL.XviD.WANTED-GRP"); tor.Fetch {
+		t.Errorf("require match must not bypass attribute vetoes: %+v", tor.Rejections)
 	}
 	if cam := r2.Rank("Movie.2020.CAM.WANTED"); cam.Fetch {
 		t.Error("require must not bypass the trash veto")
+	}
+}
+
+func TestRequireIsConjunctive(t *testing.T) {
+	p := Default()
+	p.Options.RemoveTrash = false
+	// "and" across patterns; RE2 has no lookahead, so the list is the only
+	// way to express it. "or" goes inside a single pattern via alternation.
+	p.Require = []string{`\bIMAX\b`, `\b2160p\b`}
+	r := mustRanker(t, p)
+
+	if tor := r.Rank("Movie.2020.2160p.IMAX.WEB-DL-GRP"); !tor.Fetch {
+		t.Errorf("both requirements met should fetch: %+v", tor.Rejections)
+	}
+	for _, title := range []string{
+		"Movie.2020.2160p.WEB-DL-GRP", // missing IMAX
+		"Movie.2020.1080p.IMAX-GRP",   // missing 2160p
+		"Movie.2020.1080p.WEB-DL-GRP", // missing both
+	} {
+		if tor := r.Rank(title); tor.Fetch {
+			t.Errorf("%q should be rejected when a requirement is missing", title)
+		}
+	}
+
+	// every unmet requirement is reported, not just the first
+	tor := r.Rank("Movie.2020.1080p.WEB-DL-GRP")
+	if len(tor.Rejections) != 2 {
+		t.Errorf("expected both requirements reported, got %v", tor.Rejections)
+	}
+
+	// alternation inside one pattern still behaves as "any of"
+	pAny := Default()
+	pAny.Require = []string{`\b(2160p|1080p)\b`}
+	rAny := mustRanker(t, pAny)
+	for _, title := range []string{"Movie.2020.2160p.WEB-DL-GRP", "Movie.2020.1080p.WEB-DL-GRP"} {
+		if tor := rAny.Rank(title); !tor.Fetch {
+			t.Errorf("%q should satisfy the alternation: %+v", title, tor.Rejections)
+		}
+	}
+	if tor := rAny.Rank("Movie.2020.720p.WEB-DL-GRP"); tor.Fetch {
+		t.Error("720p should not satisfy a 2160p|1080p requirement")
 	}
 }
 
