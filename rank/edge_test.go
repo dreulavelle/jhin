@@ -87,3 +87,32 @@ func TestAttributesExported(t *testing.T) {
 		}
 	}
 }
+
+func TestFullDimensionResolutionIsGated(t *testing.T) {
+	// A title spelling out both dimensions parses to "720x480p". Without
+	// reducing that to its height it lands in ResUnknown and escapes the
+	// disabled-480p gate entirely.
+	p := Default()
+	p.Options.RemoveTrash = false
+	ranker, err := New(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := ranker.Rank("Some Show - 01 (WEB-DL 720x480p x264 AAC)")
+	if got.Resolution() != Res480p {
+		t.Fatalf("Resolution() = %q, want %q", got.Resolution(), Res480p)
+	}
+	if got.Fetch {
+		t.Errorf("Fetch = true, want false (480p is disabled in Default())")
+	}
+	var rejected bool
+	for _, r := range got.Rejections {
+		if r == "resolution:480p" {
+			rejected = true
+		}
+	}
+	if !rejected {
+		t.Errorf("Rejections = %v, want it to contain %q", got.Rejections, "resolution:480p")
+	}
+}
