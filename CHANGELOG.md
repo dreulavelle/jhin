@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/dreulavelle/jhin/compare/v0.3.3...v0.4.0) (2026-07-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* profiles that relied on Require to exempt releases from other vetoes no longer do so, and profiles whose titles did not match a Require pattern are now rejected rather than fetched.
+
+### Bug Fixes
+
+* make Require a gate instead of a veto bypass ([#19](https://github.com/dreulavelle/jhin/issues/19)) ([3f78ff1](https://github.com/dreulavelle/jhin/commit/3f78ff15b00eb3b28eb93ef692abf0783c5f65f7))
+
 ## [0.3.3](https://github.com/dreulavelle/jhin/compare/v0.3.2...v0.3.3) (2026-07-26)
 
 
