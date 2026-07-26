@@ -472,13 +472,13 @@ var handlers = []handler{
 	{
 		Field:   "year",
 		Pattern: regexp.MustCompile(`^[(\[]?((?:19\d|20[012])\d)(?:\d|kbps)?[)\]]?`),
-		ValidateMatch: func(input string, match []int) bool {
+		ValidateMatch: validateFunc(func(input string, match []int) bool {
 			mValue := input[match[0]:match[1]]
 			if len(mValue) == 4 {
 				return match[0] != 0
 			}
 			return len(strings.Trim(mValue, "()[]")) == 4
-		},
+		}),
 		Transform: toYear(),
 		Remove:    true,
 	},

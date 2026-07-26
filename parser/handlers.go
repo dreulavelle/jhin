@@ -8,12 +8,29 @@ import (
 
 type hProcessor func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta
 type hTransformer func(title string, m *parseMeta, result map[string]*parseMeta)
-type hMatchValidator func(input string, idxs []int) bool
+
+// hMatchValidator decides whether a candidate match is acceptable.
+//
+// implied holds patterns that every ACCEPTED match implies occur somewhere in
+// the title — the positive lookarounds. Because a handler whose matches all
+// fail validation is skipped outright, those patterns' required literals are
+// necessary conditions for the handler to do anything, and the prefilter ANDs
+// them into its gate. A negative lookaround implies nothing and contributes
+// none.
+type hMatchValidator struct {
+	fn      func(input string, idxs []int) bool
+	implied []string
+}
+
+// validateFunc wraps a bare predicate that carries no gating information.
+func validateFunc(fn func(input string, idxs []int) bool) *hMatchValidator {
+	return &hMatchValidator{fn: fn}
+}
 
 type handler struct {
 	Field         string
 	Pattern       *regexp.Regexp
-	ValidateMatch hMatchValidator
+	ValidateMatch *hMatchValidator
 	Transform     hTransformer
 	Process       hProcessor
 
@@ -33,53 +50,75 @@ type handler struct {
 	Gate *gateLits
 }
 
-func validateAnd(validators ...hMatchValidator) hMatchValidator {
-	return func(input string, idxs []int) bool {
-		for _, validator := range validators {
-			if !validator(input, idxs) {
-				return false
+// validateAnd requires every validator to accept, so each one's implied
+// patterns stay individually necessary.
+func validateAnd(validators ...*hMatchValidator) *hMatchValidator {
+	var implied []string
+	for _, v := range validators {
+		implied = append(implied, v.implied...)
+	}
+	return &hMatchValidator{
+		implied: implied,
+		fn: func(input string, idxs []int) bool {
+			for _, validator := range validators {
+				if !validator.fn(input, idxs) {
+					return false
+				}
 			}
-		}
-		return true
+			return true
+		},
 	}
 }
 
-func validateNotAtStart() hMatchValidator {
-	return func(input string, match []int) bool {
+func validateNotAtStart() *hMatchValidator {
+	return validateFunc(func(input string, match []int) bool {
 		return match[0] != 0
-	}
+	})
 }
-func validateLookbehind(pattern, flags string, polarity bool) hMatchValidator {
+
+func validateLookbehind(pattern, flags string, polarity bool) *hMatchValidator {
 	re := regexp.MustCompile("(?" + flags + ")(?:" + pattern + ")$")
-	return func(input string, match []int) bool {
-		rv := input[:match[0]]
-		if polarity {
-			return re.MatchString(rv)
-		}
-		return !re.MatchString(rv)
+	v := &hMatchValidator{
+		fn: func(input string, match []int) bool {
+			rv := input[:match[0]]
+			if polarity {
+				return re.MatchString(rv)
+			}
+			return !re.MatchString(rv)
+		},
 	}
+	if polarity {
+		v.implied = []string{pattern}
+	}
+	return v
 }
 
-func validateLookahead(pattern, flags string, polarity bool) hMatchValidator {
+func validateLookahead(pattern, flags string, polarity bool) *hMatchValidator {
 	re := regexp.MustCompile("(?" + flags + ")^(?:" + pattern + ")")
-	return func(input string, match []int) bool {
-		rv := input[match[1]:]
-		if polarity {
-			return re.MatchString(rv)
-		}
-		return !re.MatchString(rv)
+	v := &hMatchValidator{
+		fn: func(input string, match []int) bool {
+			rv := input[match[1]:]
+			if polarity {
+				return re.MatchString(rv)
+			}
+			return !re.MatchString(rv)
+		},
 	}
+	if polarity {
+		v.implied = []string{pattern}
+	}
+	return v
 }
 
-func validateNotMatch(re *regexp.Regexp) hMatchValidator {
-	return func(input string, match []int) bool {
+func validateNotMatch(re *regexp.Regexp) *hMatchValidator {
+	return validateFunc(func(input string, match []int) bool {
 		rv := input[match[0]:match[1]]
 		return !re.MatchString(rv)
-	}
+	})
 }
 
-func validateMatchedGroupsAreSame(indices ...int) hMatchValidator {
-	return func(input string, match []int) bool {
+func validateMatchedGroupsAreSame(indices ...int) *hMatchValidator {
+	return validateFunc(func(input string, match []int) bool {
 		first := input[match[indices[0]*2]:match[indices[0]*2+1]]
 		for _, index := range indices[1:] {
 			other := input[match[index*2]:match[index*2+1]]
@@ -88,7 +127,7 @@ func validateMatchedGroupsAreSame(indices ...int) hMatchValidator {
 			}
 		}
 		return true
-	}
+	})
 }
 
 func toValue(value string) hTransformer {

@@ -21,6 +21,10 @@ package parser
 //   - script gates are derived from character classes whose every rune is
 //     non-ASCII: if the title contains no rune from the class, the regex
 //     cannot match. Script presence is computed from the ORIGINAL title.
+//   - a POSITIVE lookaround in ValidateMatch contributes its own required
+//     literals: every accepted match implies that pattern matches somewhere
+//     in the title, and a handler whose candidates all fail validation is
+//     skipped with no side effects. Negative lookarounds contribute nothing.
 //   - regexes always run against the original (current) title; the folded
 //     copy exists only for the automaton scan.
 //   - the haystack is rescanned whenever a handler mutates the title, since
@@ -162,13 +166,32 @@ func scriptPresence(title string) uint32 {
 // ---------------------------------------------------------------------------
 
 type haystack struct {
-	folded  string
+	folded  []byte // reused across the rescans one parse triggers
 	scripts uint32
 	hits    []uint64 // literal-ID bitset filled by the automaton scan
 }
 
+// appendFoldLower writes foldLower(s) into dst. Pure-ASCII input — the large
+// majority of titles — folds byte-wise with no intermediate allocation;
+// anything else defers to foldLower so the fold orbit rules stay in one place.
+func appendFoldLower(dst []byte, s string) []byte {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 0x80 {
+			return append(dst, foldLower(s)...)
+		}
+	}
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if 'A' <= c && c <= 'Z' {
+			c += 32
+		}
+		dst = append(dst, c)
+	}
+	return dst
+}
+
 func (h *haystack) scan(title string) {
-	h.folded = foldLower(title)
+	h.folded = appendFoldLower(h.folded[:0], title)
 	h.scripts = scriptPresence(title)
 	if h.hits == nil {
 		h.hits = make([]uint64, acMatcher.bitsetWords())
@@ -194,23 +217,45 @@ type gateGroup struct {
 // the handler cannot match. Factors of a concatenation are each individually
 // required, so AND-ing them is sound and strictly stronger than any single
 // factor.
+//
+// groups is the definition; compile() lowers it into the fixed probe arrays
+// the hot path reads, so hit() costs a couple of array loads instead of
+// walking a slice of 40-byte structs.
 type gateLits struct {
 	groups []gateGroup
+
+	n      int32
+	word   [gateMaxGroups]int32 // index into haystack.hits; -1 without literals
+	mask   [gateMaxGroups]uint64
+	script [gateMaxGroups]uint32
 }
 
-func (g *gateGroup) hit(h *haystack) bool {
-	if len(g.lits) > 0 && h.hits[g.bit>>6]&(1<<(uint(g.bit)&63)) != 0 {
-		return true
+// compile resolves each group's automaton bit into a word/mask pair. Groups
+// past gateMaxGroups are dropped, which only makes the gate more permissive.
+func (g *gateLits) compile() {
+	g.n = int32(min(len(g.groups), gateMaxGroups))
+	for i := 0; i < int(g.n); i++ {
+		grp := &g.groups[i]
+		if len(grp.lits) > 0 {
+			g.word[i] = grp.bit >> 6
+			g.mask[i] = 1 << (uint(grp.bit) & 63)
+		} else {
+			g.word[i] = -1
+		}
+		g.script[i] = grp.scriptMask
 	}
-	return g.scriptMask != 0 && h.scripts&g.scriptMask != 0
 }
 
 // hit reports whether the handler could possibly match.
 func (g *gateLits) hit(h *haystack) bool {
-	for i := range g.groups {
-		if !g.groups[i].hit(h) {
-			return false
+	for i := int32(0); i < g.n; i++ {
+		if w := g.word[i]; w >= 0 && h.hits[w]&g.mask[i] != 0 {
+			continue
 		}
+		if s := g.script[i]; s != 0 && h.scripts&s != 0 {
+			continue
+		}
+		return false
 	}
 	return true
 }
@@ -588,8 +633,13 @@ type acAutomaton struct {
 	edgeByte  []byte
 	edgeNext  []int32
 	fail      []int32
-	out       [][]int32 // gate indexes satisfied at this node (suffix-merged)
-	numGates  int
+	// gate indexes satisfied at each node (suffix-merged), CSR-packed:
+	// node u owns outGates[outOff[u]:outOff[u+1]]. Most nodes own none, and
+	// the two offsets sit adjacent in one array — the per-byte check is two
+	// neighbouring loads instead of a slice header.
+	outOff   []int32
+	outGates []int32
+	numGates int
 }
 
 var acMatcher *acAutomaton
@@ -598,10 +648,9 @@ func (a *acAutomaton) bitsetWords() int { return (a.numGates + 63) / 64 }
 
 // scan folds nothing — the haystack must already be folded — and sets the bit
 // of every literal that occurs.
-func (a *acAutomaton) scan(s string, hits []uint64) {
+func (a *acAutomaton) scan(s []byte, hits []uint64) {
 	state := int32(0)
-	for i := 0; i < len(s); i++ {
-		b := s[i]
+	for _, b := range s {
 		for {
 			var next int32 = -1
 			if state == 0 {
@@ -623,7 +672,8 @@ func (a *acAutomaton) scan(s string, hits []uint64) {
 			}
 			state = a.fail[state]
 		}
-		for _, id := range a.out[state] {
+		for e, end := a.outOff[state], a.outOff[state+1]; e < end; e++ {
+			id := a.outGates[e]
 			hits[id>>6] |= 1 << (uint(id) & 63)
 		}
 	}
@@ -681,10 +731,12 @@ func buildAutomaton(gates []*gateLits) *acAutomaton {
 	a := &acAutomaton{
 		numGates:  int(nextBit),
 		fail:      make([]int32, len(nodes)),
-		out:       make([][]int32, len(nodes)),
 		edgeStart: make([]int32, len(nodes)),
 		edgeEnd:   make([]int32, len(nodes)),
 	}
+	// per-node outputs during construction; the BFS reads a node's failure
+	// target randomly, so they stay indexable until the final CSR pack
+	nodeOut := make([][]int32, len(nodes))
 	for i := range a.root {
 		a.root[i] = -1
 	}
@@ -718,10 +770,10 @@ func buildAutomaton(gates []*gateLits) *acAutomaton {
 		}
 		return out
 	}
-	a.out[0] = toGates(nodes[0].out, nil)
+	nodeOut[0] = toGates(nodes[0].out, nil)
 	for qi := 0; qi < len(queue); qi++ {
 		u := queue[qi]
-		a.out[u] = toGates(nodes[u].out, a.out[a.fail[u]])
+		nodeOut[u] = toGates(nodes[u].out, nodeOut[a.fail[u]])
 		for b, v := range nodes[u].next {
 			f := a.fail[u]
 			for {
@@ -764,6 +816,15 @@ func buildAutomaton(gates []*gateLits) *acAutomaton {
 		}
 		a.edgeEnd[u] = int32(len(a.edgeByte))
 	}
+
+	// pack outputs into CSR; outOff has one trailing entry so the scan can
+	// read outOff[state+1] without a bounds special case
+	a.outOff = make([]int32, len(nodes)+1)
+	for u := 0; u < len(nodes); u++ {
+		a.outOff[u] = int32(len(a.outGates))
+		a.outGates = append(a.outGates, nodeOut[u]...)
+	}
+	a.outOff[len(nodes)] = int32(len(a.outGates))
 	return a
 }
 
@@ -775,12 +836,41 @@ func mustParse(pattern string) *syntax.Regexp {
 	return re
 }
 
+// andImplied strengthens a handler's gate with the required literals of its
+// positive lookarounds. A handler whose every candidate match fails
+// validation is skipped without side effects, so a lookaround's literals are
+// as necessary as the pattern's own — and for patterns too generic to gate
+// (bit depth's `(?:8|10|12)`), the lookaround is the only usable condition.
+func andImplied(g *gateLits, implied []string) *gateLits {
+	for _, pattern := range implied {
+		lg := deriveGate(pattern)
+		if lg == nil {
+			continue
+		}
+		if g == nil {
+			g = &gateLits{}
+		}
+		for _, grp := range lg.groups {
+			if len(g.groups) >= gateMaxGroups {
+				break
+			}
+			g.groups = append(g.groups, grp)
+		}
+	}
+	return g
+}
+
 func init() {
 	var gates []*gateLits
 	for i := range handlers {
 		h := &handlers[i]
 		if h.Gate == nil && h.Pattern != nil {
 			h.Gate = deriveGate(h.Pattern.String())
+		}
+		// lookaround literals apply only where a Pattern gates the handler;
+		// ValidateMatch is never consulted on the Process-only path
+		if h.Pattern != nil && h.ValidateMatch != nil {
+			h.Gate = andImplied(h.Gate, h.ValidateMatch.implied)
 		}
 		if h.Gate == nil && h.Field == "adult" && h.Process != nil {
 			// the adult handler is pure keyword containment; its keyword
@@ -802,4 +892,9 @@ func init() {
 		}
 	}
 	acMatcher = buildAutomaton(gates)
+	// buildAutomaton assigns each group its bit; only then can a gate be
+	// lowered to word/mask probes
+	for _, g := range gates {
+		g.compile()
+	}
 }
