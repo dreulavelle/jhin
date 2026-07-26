@@ -48,34 +48,148 @@ func replaceAll(re *regexp.Regexp, s, repl string) string {
 	return re.ReplaceAllString(s, repl)
 }
 
+// ---------------------------------------------------------------------------
+// cleanTitle guards
+//
+// Each guard below is a NECESSARY condition of the regex it precedes: when it
+// fails the pattern provably cannot match, so the scan is skipped. Guards may
+// only skip work, never change output — weakening one to a merely-likely
+// condition is a correctness bug. TestCleanTitleGuards and
+// FuzzCleanTitleGuards compare guarded against unguarded cleanTitle.
+// ---------------------------------------------------------------------------
+
+// hasNonASCII reports whether s holds any non-ASCII byte. Every
+// NON_ENGLISH_CHARS rune sits at or above U+0400, so an all-ASCII title
+// cannot contain one.
+func hasNonASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 0x80 {
+			return true
+		}
+	}
+	return false
+}
+
+// startsWordish reports that s begins with an ASCII letter, digit or
+// underscore — a rune inside \w, so a leading [^\w...] class cannot match.
+func startsWordish(s string) bool {
+	if s == "" {
+		return false
+	}
+	c := s[0]
+	return c == '_' || ('0' <= c && c <= '9') || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+}
+
+func lastByteIn(s, set string) bool {
+	return s != "" && strings.IndexByte(set, s[len(s)-1]) >= 0
+}
+
+// containsFold reports whether s contains lower (given in lowercase ASCII),
+// compared case-insensitively over ASCII.
+func containsFold(s, lower string) bool {
+	n := len(lower)
+	if n == 0 || len(s) < n {
+		return n == 0
+	}
+	for i := 0; i+n <= len(s); i++ {
+		j := 0
+		for ; j < n; j++ {
+			c := s[i+j]
+			if 'A' <= c && c <= 'Z' {
+				c += 32
+			}
+			if c != lower[j] {
+				break
+			}
+		}
+		if j == n {
+			return true
+		}
+	}
+	return false
+}
+
+// collapsesWhitespace reports whether `\s+` -> " " would change s: some
+// whitespace run is longer than one byte, or some whitespace byte is not a
+// plain space. \s is [\t\n\f\r ] under Perl syntax.
+func collapsesWhitespace(s string) bool {
+	prev := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		ws := c == ' ' || c == '\t' || c == '\n' || c == '\f' || c == '\r'
+		if ws && (prev || c != ' ') {
+			return true
+		}
+		prev = ws
+	}
+	return false
+}
+
 func cleanTitle(rawTitle string) string {
 	title := strings.TrimSpace(rawTitle)
 
-	title = strings.ReplaceAll(title, "_", " ")
-	title = replaceAll(movieIndicatorRegex, title, "") // clear movie indication flag
-	title = replaceAll(notAllowedSymbolsAtStartAndEndRegex, title, "")
-	for _, parts := range russianCastRegex.FindAllStringSubmatch(title, -1) {
-		for i, mStr := range parts {
+	if strings.IndexByte(title, '_') >= 0 {
+		title = strings.ReplaceAll(title, "_", " ")
+	}
+	// [[(]movie[)\]]
+	if containsFold(title, "movie") {
+		title = replaceAll(movieIndicatorRegex, title, "") // clear movie indication flag
+	}
+	// ^[^\w...]+ | [ \-:/\\[|{(#$&^]+$
+	if !startsWordish(title) || lastByteIn(title, ` -:/\[|{(#$&^`) {
+		title = replaceAll(notAllowedSymbolsAtStartAndEndRegex, title, "")
+	}
+	// both branches are anchored to a closing paren at end of text
+	if strings.HasSuffix(title, ")") {
+		for _, parts := range russianCastRegex.FindAllStringSubmatch(title, -1) {
+			for i, mStr := range parts {
+				if i != 0 {
+					// clear russian cast information
+					title = strings.Replace(title, mStr, "", 1)
+				}
+			}
+		}
+	}
+	// ^[[【★]
+	if strings.HasPrefix(title, "[") || strings.HasPrefix(title, "【") || strings.HasPrefix(title, "★") {
+		title = replaceAll(releaseGroupMarkingAtStartRegex, title, "$1") // remove release group markings sections from the start
+	}
+	// [\]】★]$
+	if strings.HasSuffix(title, "]") || strings.HasSuffix(title, "】") || strings.HasSuffix(title, "★") {
+		title = replaceAll(releaseGroupMarkingAtEndRegex, title, "$1") // remove unneeded markings section at the end if present
+	}
+	// every branch needs a non-English rune and a / or | separator
+	if hasNonASCII(title) && strings.ContainsAny(title, "/|") {
+		title = replaceAll(altTitlesRegex, title, "") // remove alt language titles
+	}
+	// every branch needs a non-English rune
+	if hasNonASCII(title) {
+		for i, mStr := range notOnlyNonEnglishRegex.FindStringSubmatch(title) {
 			if i != 0 {
-				// clear russian cast information
+				// remove non english chars if they are not the only ones left
 				title = strings.Replace(title, mStr, "", 1)
 			}
 		}
 	}
-	title = replaceAll(releaseGroupMarkingAtStartRegex, title, "$1") // remove release group markings sections from the start
-	title = replaceAll(releaseGroupMarkingAtEndRegex, title, "$1")   // remove unneeded markings section at the end if present
-	title = replaceAll(altTitlesRegex, title, "")                    // remove alt language titles
-	for i, mStr := range notOnlyNonEnglishRegex.FindStringSubmatch(title) {
-		if i != 0 {
-			// remove non english chars if they are not the only ones left
-			title = strings.Replace(title, mStr, "", 1)
-		}
+	// ^[^\w...#]+ | ]$
+	leadingNotAllowed := title != "" && !startsWordish(title) && title[0] != '#'
+	if leadingNotAllowed || strings.HasSuffix(title, "]") {
+		title = replaceAll(remainingNotAllowedSymbolsAtStartAndEndRegex, title, "")
 	}
-	title = replaceAll(remainingNotAllowedSymbolsAtStartAndEndRegex, title, "")
-	title = replaceAll(emptyBracketsRegex, title, "")
-	title = replaceAll(mp3AtEndRegex, title, "")
-	title = replaceAll(parenthesesWithoutContentRegex, title, "")
-	title = replaceAll(specialCharSpacingRegex, title, "")
+	// every branch opens with (, [ or {
+	if strings.ContainsAny(title, "([{") {
+		title = replaceAll(emptyBracketsRegex, title, "")
+	}
+	if strings.HasSuffix(title, "mp3") {
+		title = replaceAll(mp3AtEndRegex, title, "")
+	}
+	if strings.ContainsAny(title, "([{") {
+		title = replaceAll(parenthesesWithoutContentRegex, title, "")
+	}
+	// [\-\+\_\{\}\[\]] leads every match
+	if strings.ContainsAny(title, `-+_{}[]`) {
+		title = replaceAll(specialCharSpacingRegex, title, "")
+	}
 
 	for _, b := range brackets {
 		if strings.Count(title, b[0]) != strings.Count(title, b[1]) {
@@ -87,8 +201,13 @@ func cleanTitle(rawTitle string) string {
 		title = strings.ReplaceAll(title, ".", " ")
 	}
 
-	title = replaceAll(redundantSymbolsAtEnd, title, "")
-	title = replaceAll(whitespacesRegex, title, " ")
+	// [ \-:./\\]+$
+	if lastByteIn(title, ` -:./\`) {
+		title = replaceAll(redundantSymbolsAtEnd, title, "")
+	}
+	if collapsesWhitespace(title) {
+		title = replaceAll(whitespacesRegex, title, " ")
+	}
 
 	return strings.TrimSpace(title)
 }
@@ -194,8 +313,12 @@ func parse(title string, handlers []handler) (r *Result) {
 		}
 	}()
 
-	title = replaceAll(whitespacesRegex, title, " ")
-	title = replaceAll(underscoresRegex, title, " ")
+	if collapsesWhitespace(title) {
+		title = replaceAll(whitespacesRegex, title, " ")
+	}
+	if strings.IndexByte(title, '_') >= 0 {
+		title = replaceAll(underscoresRegex, title, " ")
+	}
 	result := make(map[string]*parseMeta, 24)
 	// endOfTitle is tracked in RUNES to mirror Python's character indexing —
 	// multibyte titles would otherwise slice at different boundaries
@@ -236,7 +359,7 @@ func parse(title string, handlers []handler) (r *Result) {
 			if len(idxs) == 0 {
 				continue
 			}
-			if handler.ValidateMatch != nil && !handler.ValidateMatch(title, idxs) {
+			if handler.ValidateMatch != nil && !handler.ValidateMatch.fn(title, idxs) {
 				// Python's regex engine keeps scanning when an embedded
 				// lookaround rejects a position; emulate by advancing past
 				// rejected candidates (unless the pattern is ^-anchored,
@@ -265,7 +388,7 @@ func parse(title string, handlers []handler) (r *Result) {
 						}
 					}
 					idxs = sub
-					if handler.ValidateMatch(title, idxs) {
+					if handler.ValidateMatch.fn(title, idxs) {
 						break
 					}
 				}

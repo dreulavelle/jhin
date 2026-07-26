@@ -1,13 +1,12 @@
 # Benchmarks
 
-Measured 2026-07-24. Every number here comes from a recorded run; none are
-estimates. The comparison harness that produced the cross-library tables was
-a standalone Go module under `benchmarks/`, removed in favour of this
-document — it and its raw output are recoverable from git:
+Measured 2026-07-25. Every number here comes from a recorded run; none are
+estimates. The comparison harness that produced the cross-library tables is a
+standalone Go module kept out of the tree so competitor dependencies never
+touch jhin's dependency graph. Restore it to reproduce:
 
 ```sh
-git show 34c12fa6:benchmarks/README.md
-git checkout 34c12fa6 -- benchmarks/
+git checkout c3f3bdd~1 -- benchmarks/
 ```
 
 ## Environment
@@ -48,19 +47,18 @@ vocabulary normalization.
 
 | Library | per title | B/op | allocs/op |
 |---|---|---|---|
-| middelink/go-parse-torrent-name | 38.0µs ± 0% | 1.2Ki | 14 |
-| razsteinmetz/go-ptn | 43.3µs ± 1% | 2.6Ki | 23 |
-| ProfChaos/torrent-name-parser | 60.9µs ± 1% | 0.7Ki | 15 |
-| **jhin** | **68.9µs ± 1%** | 4.4Ki | 60 |
-| jhin `ParseAll` (batch, 8 threads) | ~18µs/title | — | — |
+| middelink/go-parse-torrent-name | 37.50µs ± 0% | 1.2Ki | 14 |
+| razsteinmetz/go-ptn | 42.82µs ± 1% | 2.6Ki | 23 |
+| **jhin** | **54.54µs ± 0%** | 4.1Ki | 50 |
+| ProfChaos/torrent-name-parser | 60.36µs ± 1% | 0.7Ki | 15 |
+| jhin `ParseAll` (batch, 8 threads) | 13.79µs ± 1% | — | — |
 
-jhin is the slowest of the four per single-threaded call — published as
-measured. It runs 424 ordered handlers extracting 46 fields behind an
-Aho-Corasick literal prefilter where the others run ~30 regexes filling ~20
-scalar fields; the accuracy table is what that buys at ~1.1x the cost of the
-nearest rival. `ParseAll` is jhin's built-in parallel batch API; no
-competitor ships one, so that row is jhin-only (any parser can be sharded by
-the caller).
+jhin sits third of four per single-threaded call. It runs 432 ordered
+handlers extracting 46 fields behind an Aho-Corasick literal prefilter where
+the others run ~30 regexes filling ~20 scalar fields; the accuracy table is
+what that buys. The two parsers still ahead of it fill roughly half as many
+fields. `ParseAll` is jhin's built-in parallel batch API; no competitor ships
+one, so that row is jhin-only (any parser can be sharded by the caller).
 
 ## Speed — cross-language, same corpus, in-process timing
 
@@ -69,10 +67,10 @@ script times only the parse loop, so the numbers are comparable to Go ns/op.
 
 | Library | per title | vs jhin |
 |---|---|---|
-| parse-torrent-title 3.0.1 (npm, Node 22) | 17.2µs | 4.0x faster — much smaller handler set, not accuracy-scored |
-| **jhin** (Go, serial) | 68.9µs | — |
-| PTT 1.8.5 (parsett, Python 3.13) | 595.0µs | jhin 8.6x faster with byte-identical output |
-| guessit 4.1.0 (Python 3.13) | 4,430µs | jhin 64x faster |
+| parse-torrent-title 3.0.1 (npm, Node 22) | 16.9µs | 3.2x faster — much smaller handler set, not accuracy-scored |
+| **jhin** (Go, serial) | 54.5µs | — |
+| PTT 1.8.5 (parsett, Python 3.13) | 575.7µs | jhin 10.6x faster with byte-identical output |
+| guessit 4.1.0 (Python 3.13) | 4,298µs | jhin 79x faster |
 
 ## Read this before quoting the numbers
 
@@ -81,7 +79,7 @@ script times only the parse loop, so the numbers are comparable to Go ns/op.
   reproduce PTT byte-for-byte, so **jhin's 100% is by construction** — the
   accuracy table's real content is how the other parsers handle the same
   titles. PTT's vocabulary decides ties (e.g. `R5.DVDRip` labels as DVDRip).
-- **Normalization was neutral and lived in the harness**, not in jhin:
+- **Normalization is neutral and lives in the harness**, not in jhin:
   `x264`/`H.264`/`AVC` are one codec class, `4K`/`UHD`/`2160p` one resolution
   class, `WEB-DL`/`WEBDL`/`WEB` one source class (WEB-DL vs WEBRip stays
   distinct — that difference is the field's point), titles compare
@@ -90,7 +88,7 @@ script times only the parse loop, so the numbers are comparable to Go ns/op.
   episode, so multi-season packs count against them. That is a genuine
   capability difference, not a scoring trick.
 - Speed numbers are the mean over the full mixed corpus (easy scene names and
-  hostile unicode alike). Every library call was wrapped in the same panic
+  hostile unicode alike). Every library call is wrapped in the same panic
   guard, so the constant defer cost cancels out.
 - The npm `parse-torrent-title` is genuinely faster than jhin — published as
   measured. No cross-language accuracy score is computed for it or guessit
@@ -98,29 +96,45 @@ script times only the parse loop, so the numbers are comparable to Go ns/op.
 
 ## In-repo microbenchmarks
 
-These live in the main module and still run: `make bench`, or
-`go test -bench=. -benchmem -run='^$' ./parser/ ./rank/`.
+These live in the main module: `make bench`, or
+`go test -bench=. -benchmem -run='^$' ./parser/ ./rank/`. 6 runs through
+`benchstat`.
 
-Parser, before and after the literal prefilter (325/424 handlers gated),
-2026-07-24, same machine:
-
-| Benchmark | pre-prefilter | post-prefilter |
-|---|---|---|
-| `BenchmarkParse` (corpus sweep) | 5.77ms | 1.87ms |
-| `BenchmarkParseSimple` | 267µs | 92µs |
-| `BenchmarkParseComplex` | 514µs | 192µs |
-| `BenchmarkPartialParser` | 26.0µs | 11.5µs |
-
-Rank pipeline over the golden corpus:
-
-| Benchmark | ns/op | B/op | allocs/op |
+| Benchmark | sec/op | B/op | allocs/op |
 |---|---|---|---|
-| `BenchmarkRankAll` (1,133 titles) | 40.4ms | 6.09Mi | 69,097 |
-| `BenchmarkEvaluate` (single torrent) | 385 | 224 | 3 |
+| `BenchmarkParse` (12-title sweep, not per title) | 694.6µs ± 2% | 48.3Ki | 764 |
+| `BenchmarkParseSimple` | 34.91µs ± 1% | 3.8Ki | 58 |
+| `BenchmarkParseComplex` | 71.80µs ± 2% | 5.4Ki | 96 |
+| `BenchmarkPartialParser` | 7.494µs ± 1% | 2.2Ki | 23 |
+| `BenchmarkRankAll` (1,133 titles) | 16.10ms ± 1% | 5.1Mi | 60,757 |
+| `BenchmarkEvaluate` (single torrent) | 313.1ns ± 2% | 192 | 1 |
 
-## Reproducing the comparison
+## Optimization history
 
-The harness is not maintained in-tree. Restore it from the commit above; it
-pins competitor versions in its own `go.mod` and `crosslang/package.json`,
-and `TestHarness` fails if any adapter crashes or if jhin scores below 100%
-on its own contract corpus.
+Each entry is a before/after measured back-to-back on the machine above, so
+the delta is attributable to the change rather than to machine drift.
+
+**2026-07-25 — cleanup guards, lookaround gating, gate/automaton layout.**
+On the 1,156-title corpus via the comparison harness, serial `Parse`:
+67.51µs → 54.54µs (**-19.2%**), 59 → 50 allocs/op. In-repo:
+`BenchmarkParse` -16.9%, `ParseSimple` -20.5%, `ParseComplex` -10.9%,
+allocations -12.3% geomean. Average regex executions per title fell 45.7 →
+42.0 and ungated handlers 25 → 22. Three changes, no output change:
+
+- `cleanTitle`'s 15 cleanup regexes got byte-level necessary-condition
+  guards. They ran unconditionally at ~17.7µs/title while almost never
+  matching — `emptyBrackets` and `parensNoContent` matched zero of 1,156
+  titles. Largest single win.
+- Positive lookarounds are now visible to gate derivation. They live in
+  `ValidateMatch` closures, so patterns like bit depth's `(?:8|10|12)`, which
+  nothing in the pattern itself can gate, are now gated on the `bit` its
+  lookahead requires.
+- Gates lower to word/mask probes at init instead of walking a slice of
+  structs, automaton outputs are CSR-packed, and the fold buffer is reused
+  across the ~3 rescans a parse triggers.
+
+**2026-07-24 — literal prefilter.** Introducing the Aho-Corasick gate
+(325/424 handlers gated at the time) cut `BenchmarkParseSimple` 267µs → 92µs
+and `BenchmarkParseComplex` 514µs → 192µs, roughly 2.8x. Those figures are
+from that day's run and are not comparable to the table above, which reflects
+later work.
