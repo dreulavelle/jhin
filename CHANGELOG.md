@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/dreulavelle/jhin/compare/v0.3.1...v0.3.2) (2026-07-26)
+
+
+### Performance Improvements
+
+* gate cleanup regexes and derive gates from lookarounds ([#13](https://github.com/dreulavelle/jhin/issues/13)) ([250eefc](https://github.com/dreulavelle/jhin/commit/250eefc1e0a7e711e48219430bf8528bf39ed9ac))
+
 ## [0.3.1](https://github.com/dreulavelle/jhin/compare/v0.3.0...v0.3.1) (2026-07-24)
 
 
