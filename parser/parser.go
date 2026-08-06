@@ -323,6 +323,9 @@ func parse(title string, handlers []handler) (r *Result) {
 	// endOfTitle is tracked in RUNES to mirror Python's character indexing —
 	// multibyte titles would otherwise slice at different boundaries
 	endOfTitle := utf8.RuneCountInString(title)
+	// handlers only ever splice text out, so a shorter working title is proof
+	// that some field has already been removed from it
+	fullLen := len(title)
 
 	var hs haystack
 	if prefilterEnabled {
@@ -359,7 +362,8 @@ func parse(title string, handlers []handler) (r *Result) {
 			if len(idxs) == 0 {
 				continue
 			}
-			if handler.ValidateMatch != nil && !handler.ValidateMatch.fn(title, idxs) {
+			mctx := matchContext{endOfTitle: endOfTitle, stripped: len(title) < fullLen}
+			if handler.ValidateMatch != nil && !handler.ValidateMatch.accepts(title, idxs, mctx) {
 				// Python's regex engine keeps scanning when an embedded
 				// lookaround rejects a position; emulate by advancing past
 				// rejected candidates (unless the pattern is ^-anchored,
@@ -388,7 +392,7 @@ func parse(title string, handlers []handler) (r *Result) {
 						}
 					}
 					idxs = sub
-					if handler.ValidateMatch.fn(title, idxs) {
+					if handler.ValidateMatch.accepts(title, idxs, mctx) {
 						break
 					}
 				}
