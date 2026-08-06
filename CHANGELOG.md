@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/dreulavelle/jhin/compare/v0.4.0...v0.4.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* **parser:** stop the site handler from swallowing the whole title ([4e6b81d](https://github.com/dreulavelle/jhin/commit/4e6b81d7c4183ec037cb5f4aa5b6accb644ae48e))
+
 ## [0.4.0](https://github.com/dreulavelle/jhin/compare/v0.3.3...v0.4.0) (2026-07-26)
 
 
