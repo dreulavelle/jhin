@@ -14,6 +14,12 @@ on:
   pull_request_target:
     types: [opened, reopened]
 
+# pull_request_target reports github.ref as the base branch, so the group must
+# key on the PR number or every open PR shares one slot and cancels the rest.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   anti-slop:
     runs-on: ubuntu-latest

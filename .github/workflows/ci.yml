@@ -16,6 +16,12 @@ on:
     branches: [main]
     paths: *code-paths
 
+# A superseded push should not hold a runner. main is exempt: every commit
+# that can be released keeps its own verdict.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 permissions:
   contents: read
 
