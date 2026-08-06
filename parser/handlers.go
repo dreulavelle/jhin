@@ -17,14 +17,32 @@ type hTransformer func(title string, m *parseMeta, result map[string]*parseMeta)
 // necessary conditions for the handler to do anything, and the prefilter ANDs
 // them into its gate. A negative lookaround implies nothing and contributes
 // none.
+// matchContext is the parse state a validator may consult beyond the match
+// itself. endOfTitle is a rune index into the working title; stripped reports
+// whether an earlier handler has already removed text from it.
+type matchContext struct {
+	endOfTitle int
+	stripped   bool
+}
+
+// span is consulted in addition to fn for the rare validator that cannot
+// decide from the match alone.
 type hMatchValidator struct {
 	fn      func(input string, idxs []int) bool
+	span    func(input string, idxs []int, ctx matchContext) bool
 	implied []string
 }
 
 // validateFunc wraps a bare predicate that carries no gating information.
 func validateFunc(fn func(input string, idxs []int) bool) *hMatchValidator {
 	return &hMatchValidator{fn: fn}
+}
+
+func (v *hMatchValidator) accepts(input string, idxs []int, ctx matchContext) bool {
+	if v.fn != nil && !v.fn(input, idxs) {
+		return false
+	}
+	return v.span == nil || v.span(input, idxs, ctx)
 }
 
 type handler struct {
@@ -59,9 +77,9 @@ func validateAnd(validators ...*hMatchValidator) *hMatchValidator {
 	}
 	return &hMatchValidator{
 		implied: implied,
-		fn: func(input string, idxs []int) bool {
+		span: func(input string, idxs []int, ctx matchContext) bool {
 			for _, validator := range validators {
-				if !validator.fn(input, idxs) {
+				if !validator.accepts(input, idxs, ctx) {
 					return false
 				}
 			}
@@ -115,6 +133,31 @@ func validateNotMatch(re *regexp.Regexp) *hMatchValidator {
 		rv := input[match[0]:match[1]]
 		return !re.MatchString(rv)
 	})
+}
+
+// validateSiteLeavesTitle rejects a domain-shaped match that would swallow the
+// whole title. "<word><separator><tld>" is ambiguous — "The Net", "The.Net"
+// and "Rutracker.org" all fit it — so where the match would leave no title it
+// is only trusted for a name nothing has yet been stripped from: a bare site
+// stands alone, whereas anything that carried removable metadata is a release,
+// and a release has a title.
+func validateSiteLeavesTitle() *hMatchValidator {
+	return &hMatchValidator{
+		span: func(input string, match []int, ctx matchContext) bool {
+			titleRegion := runePrefix(input, ctx.endOfTitle)
+			if match[0] >= len(titleRegion) {
+				return true // the match sits past the title entirely
+			}
+			var after string
+			if match[1] < len(titleRegion) {
+				after = titleRegion[match[1]:]
+			}
+			if strings.TrimSpace(titleRegion[:match[0]]) != "" || strings.TrimSpace(after) != "" {
+				return true
+			}
+			return !ctx.stripped
+		},
+	}
 }
 
 func validateMatchedGroupsAreSame(indices ...int) *hMatchValidator {

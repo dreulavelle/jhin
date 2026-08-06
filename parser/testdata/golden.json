@@ -12311,6 +12311,16 @@
     }
   },
   {
+    "title": "The Net (1995)",
+    "result": {
+      "year": 1995,
+      "episodes": [],
+      "seasons": [],
+      "languages": [],
+      "title": "The Net"
+    }
+  },
+  {
     "title": "The New Frontier",
     "result": {
       "episodes": [],
@@ -13390,6 +13400,20 @@
       "episodes": [],
       "seasons": [],
       "title": "The Mysteries of Pittsburgh LIMITED"
+    }
+  },
+  {
+    "title": "The.Net.1995.1080p.BluRay.x264-GRP",
+    "result": {
+      "resolution": "1080p",
+      "year": 1995,
+      "quality": "BluRay",
+      "codec": "avc",
+      "group": "GRP",
+      "episodes": [],
+      "seasons": [],
+      "languages": [],
+      "title": "The Net"
     }
   },
   {

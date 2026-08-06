@@ -2966,10 +2966,11 @@ var handlers = []handler{
 	},
 	// site: \b(?:www?.?)?(?:\w+\-)?\w+[\.\s](?:com|org|net|ms|tv|mx|co|party|vip|nu|pics)\b
 	{
-		Field:     "site",
-		Pattern:   regexp.MustCompile(`(?i)\b(?:www?.?)?(?:\w+\-)?\w+[\.\s](?:com|org|net|ms|tv|mx|co|\.party|vip|nu|pics)\b`),
-		Transform: toValueSub(`$1`),
-		Remove:    true,
+		Field:         "site",
+		Pattern:       regexp.MustCompile(`(?i)\b(?:www?.?)?(?:\w+\-)?\w+[\.\s](?:com|org|net|ms|tv|mx|co|\.party|vip|nu|pics)\b`),
+		ValidateMatch: validateSiteLeavesTitle(),
+		Transform:     toValueSub(`$1`),
+		Remove:        true,
 	},
 	// site: rarbg|torrentleech|(?:the)?piratebay
 	{
