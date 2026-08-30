@@ -63,7 +63,10 @@ func ParseText(src string) ([]Rule, error) {
 			continue
 		}
 		if indented(line) && pending != "" {
-			pending += " " + trimmed
+			// Joined with a newline rather than a space: the expression lexer
+			// treats both as whitespace, and keeping the break means an error
+			// names the line the author actually wrote it on.
+			pending += "\n" + trimmed
 			continue
 		}
 		if err := flush(); err != nil {
@@ -75,6 +78,10 @@ func ParseText(src string) ([]Rule, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+func isSpace(c byte) bool {
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
 
 func indented(line string) bool {
@@ -227,14 +234,16 @@ func splitCondition(s string) (body, condition string, err error) {
 		case ')', ']':
 			depth--
 		case 'i':
-			// the separator is `if ` at the start of the tail — which is
-			// where a bodiless action like `reject` leaves it — or after a
-			// space, and never inside a string or a bracketed group
-			if depth != 0 || (i > 0 && s[i-1] != ' ') {
+			// the separator is `if` at the start of the tail — which is where
+			// a bodiless action like `reject` leaves it — or after a space,
+			// and never inside a string or a bracketed group. What follows it
+			// may be a newline as well as a space: a condition continued
+			// across lines keeps its breaks so errors can name them.
+			if depth != 0 || (i > 0 && !isSpace(s[i-1])) {
 				continue
 			}
-			if strings.HasPrefix(s[i:], "if ") {
-				return strings.TrimSpace(s[:max(i-1, 0)]), s[i+3:], nil
+			if i+2 < len(s) && s[i] == 'i' && s[i+1] == 'f' && isSpace(s[i+2]) {
+				return strings.TrimSpace(s[:i]), s[i+3:], nil
 			}
 		}
 	}

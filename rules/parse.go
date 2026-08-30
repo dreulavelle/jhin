@@ -1,8 +1,10 @@
 package rules
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -45,6 +47,47 @@ type exprParser struct {
 // parse turns source into an unchecked tree. Types, field names and function
 // arity are the checker's business (see check.go); this stage only decides
 // shape.
+// position renders a byte offset as line:column, which is what a rule editor
+// can point at. Offsets are carried through the tree because they are cheap;
+// they are only turned into coordinates when an error is on its way out.
+func position(src string, off int) string {
+	if off < 0 || off > len(src) {
+		return "?"
+	}
+	line, col := 1, 1
+	for i := 0; i < off; i++ {
+		if src[i] == '\n' {
+			line++
+			col = 1
+			continue
+		}
+		col++
+	}
+	if line == 1 {
+		return fmt.Sprintf("column %d", col)
+	}
+	return fmt.Sprintf("line %d, column %d", line, col)
+}
+
+// offsetPattern finds the "(at N)" and "at N" markers the parser and checker
+// write, so one pass can turn every offset in a message into coordinates.
+var offsetPattern = regexp.MustCompile(`\bat (\d+)\b`)
+
+// locate rewrites the byte offsets in an error message into line:column.
+func locate(src string, err error) error {
+	if err == nil {
+		return nil
+	}
+	msg := offsetPattern.ReplaceAllStringFunc(err.Error(), func(m string) string {
+		off, convErr := strconv.Atoi(m[3:])
+		if convErr != nil {
+			return m
+		}
+		return "at " + position(src, off)
+	})
+	return errors.New(msg)
+}
+
 func parse(src string) (node, error) {
 	if len(src) > maxSource {
 		return nil, fmt.Errorf("expression is %d bytes; the limit is %d", len(src), maxSource)

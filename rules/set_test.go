@@ -400,3 +400,37 @@ func TestLimitValidation(t *testing.T) {
 		t.Errorf("a score rule accepted a grouping: %v", err)
 	}
 }
+
+// count over a list of yes/no values counts the true ones and judges this
+// release; count over a condition judges the whole set. The argument's type
+// is what tells them apart.
+func TestCountOverBoolList(t *testing.T) {
+	eng, err := Compile(testRegistry(), []Rule{
+		{Name: "flags", When: `count([proper, repack, remastered]) >= 2`, Score: "1"},
+		{Name: "set", When: `count(resolution == "2160p") >= 1`, Score: "10"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(eng.aggs) != 1 {
+		t.Fatalf("%d aggregates, want only the set question lifted", len(eng.aggs))
+	}
+	f := release("2160p", "BluRay", nil, map[string]Value{
+		"proper": BoolOf(true), "repack": BoolOf(true), "remastered": BoolOf(false),
+	})
+	if got := eng.Evaluate(f, "", eng.ComputeAggregates([]Facts{f}, "")).Points; got != 11 {
+		t.Errorf("points = %d, want both forms to work", got)
+	}
+	// one flag is not two
+	f = release("2160p", "BluRay", nil, map[string]Value{
+		"proper": BoolOf(true), "repack": BoolOf(false), "remastered": BoolOf(false),
+	})
+	if got := eng.Evaluate(f, "", eng.ComputeAggregates([]Facts{f}, "")).Points; got != 10 {
+		t.Errorf("points = %d, want only the set question", got)
+	}
+	// a list of anything else still names the two-argument form
+	_, err = Compile(testRegistry(), []Rule{{Name: "r", When: `count(traits) > 0`}})
+	if err == nil || !strings.Contains(err.Error(), "two-argument form") {
+		t.Errorf("error %v, want it to name the two-argument form", err)
+	}
+}

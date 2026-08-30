@@ -320,6 +320,13 @@ func (c *checker) checkAggregate(t *callNode) (Type, error) {
 	if err != nil {
 		return invalid, err
 	}
+	// count over a list of yes/no values counts the true ones and judges this
+	// release, not the set. It is the one single-argument form that is not a
+	// result-set question, and the argument's type is what says so.
+	if at.K == KList && at.Elem == KBool && t.name == "count" {
+		t.args = append(t.args, &hashNode{p: t.p})
+		return c.checkPredicate(t, builtins["count"])
+	}
 	if at != Bool {
 		return invalid, fmt.Errorf("%s over one argument asks a yes/no question about the result set, got %s — for a list, use the two-argument form like %s(hdr, # == \"DV\") (at %d)", t.name, at, t.name, t.p)
 	}

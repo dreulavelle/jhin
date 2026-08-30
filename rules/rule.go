@@ -274,10 +274,10 @@ func (e *Engine) compileRule(rc Rule, name string, refs *refExpander, aggIdx map
 func (e *Engine) compileExpr(src string, refs *refExpander, self string, aggIdx map[string]int, tiers map[string]bool, want Type, what string) (node, error) {
 	n, err := parse(src)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", what, err)
+		return nil, fmt.Errorf("%s: %w", what, locate(src, err))
 	}
 	if n, err = refs.expand(n, self, nil); err != nil {
-		return nil, fmt.Errorf("%s: %w", what, err)
+		return nil, fmt.Errorf("%s: %w", what, locate(src, err))
 	}
 
 	ck := newChecker(e.reg)
@@ -286,7 +286,7 @@ func (e *Engine) compileExpr(src string, refs *refExpander, self string, aggIdx 
 	}
 	got, err := ck.check(n)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", what, err)
+		return nil, fmt.Errorf("%s: %w", what, locate(src, err))
 	}
 	if want != anyType && !got.assignable(want) {
 		return nil, fmt.Errorf("%s has to be %s, but it gives %s", what, want, got)

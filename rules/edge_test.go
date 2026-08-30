@@ -294,3 +294,25 @@ func TestValueJSON(t *testing.T) {
 		t.Errorf("empty list marshalled to %s, want []", b)
 	}
 }
+
+// A byte offset is no use to someone looking at a rule. Errors name a column,
+// and a line too when the condition has more than one.
+func TestErrorPositions(t *testing.T) {
+	for _, tc := range []struct{ when, contains string }{
+		{`resolution == 1`, "column 12"},
+		{"resolution == \"2160p\"\n  and year == \"x\"", "line 2, column 12"},
+		{"true\nand\nnot year", "line 3, column 1"},
+	} {
+		_, err := Compile(testRegistry(), []Rule{{Name: "r", When: tc.when}})
+		if err == nil {
+			t.Errorf("%q compiled", tc.when)
+			continue
+		}
+		if !strings.Contains(err.Error(), tc.contains) {
+			t.Errorf("%q: error %q, want it to contain %q", tc.when, err, tc.contains)
+		}
+		if strings.Contains(err.Error(), "at 1)") || strings.Contains(err.Error(), "at 2)") {
+			t.Errorf("%q: error %q still carries a raw offset", tc.when, err)
+		}
+	}
+}

@@ -145,9 +145,15 @@ UHD T2: define if group in ["HiFi"]
 	if len(rules) != 3 {
 		t.Fatalf("%d rules, want 3: %+v", len(rules), rules)
 	}
-	want := `resolution == "2160p" and "bluray" in traits and not (matched("UHD T1") or matched("UHD T2")) and exists(resolution == "2160p" and "remux" in traits)`
+	want := "resolution == \"2160p\" and \"bluray\" in traits\n" +
+		"and not (matched(\"UHD T1\") or matched(\"UHD T2\"))\n" +
+		"and exists(resolution == \"2160p\" and \"remux\" in traits)"
 	if rules[0].When != want {
 		t.Errorf("condition folded to\n %q\nwant\n %q", rules[0].When, want)
+	}
+	// the canonical form is still one line
+	if strings.Contains(FormatLine(rules[0]), "\n") {
+		t.Error("FormatLine kept the author's line breaks")
 	}
 	if _, err := Compile(testRegistry(), rules); err != nil {
 		t.Fatalf("the folded rule does not compile: %v", err)
