@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 //go:embed keywords/combined-keywords.txt
@@ -636,6 +638,161 @@ var (
 	langHrSubSuffix  = regexp.MustCompile(`(?i)^[ .,/-]*(?:[A-Z]{2}[ .,/-]+)*sub`)
 	dubbedSubsAfter  = regexp.MustCompile(`(?i)\bsub(s|bed)?\b`)
 )
+
+// ---------------------------------------------------------------------------
+// Bare uppercase DE as a German tag.
+//
+// GER, DEU and GERMAN are unambiguous; a bare "de" is also the commonest word
+// in Romance titles ("La Casa de Papel", "Anatomia De Grey", "Espanol De
+// Espana"), so PTT only accepted it inside a run of two-letter codes. The
+// handlers below widen that in three directions, each pairing a CASE-SENSITIVE
+// uppercase match with positive evidence that the token sits in metadata
+// rather than prose. Lower- and title-case "de"/"De" never reach them.
+//
+// Note these run at handler ~286 of 432, by which point the metadata handlers
+// have spliced their own matches out of the working title: resolution, source
+// and codec are already gone, so only DL, MULTi, DUBBED and friends survive to
+// serve as neighbours.
+// ---------------------------------------------------------------------------
+
+// deTagSurvivors are the release-metadata tokens still present in the working
+// title when the language handlers run. Adjacency to one of them is evidence
+// no Romance preposition can offer.
+var deTagAdjacent = regexp.MustCompile(
+	`\b(?:DE[ ._-](?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO|TRUEDEF)` +
+		`|(?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)[ ._-]DE)\b`)
+
+// deAdjacentWord returns the alphabetic token abutting off — searching back
+// when dir is -1, forward when +1 — together with the byte offset it starts
+// at. Separators are skipped; a digit run or a boundary yields "", because
+// only a real word is evidence of prose.
+func deAdjacentWord(title string, off, dir int) (string, int) {
+	if dir < 0 {
+		i := off
+		for i > 0 {
+			r, sz := utf8.DecodeLastRuneInString(title[:i])
+			if unicode.IsLetter(r) || unicode.IsDigit(r) {
+				break
+			}
+			i -= sz
+		}
+		end := i
+		for i > 0 {
+			r, sz := utf8.DecodeLastRuneInString(title[:i])
+			if !unicode.IsLetter(r) {
+				break
+			}
+			i -= sz
+		}
+		return title[i:end], i
+	}
+	i := off
+	for i < len(title) {
+		r, sz := utf8.DecodeRuneInString(title[i:])
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			break
+		}
+		i += sz
+	}
+	start := i
+	for i < len(title) {
+		r, sz := utf8.DecodeRuneInString(title[i:])
+		if !unicode.IsLetter(r) {
+			break
+		}
+		i += sz
+	}
+	return title[start:i], start
+}
+
+// deIsPreposition reports whether the span is flanked by words on both sides,
+// as "Espanol DE Espana" is and a metadata token run is not.
+//
+// A neighbour inside the still-unconsumed title region counts only when the
+// span itself is inside it too: past the title the word to the left is just
+// the title's last word ("Movie.Name..DE.DL") and carries no signal, whereas
+// a span sitting between two title words is prose by construction.
+func deIsPreposition(title string, start, end, titleRegion int) bool {
+	spanInTitle := start < titleRegion
+	counts := func(word string, off int) bool {
+		if utf8.RuneCountInString(word) < 3 {
+			return false
+		}
+		return spanInTitle || off >= titleRegion
+	}
+	before, bOff := deAdjacentWord(title, start, -1)
+	after, aOff := deAdjacentWord(title, end, 1)
+	return counts(before, bOff) && counts(after, aOff)
+}
+
+// deIsLangCode reports whether word is an uppercase two-letter code the parser
+// knows as a language.
+func deIsLangCode(word string) bool {
+	if len(word) != 2 || word != strings.ToUpper(word) {
+		return false
+	}
+	_, ok := languageNames[strings.ToLower(word)]
+	return ok
+}
+
+// deCodeRun expands the span across abutting uppercase two-letter language
+// codes and returns the maximal run, reporting whether it caught any code
+// besides the DE itself. "IT EN FR DE ES" is one run; the DE in
+// "EL CLUB DE LA LUCHA" pairs only with LA.
+func deCodeRun(title string, start, end int) (int, int, bool) {
+	paired := false
+	for {
+		word, off := deAdjacentWord(title, start, -1)
+		if !deIsLangCode(word) {
+			break
+		}
+		start, paired = off, true
+	}
+	for {
+		word, off := deAdjacentWord(title, end, 1)
+		if !deIsLangCode(word) {
+			break
+		}
+		end, paired = off+len(word), true
+	}
+	return start, end, paired
+}
+
+// validateDEPastTitle accepts an uppercase DE that the title no longer covers
+// — everything before endOfTitle has been claimed by the metadata handlers —
+// unless it reads as a preposition.
+func validateDEPastTitle() *hMatchValidator {
+	return &hMatchValidator{
+		span: func(input string, match []int, ctx matchContext) bool {
+			region := len(runePrefix(input, ctx.endOfTitle))
+			if match[0] < region {
+				return false
+			}
+			if langWwwI.MatchString(input[:match[0]]) {
+				return false // a .DE domain, not a language tag
+			}
+			return !deIsPreposition(input, match[0], match[1], region)
+		},
+	}
+}
+
+// validateDELangCodePair accepts an uppercase DE abutting at least one other
+// known two-letter language code, provided the run as a whole is not embedded
+// in prose. This is the existing code-run gate loosened to runs of two.
+func validateDELangCodePair() *hMatchValidator {
+	return &hMatchValidator{
+		span: func(input string, match []int, ctx matchContext) bool {
+			if langWwwI.MatchString(input[:match[0]]) {
+				return false
+			}
+			start, end, paired := deCodeRun(input, match[0], match[1])
+			if !paired {
+				return false
+			}
+			return !deIsPreposition(input, start, end, len(runePrefix(input, ctx.endOfTitle)))
+		},
+	}
+}
 
 // langAbbrValid builds a validator for the PTT pattern family
 // \b(?:(?<!w{3}\.\w+\.)ABBR|fullword)\b — the www-lookbehind (and optional

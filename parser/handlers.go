@@ -160,6 +160,26 @@ func validateSiteLeavesTitle() *hMatchValidator {
 	}
 }
 
+// validateUniformRangePadding rejects a hyphenated episode range whose upper
+// bound is zero-padded wider than its lower bound. In "S04E16-074" the 074 is
+// an anime absolute episode number trailing the season episode, not the end of
+// a 59-episode range; a real range pads both ends alike ("E16-74", "E016-074").
+func validateUniformRangePadding(group int) *hMatchValidator {
+	return validateFunc(func(input string, match []int) bool {
+		start, end := match[group*2], match[group*2+1]
+		if start < 0 {
+			return true
+		}
+		parts := strings.Split(input[start:end], "-")
+		for _, part := range parts[1:] {
+			if len(part) > len(parts[0]) && strings.HasPrefix(part, "0") {
+				return false
+			}
+		}
+		return true
+	})
+}
+
 func validateMatchedGroupsAreSame(indices ...int) *hMatchValidator {
 	return validateFunc(func(input string, match []int) bool {
 		first := input[match[indices[0]*2]:match[indices[0]*2+1]]

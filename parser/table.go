@@ -1589,9 +1589,10 @@ var handlers = []handler{
 	},
 	// episodes: (?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)
 	{
-		Field:     "episodes",
-		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)`),
-		Transform: toIntRange(),
+		Field:         "episodes",
+		Pattern:       regexp.MustCompile(`(?i)(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)`),
+		ValidateMatch: validateUniformRangePadding(1),
+		Transform:     toIntRange(),
 	},
 	// episodes: (?:\W|^)(\d{1,3}(?:[ .]*~[ .]*\d{1,3})+)(?:\W|$)
 	{
@@ -2246,6 +2247,35 @@ var handlers = []handler{
 		Transform:    toValueSet(`de`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
+	},
+	// languages: bare uppercase DE, past the title region (jhin #27, 1)
+	{
+		Gate:          gate("de"),
+		Field:         "languages",
+		Pattern:       regexp.MustCompile(`\bDE\b`),
+		ValidateMatch: validateDEPastTitle(),
+		Transform:     toValueSet(`de`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
+	},
+	// languages: bare uppercase DE abutting a surviving metadata token (jhin #27, 2)
+	{
+		Gate:          gate("de"),
+		Field:         "languages",
+		Pattern:       deTagAdjacent,
+		Transform:     toValueSet(`de`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
+	},
+	// languages: bare uppercase DE in a run of two language codes (jhin #27, 3)
+	{
+		Gate:          gate("de"),
+		Field:         "languages",
+		Pattern:       regexp.MustCompile(`\bDE\b`),
+		ValidateMatch: validateDELangCodePair(),
+		Transform:     toValueSet(`de`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
 	},
 	// languages: \bRUS?\b
 	{

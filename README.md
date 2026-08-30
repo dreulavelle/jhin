@@ -166,10 +166,27 @@ traces to an attribute, pattern, or preference in the profile.
 ```sh
 go install github.com/dreulavelle/jhin/cmd/jhin@latest
 
-jhin parse --pretty "The.Matrix.1999.1080p.BluRay.x264"   # parse one or more titles
+jhin parse --pretty "The.Matrix.1999.1080p.BluRay.x264"   # parse a title
+jhin parse --long "The.Matrix.1999.1080p.BluRay.x264"     # ...including unset fields
 jhin rank --target "The Matrix" < titles.txt              # rank/filter/sort a list
 jhin version                                              # installed version
 ```
+
+`parse` prints only the fields it actually set, so the output is what the
+title carried:
+
+```json
+{
+  "codec": "AVC",
+  "quality": "BluRay",
+  "resolution": "1080p",
+  "title": "The Matrix",
+  "year": "1999"
+}
+```
+
+`--long` prints all 45 fields, unset ones included, for a stable shape to
+script against.
 
 ## Performance
 
