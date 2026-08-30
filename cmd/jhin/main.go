@@ -27,7 +27,9 @@ func main() {
 			},
 			rankCommand,
 			{
-				Name: "parse",
+				Name:      "parse",
+				Usage:     "parse a release name (only the fields it set; --long for all)",
+				ArgsUsage: "<title>",
 				Flags: []cli.Flag{
 					&cli.BoolWithInverseFlag{
 						Name:  "normalize",
@@ -35,6 +37,10 @@ func main() {
 					},
 					&cli.BoolFlag{
 						Name: "pretty",
+					},
+					&cli.BoolFlag{
+						Name:  "long",
+						Usage: "print every field, including the ones parsing did not set",
 					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -46,11 +52,15 @@ func main() {
 					if cmd.Bool("normalize") {
 						r = r.Normalize()
 					}
+					pretty := cmd.Bool("pretty")
 					var blob []byte
 					var err error
-					if cmd.Bool("pretty") {
+					switch {
+					case !cmd.Bool("long"):
+						blob, err = marshalSet(r, pretty)
+					case pretty:
 						blob, err = json.MarshalIndent(&r, "", "  ")
-					} else {
+					default:
 						blob, err = json.Marshal(&r)
 					}
 					if err != nil {
