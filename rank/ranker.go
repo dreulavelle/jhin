@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/dreulavelle/jhin/parser"
+	"github.com/dreulavelle/jhin/rules"
 )
 
 // Torrent is one evaluated release. Slices returned by RankAll preserve
@@ -35,6 +36,24 @@ type Torrent struct {
 	// TitleRatio is the similarity against the target title (0 when no
 	// target was supplied).
 	TitleRatio float64 `json:"title_ratio,omitempty"`
+
+	// RuleMatches lists the rules that paid out, in configuration order.
+	RuleMatches []rules.Match `json:"rule_matches,omitempty"`
+	// RuleSkipped lists the rules that did not run and why — a release that
+	// was never probed cannot answer a rule about a probe, and saying so
+	// beats leaving it to be inferred.
+	RuleSkipped []rules.Skip `json:"rule_skipped,omitempty"`
+	// Limits are the caps this release counts against. Whether it survives
+	// them needs the whole set in final score order, so it is decided by
+	// ApplyLimits rather than here.
+	Limits []rules.LimitMatch `json:"limits,omitempty"`
+	// Effects are the application-defined actions that fired.
+	Effects []rules.Effect `json:"effects,omitempty"`
+
+	// facts holds this release's application-supplied attributes between
+	// evaluation and the rules pass, which cannot run until the whole batch
+	// is parsed (result-set questions need the set).
+	facts Facts
 }
 
 // Resolution returns the release's resolution bucket.
@@ -55,6 +74,8 @@ type Ranker struct {
 	patternRanks  []compiledPatternRank
 	resPrecedence map[Resolution]int
 
+	rules *rules.Engine
+
 	requiredLangs  map[string]bool
 	allowedLangs   map[string]bool
 	excludeLangs   map[string]bool
@@ -66,9 +87,13 @@ type compiledPatternRank struct {
 	rank int
 }
 
-// New compiles a profile into a Ranker.
-func New(p Profile) (*Ranker, error) {
+// New compiles a profile into a Ranker. Options attach anything the profile
+// alone cannot carry — see WithRules.
+func New(p Profile, opts ...Option) (*Ranker, error) {
 	r := &Ranker{profile: p}
+	for _, opt := range opts {
+		opt(r)
+	}
 	var err error
 	if r.require, err = compilePatterns(p.Require); err != nil {
 		return nil, fmt.Errorf("require: %w", err)
@@ -157,6 +182,22 @@ type RankOptions struct {
 	Aliases []string
 	// Infohash is carried through to the Torrent.
 	Infohash string
+	// Kind is the content kind a rule's scope is matched against — the
+	// vocabulary is the application's, and an empty kind matches only rules
+	// that apply to everything.
+	Kind string
+	// Facts supplies the application's own attributes to the rule engine,
+	// layered over the ones jhin derives from the release name. Use Entry.Facts
+	// for per-release data in a batch.
+	Facts Facts
+}
+
+// factsFor picks the per-release facts, falling back to the batch-wide ones.
+func (o *RankOptions) factsFor(t *Torrent) Facts {
+	if t.facts != nil {
+		return t.facts
+	}
+	return o.Facts
 }
 
 // Rank parses and evaluates one release name.
@@ -166,15 +207,20 @@ func (r *Ranker) Rank(raw string, opts ...RankOptions) Torrent {
 		opt = opts[0]
 	}
 	data := parser.Parse(raw)
-	t := Torrent{Raw: raw, Infohash: opt.Infohash, Data: data}
-	r.evaluate(&t, &opt)
-	return t
+	batch := []Torrent{{Raw: raw, Infohash: opt.Infohash, Data: data, facts: opt.Facts}}
+	r.evaluate(&batch[0], &opt)
+	// The set a result-set question sees is this one release, which is the
+	// honest answer for a call that was given one release.
+	r.runRules(batch, &opt)
+	return batch[0]
 }
 
 // Entry is one release in a batch, carrying its own identity.
 type Entry struct {
 	Title    string
 	Infohash string
+	// Facts are this release's application-supplied attributes.
+	Facts Facts
 }
 
 // RankEntries evaluates a batch in parallel, preserving each entry's
@@ -194,7 +240,12 @@ func (r *Ranker) RankEntries(entries []Entry, opts ...RankOptions) []Torrent {
 			defer wg.Done()
 			for i := range ch {
 				data := parser.Parse(entries[i].Title)
-				out[i] = Torrent{Raw: entries[i].Title, Infohash: entries[i].Infohash, Data: data}
+				out[i] = Torrent{
+					Raw:      entries[i].Title,
+					Infohash: entries[i].Infohash,
+					Data:     data,
+					facts:    entries[i].Facts,
+				}
 				r.evaluate(&out[i], &opt)
 			}
 		}()
@@ -204,6 +255,7 @@ func (r *Ranker) RankEntries(entries []Entry, opts ...RankOptions) []Torrent {
 	}
 	close(ch)
 	wg.Wait()
+	r.runRules(out, &opt)
 	return out
 }
 

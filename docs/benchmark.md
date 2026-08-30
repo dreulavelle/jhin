@@ -138,3 +138,26 @@ allocations -12.3% geomean. Average regex executions per title fell 45.7 →
 and `BenchmarkParseComplex` 514µs → 192µs, roughly 2.8x. Those figures are
 from that day's run and are not comparable to the table above, which reflects
 later work.
+
+## Rules
+
+Recorded on an AMD Ryzen 9 5900HX, Go 1.24, `-benchtime 2000x`.
+
+The rule set is the twelve worked examples in `rules/bench_test.go`: four
+score rules with computed points, two rejections, a release-group tier list
+reached through `matched()`, a regex, and a grouped cap.
+
+| Benchmark | Time | Allocations |
+|---|---|---|
+| `Evaluate` — 12 rules, 6 firing | 4.5 µs | 1,209 B / 12 allocs |
+| `Condition` — one rule, not firing | 845 ns | 64 B / 2 allocs |
+| `Compile` — the whole set | 46 µs | 59.7 KB / 302 allocs |
+| `ComputeAggregates` — 2 questions over 100 releases | 54 µs | 66 B / 3 allocs |
+
+For scale, parsing one title averages ~55 µs, so a twelve-rule profile adds
+under a tenth of what parsing already costs. Compilation happens once when a
+profile is loaded, not per release.
+
+Evaluation is not allocation-free: a rule that fires allocates what it
+reports (its match, its rejection, its skip reason), and every evaluation
+allocates its own state so that a batch can be evaluated concurrently.

@@ -161,6 +161,58 @@ Standalone helpers: `rank.TitleMatch(a, b, threshold, aliases...)`,
 `ranker.Explain(&torrent)` returns the per-clause breakdown — every point
 traces to an attribute, pattern, or preference in the profile.
 
+## Rules
+
+Everything derivable from a release name is already profile-configurable.
+Rules are how an application folds in what only it knows — size, age, grab
+count, what a probe measured — from configuration rather than from Go:
+
+```
+Seeders:             score min(grabs, 200) * 15  if grabs > 0
+Freshness:           score max(0, 500 - ageDays * 5)  if true
+Oversized:           reject if sizeGB > 12 and resolution != "2160p"
+DV without fallback: reject if dolbyVision and not hdrFallback
+Bad upscale:         reject if upscaled and exists(resolution == "2160p" and "remux" in traits)
+Best 2 per flavour:  keep 2 per resolution + " " + quality if true
+UHD T1:              define if group in ["FraMeSToR", "W4NK3R"]
+```
+
+Points are an expression rather than a constant, so an attribute can be scored
+*by* a value instead of at a flat rate. `exists`, `count` and `none` ask about
+the whole result set, which is what turns "reject upscales" into "reject an
+upscale only when something better turned up". `define` names a condition for
+`matched("UHD T1")` to reuse, so a release-group tier list is written once.
+
+An application declares its own attributes against a registry — that, not the
+grammar, is where new capability goes:
+
+```go
+reg := rules.Core()                     // everything a release name says
+reg.Tier("measured", "a probed file")
+reg.Namespace("probed", "measured").Num("height").Bool("dolbyVision")
+reg.Field("sizeGB", rules.Num, "reported")
+reg.Func("imdbRating", nil, rules.Num, fetchRating)   // anything the language can't say
+reg.Effect("tag", rules.Str)                          // an action jhin doesn't interpret
+
+profile.Rules, _ = rules.ParseText(ruleFile)
+eng, _ := profile.CompileRules(reg)
+ranker, _ := rank.New(profile, rank.WithRules(eng))
+
+torrents := ranker.RankEntries(entries)   // Entry.Facts carries your data
+best := ranker.Sort(torrents, rank.SortOptions{FetchableOnly: true})
+rank.ApplyLimits(best)                    // caps need the final order
+```
+
+A field belongs to a confidence tier, and a rule reading a tier the release
+carries nothing in is **skipped and reported** rather than judged against zero
+— otherwise one `probed.height < 1080` rule would empty every result list of
+everything nothing had opened. `Explain` reports rule contributions alongside
+attribute ones, and `Torrent.RuleSkipped` says what did not run and why.
+
+Conditions are checked when the profile is compiled: an unknown attribute, a
+type mismatch or a bad pattern names the rule it came from. See
+[`rules`](rules/) for the full reference.
+
 ## CLI
 
 ```sh
@@ -169,6 +221,7 @@ go install github.com/dreulavelle/jhin/cmd/jhin@latest
 jhin parse --pretty "The.Matrix.1999.1080p.BluRay.x264"   # parse a title
 jhin parse --long "The.Matrix.1999.1080p.BluRay.x264"     # ...including unset fields
 jhin rank --target "The Matrix" < titles.txt              # rank/filter/sort a list
+jhin rank --rules my-rules.txt < titles.txt               # ...with a rule file
 jhin version                                              # installed version
 ```
 

@@ -18,7 +18,19 @@ dependencies. Accuracy is contractual, speed is a feature, slop is a bug.
   `go test -run 'TestGoldenCorpus|TestPrefilterEquivalence' ./parser` and a
   fuzz smoke `go test -run '^$' -fuzz FuzzPrefilterEquivalence -fuzztime 30s ./parser`.
 - **Zero runtime dependencies**, library and CLI alike. Anything needing a
-  third-party package belongs in a separate module, not this one.
+  third-party package belongs in a separate module, not this one. The rule
+  language in `rules/` is hand-written for this reason: an expression engine
+  is a dependency, and the registry is what makes one unnecessary.
+- **The rule grammar is closed; the registry is open.** Every "can it support
+  X?" is answered by registering a namespace, a function or an effect — never
+  by adding syntax. A closed grammar is what keeps `rules/` fuzzable, cheap
+  per release, and explainable. After touching `rules/`, run
+  `go test -race ./rules` and a fuzz smoke
+  `go test -run '^$' -fuzz FuzzCompile -fuzztime 30s ./rules`.
+- **A rule that cannot be answered is skipped, not failed.** A condition
+  reading a tier the release carries nothing in never runs. Judging it against
+  zero values would let one rule empty a result list, so any change that makes
+  an unanswerable rule act is a bug however reasonable it looks.
 - **Libraries don't log.** Failures come back as errors or data
   (`Result.Error()`, `Torrent.Rejections`, `Explain()`). Logging belongs to
   `cmd/jhin` only.

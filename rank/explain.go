@@ -4,14 +4,21 @@ package rank
 // Rank traces to a contribution here, so a surprising result is always
 // answerable from the profile.
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/dreulavelle/jhin/rules"
+)
 
 // Contribution is one scored component of a release's rank.
 type Contribution struct {
 	// Source identifies the clause: "attribute:remux",
-	// "preferred_pattern", or "preferred_language".
+	// "preferred_pattern", "preferred_language", or "rule:<name>".
 	Source string `json:"source"`
 	Rank   int    `json:"rank"`
+	// Detail carries a rule's score expression, so a breakdown can show the
+	// working behind a number that was computed rather than looked up.
+	Detail string `json:"detail,omitempty"`
 }
 
 // Explain returns the score breakdown for a parsed release under this
@@ -38,5 +45,17 @@ func (r *Ranker) Explain(t *Torrent) []Contribution {
 			out = append(out, Contribution{Source: "pattern:" + pr.re.String(), Rank: pr.rank})
 		}
 	}
+	// Rules are reported from the evaluated release rather than re-run: a
+	// rule may read facts only the caller has, so re-deriving them here would
+	// give a different answer than the score actually used.
+	for _, m := range t.RuleMatches {
+		out = append(out, Contribution{Source: "rule:" + m.Name, Rank: m.Score, Detail: m.Source})
+	}
 	return out
 }
+
+// Skipped lists the rules that did not run for a release, and why. It is the
+// half of a breakdown a static weight table never needed: a rule reading a
+// fact the release does not carry is skipped rather than judged against zero,
+// and a surprising result should say so rather than leave it to be inferred.
+func (r *Ranker) Skipped(t *Torrent) []rules.Skip { return t.RuleSkipped }
