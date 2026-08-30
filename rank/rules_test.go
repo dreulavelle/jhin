@@ -361,3 +361,30 @@ func TestSyntaxVersion(t *testing.T) {
 		t.Errorf("error %q does not say what to do about it", err)
 	}
 }
+
+// The trait vocabulary is closed, so a rule naming a trait that does not
+// exist fails when the profile is compiled rather than never firing.
+func TestTraitVocabularyIsChecked(t *testing.T) {
+	p := Default()
+	p.Rules = []rules.Rule{{Name: "r", When: `"dual_audio" in traits`, Score: "1"}}
+	if _, err := p.CompileRules(nil); err == nil {
+		t.Fatal("a trait that does not exist compiled")
+	} else if !strings.Contains(err.Error(), "never holds") {
+		t.Errorf("error %q does not say the trait cannot occur", err)
+	}
+
+	// dual audio is carried as dubbed, which does exist
+	p.Rules = []rules.Rule{{Name: "r", When: `"dubbed" in traits`, Score: "1"}}
+	eng, err := p.CompileRules(nil)
+	if err != nil {
+		t.Fatalf("a real trait was refused: %v", err)
+	}
+	r, err := New(p, WithRules(eng))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := r.Rank("Anime.S01E01.1080p.BluRay.Dual.Audio.x265-GRP")
+	if len(got.RuleMatches) != 1 {
+		t.Errorf("dual audio did not read as dubbed: %+v", got.RuleMatches)
+	}
+}

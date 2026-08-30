@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/dreulavelle/jhin/rank"
 	"github.com/dreulavelle/jhin/rules"
 	"github.com/urfave/cli/v3"
 )
@@ -34,7 +35,7 @@ var rulesCommand = &cli.Command{
 				if err != nil {
 					return err
 				}
-				eng, err := rules.Compile(rules.Core(), parsed)
+				eng, err := rules.Compile(rank.CoreRegistry(), parsed)
 				if err != nil {
 					return err
 				}
@@ -60,7 +61,7 @@ var rulesCommand = &cli.Command{
 			Name:  "fields",
 			Usage: "list the attributes a rule can name",
 			Action: func(ctx context.Context, cmd *cli.Command) error {
-				fields := rules.Core().Fields()
+				fields := rank.CoreRegistry().Fields()
 				sort.Strings(fields)
 				for _, f := range fields {
 					fmt.Println(f)

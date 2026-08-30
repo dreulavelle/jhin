@@ -80,6 +80,69 @@ func (c *checker) check(n node) (Type, error) {
 	return invalid, fmt.Errorf("cannot type this expression")
 }
 
+// checkValues catches a literal that an attribute can never hold. The types
+// line up — "dual_audio" in traits is a string against a list of strings —
+// so nothing else would object, and the rule would simply never fire.
+func (c *checker) checkValues(t *binaryNode) error {
+	switch t.op {
+	case "==", "!=", "in", "not in":
+	default:
+		return nil
+	}
+	// field == "lit", "lit" == field, "lit" in field, field in ["a", "b"]
+	if f, ok := t.l.(*fieldNode); ok {
+		if lit, ok := t.r.(*litNode); ok {
+			return c.valueKnown(f, lit)
+		}
+		if list, ok := t.r.(*listNode); ok {
+			for _, it := range list.items {
+				if lit, ok := it.(*litNode); ok {
+					if err := c.valueKnown(f, lit); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}
+	if f, ok := t.r.(*fieldNode); ok {
+		if lit, ok := t.l.(*litNode); ok {
+			return c.valueKnown(f, lit)
+		}
+	}
+	return nil
+}
+
+func (c *checker) valueKnown(f *fieldNode, lit *litNode) error {
+	decl, ok := c.reg.Lookup(f.path)
+	if !ok || len(decl.Values) == 0 || lit.v.Kind() != KStr {
+		return nil
+	}
+	want := lit.v.Str()
+	for _, v := range decl.Values {
+		if v == want {
+			return nil
+		}
+	}
+	return fmt.Errorf("%s never holds %q%s (at %d)", f.path, want, nearest(want, decl.Values), lit.p)
+}
+
+// nearest offers the closest declared value, which turns "it never fires"
+// into "you meant this".
+func nearest(want string, values []string) string {
+	best, bestD := "", 1<<30
+	lower := strings.ToLower(want)
+	for _, v := range values {
+		if d := editDistance(lower, strings.ToLower(v)); d < bestD {
+			best, bestD = v, d
+		}
+	}
+	if best != "" && bestD <= 1+len(want)/3 {
+		return fmt.Sprintf(" (did you mean %q?)", best)
+	}
+	return ""
+}
+
 // suggest offers the closest declared name, which turns the commonest rule
 // error — a typo — from a puzzle into a fix.
 func (c *checker) suggest(path string) string {
@@ -154,6 +217,10 @@ func (c *checker) checkBinary(t *binaryNode) (Type, error) {
 	}
 	rt, err := c.check(t.r)
 	if err != nil {
+		return invalid, err
+	}
+
+	if err := c.checkValues(t); err != nil {
 		return invalid, err
 	}
 

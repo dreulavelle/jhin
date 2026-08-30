@@ -25,9 +25,24 @@ func WithRules(eng *rules.Engine) Option {
 // Option configures a Ranker at construction.
 type Option func(*Ranker)
 
+// CoreRegistry is rules.Core plus the trait vocabulary, which lives here
+// because the attributes are declared here. Declaring the values closes a gap
+// the type checker cannot see on its own: `"remuxx" in traits` is a well-typed
+// question whose answer is always no, and without a value set nothing would
+// say so.
+func CoreRegistry() *rules.Registry {
+	reg := rules.Core()
+	names := make([]string, 0, len(DefaultPolicies))
+	for a := range DefaultPolicies {
+		names = append(names, string(a))
+	}
+	reg.Values("traits", names...)
+	return reg
+}
+
 // CompileRules builds an engine for a profile's rules against a registry.
-// Applications that register their own attributes pass their own registry;
-// passing nil uses rules.Core() alone.
+// Applications that register their own attributes pass their own registry —
+// most will build on CoreRegistry. Passing nil uses CoreRegistry alone.
 func (p Profile) CompileRules(reg *rules.Registry) (*rules.Engine, error) {
 	if len(p.Rules) == 0 {
 		return nil, nil
@@ -36,7 +51,7 @@ func (p Profile) CompileRules(reg *rules.Registry) (*rules.Engine, error) {
 		return nil, fmt.Errorf("rules: profile uses rule syntax %d, this build understands %d — upgrade jhin", v, rules.SyntaxVersion)
 	}
 	if reg == nil {
-		reg = rules.Core()
+		reg = CoreRegistry()
 	}
 	eng, err := rules.Compile(reg, p.Rules, p.RuleLibrary...)
 	if err != nil {

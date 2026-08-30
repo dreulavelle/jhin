@@ -28,6 +28,10 @@ type Field struct {
 	// Tier names the confidence group this attribute belongs to. The empty
 	// tier is always present: it is for facts every release carries.
 	Tier string
+	// Values, when set, is every value this attribute can hold. Declaring it
+	// lets the checker catch a literal that is not one of them — see
+	// Registry.Values.
+	Values []string
 }
 
 // Func is an application-supplied function. Params are exact — the checker
@@ -189,6 +193,32 @@ func (r *Registry) Effect(name string, value Type) *Registry {
 		return r.fail("effect %q: no value type", name)
 	}
 	r.effects[name] = value
+	return r
+}
+
+// Values declares the complete set of values an attribute can hold, so that
+// a rule naming one that does not exist fails when the profile is saved.
+//
+// Without this a typo in a value is invisible: "dual_audio" in traits is a
+// well-typed question about a list of strings, and the answer is simply
+// always no. The attribute names are checked already; this extends the same
+// protection to the values of an attribute whose vocabulary is closed.
+//
+// Only declare it where the set really is closed. A release group is not.
+func (r *Registry) Values(path string, values ...string) *Registry {
+	f, ok := r.fields[path]
+	if !ok {
+		return r.fail("values for %q: no such field", path)
+	}
+	if f.Type != Str && f.Type != StrList {
+		return r.fail("values for %q: only text and lists of text have a value set, not %s", path, f.Type)
+	}
+	if len(values) == 0 {
+		return r.fail("values for %q: no values given", path)
+	}
+	f.Values = append([]string(nil), values...)
+	sort.Strings(f.Values)
+	r.fields[path] = f
 	return r
 }
 

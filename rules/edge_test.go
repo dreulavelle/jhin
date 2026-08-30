@@ -316,3 +316,63 @@ func TestErrorPositions(t *testing.T) {
 		}
 	}
 }
+
+// The types line up on a value that can never occur, so nothing else would
+// object and the rule would simply never fire. A closed value set is what
+// turns that into an error you see when you save.
+func TestClosedValueSets(t *testing.T) {
+	reg := testRegistry()
+	reg.Values("traits", "remux", "webdl", "bluray", "hevc", "10bit", "dubbed")
+	reg.Field("status", Str, "")
+	reg.Values("status", "available", "unavailable", "unknown")
+
+	for _, tc := range []struct{ when, contains string }{
+		{`"dual_audio" in traits`, `traits never holds "dual_audio"`},
+		{`"remuxx" in traits`, `did you mean "remux"`},
+		{`"remuxx" not in traits`, "never holds"},
+		{`status == "avaliable"`, `did you mean "available"`},
+		{`"unkown" == status`, "never holds"},
+		{`status in ["available", "nope"]`, `never holds "nope"`},
+	} {
+		_, err := Compile(reg, []Rule{{Name: "r", When: tc.when}})
+		if err == nil {
+			t.Errorf("%s: compiled, want %q", tc.when, tc.contains)
+		} else if !strings.Contains(err.Error(), tc.contains) {
+			t.Errorf("%s: error %q, want it to contain %q", tc.when, err, tc.contains)
+		}
+	}
+
+	// everything real still compiles
+	for _, when := range []string{
+		`"remux" in traits`,
+		`"dubbed" in traits and "10bit" in traits`,
+		`status == "available"`,
+		`status in ["available", "unknown"]`,
+		`status != "unavailable"`,
+		// a field with no declared set is unconstrained
+		`group == "whoever"`,
+		// and so is a comparison between two fields
+		`status == quality`,
+	} {
+		if _, err := Compile(reg, []Rule{{Name: "r", When: when}}); err != nil {
+			t.Errorf("%s: %v", when, err)
+		}
+	}
+}
+
+func TestValuesRegistration(t *testing.T) {
+	for _, tc := range []struct {
+		build    func(*Registry)
+		contains string
+	}{
+		{func(r *Registry) { r.Values("nosuch", "a") }, "no such field"},
+		{func(r *Registry) { r.Values("year", "a") }, "only text"},
+		{func(r *Registry) { r.Values("traits") }, "no values given"},
+	} {
+		reg := Core()
+		tc.build(reg)
+		if err := reg.Err(); err == nil || !strings.Contains(err.Error(), tc.contains) {
+			t.Errorf("error %v, want it to contain %q", err, tc.contains)
+		}
+	}
+}
