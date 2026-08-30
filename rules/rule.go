@@ -100,7 +100,7 @@ type LimitMatch struct {
 // Effect is an application-defined action that fired.
 type Effect struct {
 	Name  string `json:"name"`
-	Value Value  `json:"-"`
+	Value Value  `json:"value"`
 }
 
 // Outcome is what a rule set did to one release.

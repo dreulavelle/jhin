@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"encoding/json"
 	"strings"
 	"sync"
 	"testing"
@@ -258,5 +259,38 @@ func TestTernaryTypes(t *testing.T) {
 	// branches that genuinely disagree are still refused
 	if _, err := Compile(testRegistry(), []Rule{{Name: "r", When: `(true ? 1 : "a") == 1`}}); err == nil {
 		t.Error("mismatched ternary branches compiled")
+	}
+}
+
+// An effect has to reach an application's own output with its value intact,
+// not as an opaque name.
+func TestValueJSON(t *testing.T) {
+	reg := testRegistry()
+	reg.Effect("boost", Num)
+	reg.Effect("langs", StrList)
+	eng, err := Compile(reg, []Rule{
+		{Name: "t", When: "true", Action: "tag", Score: `"x"`},
+		{Name: "b", When: "true", Action: "boost", Score: "1.5"},
+		{Name: "l", When: "true", Action: "langs", Score: `languages`},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := eng.Evaluate(facts(map[string]Value{
+		"languages": StrListOf([]string{"en", "de"}),
+	}), "", nil)
+
+	blob, err := json.Marshal(out.Effects)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `[{"name":"tag","value":"x"},{"name":"boost","value":1.5},{"name":"langs","value":["en","de"]}]`
+	if string(blob) != want {
+		t.Errorf("effects marshalled to\n %s\nwant\n %s", blob, want)
+	}
+
+	// an empty list is [] rather than null, so a consumer can iterate it
+	if b, _ := json.Marshal(ListOf(KStr)); string(b) != "[]" {
+		t.Errorf("empty list marshalled to %s, want []", b)
 	}
 }

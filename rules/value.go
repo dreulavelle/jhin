@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"encoding/json"
 	"math"
 	"strconv"
 	"strings"
@@ -189,6 +190,26 @@ func (v Value) String() string {
 		return b.String()
 	}
 	return ""
+}
+
+// MarshalJSON renders a value as the JSON of what it holds, so an effect
+// reaches an application's own output with its value intact rather than as an
+// opaque name.
+func (v Value) MarshalJSON() ([]byte, error) {
+	switch v.k {
+	case KBool:
+		return json.Marshal(v.Bool())
+	case KNum:
+		return json.Marshal(v.num)
+	case KStr:
+		return json.Marshal(v.str)
+	case KList:
+		if v.list == nil {
+			return []byte("[]"), nil
+		}
+		return json.Marshal(v.list)
+	}
+	return []byte("null"), nil
 }
 
 // zero is the value a field of type t holds when nothing supplied it. It is
