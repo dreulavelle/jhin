@@ -128,3 +128,38 @@ func TestParseTextReportsLine(t *testing.T) {
 		t.Errorf("error %v, want it to name line 2", err)
 	}
 }
+
+// A condition worth writing is often too long to read on one line.
+func TestParseTextContinuation(t *testing.T) {
+	src := `Untrusted UHD encode: reject if
+    resolution == "2160p" and "bluray" in traits
+    and not (matched("UHD T1") or matched("UHD T2"))
+    and exists(resolution == "2160p" and "remux" in traits)
+UHD T1: define if group in ["FraMeSToR"]
+UHD T2: define if group in ["HiFi"]
+`
+	rules, err := ParseText(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rules) != 3 {
+		t.Fatalf("%d rules, want 3: %+v", len(rules), rules)
+	}
+	want := `resolution == "2160p" and "bluray" in traits and not (matched("UHD T1") or matched("UHD T2")) and exists(resolution == "2160p" and "remux" in traits)`
+	if rules[0].When != want {
+		t.Errorf("condition folded to\n %q\nwant\n %q", rules[0].When, want)
+	}
+	if _, err := Compile(testRegistry(), rules); err != nil {
+		t.Fatalf("the folded rule does not compile: %v", err)
+	}
+
+	// a blank line ends a rule, so an indented line after one starts fresh
+	if _, err := ParseText("A: score 1 if true\n\n    B: score 2 if true\n"); err != nil {
+		t.Errorf("an indented line after a blank should stand alone: %v", err)
+	}
+	// and the error still names the line the rule started on
+	_, err = ParseText("A: score 1 if true\nB: keep x if\n    true\n")
+	if err == nil || !strings.Contains(err.Error(), "line 2") {
+		t.Errorf("error %v, want it to name line 2", err)
+	}
+}

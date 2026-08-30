@@ -50,6 +50,19 @@ A line is `Name: action if condition`. The action is `score <expression>`,
 effect and its value. Brackets before the colon carry the scope and `off`, in
 either order and both optional.
 
+An indented line continues the one above it, because a condition worth writing
+is often too long to read on one:
+
+```
+Untrusted UHD encode: reject if
+    resolution == "2160p" and "bluray" in traits
+    and not (matched("UHD T1") or matched("UHD T2"))
+    and exists(resolution == "2160p" and "remux" in traits)
+```
+
+Rule names start at the left margin, so nothing else has to distinguish a
+continuation from a new rule, and a blank line ends one.
+
 This grammar wraps conditions; it never parses them. Everything after `if`
 goes to the expression language exactly as written, so a condition containing
 a colon, a bracket, or the word "if" inside a string survives.

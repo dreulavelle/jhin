@@ -25,20 +25,60 @@ import (
 
 // ParseText reads the text form. It reports the line number with any error,
 // so a half-typed rule names itself rather than the file.
+//
+// An indented line continues the one above it, because a condition worth
+// writing is often too long to read on one:
+//
+//	Untrusted UHD encode: reject if
+//	    resolution == "2160p" and "bluray" in traits
+//	    and not (matched("UHD T1") or matched("UHD T2"))
+//	    and exists(resolution == "2160p" and "remux" in traits)
+//
+// Rule names start at the left margin, so nothing else has to distinguish a
+// continuation from a new rule.
 func ParseText(src string) ([]Rule, error) {
 	var out []Rule
+	var pending string
+	var pendingLine int
+
+	flush := func() error {
+		if pending == "" {
+			return nil
+		}
+		r, err := ParseLine(pending)
+		pending = ""
+		if err != nil {
+			return fmt.Errorf("line %d: %w", pendingLine, err)
+		}
+		out = append(out, r)
+		return nil
+	}
+
 	for i, line := range strings.Split(src, "\n") {
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" || strings.HasPrefix(trimmed, "#") || strings.HasPrefix(trimmed, "//") {
+			if err := flush(); err != nil {
+				return nil, err
+			}
 			continue
 		}
-		r, err := ParseLine(trimmed)
-		if err != nil {
-			return nil, fmt.Errorf("line %d: %w", i+1, err)
+		if indented(line) && pending != "" {
+			pending += " " + trimmed
+			continue
 		}
-		out = append(out, r)
+		if err := flush(); err != nil {
+			return nil, err
+		}
+		pending, pendingLine = trimmed, i+1
+	}
+	if err := flush(); err != nil {
+		return nil, err
 	}
 	return out, nil
+}
+
+func indented(line string) bool {
+	return len(line) > 0 && (line[0] == ' ' || line[0] == '\t')
 }
 
 // ParseLine reads one rule.
