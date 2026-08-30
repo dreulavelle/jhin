@@ -104,6 +104,6 @@ func BenchmarkAggregates(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for b.Loop() {
-		_ = eng.ComputeAggregates(set)
+		_ = eng.ComputeAggregates(set, "")
 	}
 }

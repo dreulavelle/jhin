@@ -98,7 +98,10 @@ func (e *Engine) HasAggregates() bool {
 // question is unanswerable, so rules reading it are skipped rather than fed a
 // zero. On a fresh search where nothing has been probed,
 // none(probed.height >= 2000) must not read as "there is no good 4K".
-func (e *Engine) ComputeAggregates(set []Facts) *AggregateState {
+//
+// kind is the content kind the request is for, matched against the scope of
+// any rule an inner condition references.
+func (e *Engine) ComputeAggregates(set []Facts, kind string) *AggregateState {
 	if e == nil || len(e.aggs) == 0 {
 		return nil
 	}
@@ -106,7 +109,11 @@ func (e *Engine) ComputeAggregates(set []Facts) *AggregateState {
 		values:   make([]int, len(e.aggs)),
 		answered: make([]bool, len(e.aggs)),
 	}
-	ev := &evalState{reg: e.reg}
+	// The kind travels with the question: an inner condition may name a
+	// scoped rule through matched(), and a whole result set is judged for one
+	// request, so counting it against no kind at all would silently answer
+	// false for every scoped reference.
+	ev := &evalState{reg: e.reg, kind: kind}
 	for i := range e.aggs {
 		agg := &e.aggs[i]
 		for _, facts := range set {

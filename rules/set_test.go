@@ -38,7 +38,7 @@ func TestAggregates(t *testing.T) {
 
 	// with a remux on offer, the upscale goes
 	set := []Facts{upscale, remux}
-	st := eng.ComputeAggregates(set)
+	st := eng.ComputeAggregates(set, "")
 	if out := eng.Evaluate(upscale, "", st); len(out.Rejections) != 1 {
 		t.Errorf("upscale survived a set containing a remux: %+v", out)
 	}
@@ -48,13 +48,13 @@ func TestAggregates(t *testing.T) {
 	}
 
 	// alone, the upscale is all there is — nothing better exists, so it stays
-	st = eng.ComputeAggregates([]Facts{upscale})
+	st = eng.ComputeAggregates([]Facts{upscale}, "")
 	if out := eng.Evaluate(upscale, "", st); len(out.Rejections) != 0 {
 		t.Errorf("upscale rejected with no replacement available: %+v", out)
 	}
 
 	// the set includes the release being judged
-	st = eng.ComputeAggregates([]Facts{remux})
+	st = eng.ComputeAggregates([]Facts{remux}, "")
 	if out := eng.Evaluate(remux, "", st); out.Points != 500+200 {
 		t.Errorf("points = %d, want scarce-4K and no-web to both fire", out.Points)
 	}
@@ -75,7 +75,7 @@ func TestAggregateOrderIndependence(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		st := eng.ComputeAggregates(set)
+		st := eng.ComputeAggregates(set, "")
 		if got := eng.Evaluate(set[1], "", st).Points; got != 7 {
 			t.Errorf("points = %d, want 7 regardless of rule order", got)
 		}
@@ -110,7 +110,7 @@ func TestAggregateFailOpen(t *testing.T) {
 	unprobed := release("1080p", "WEB-DL", nil)
 	unprobed.Tiers = map[string]bool{"reported": true}
 
-	st := eng.ComputeAggregates([]Facts{unprobed})
+	st := eng.ComputeAggregates([]Facts{unprobed}, "")
 	out := eng.Evaluate(unprobed, "", st)
 	if len(out.Rejections) != 0 {
 		t.Errorf("rejected on an unanswerable question: %v", out.Rejections)
@@ -121,7 +121,7 @@ func TestAggregateFailOpen(t *testing.T) {
 
 	// once something in the set has been probed, the question has an answer
 	probed := release("1080p", "WEB-DL", nil, map[string]Value{"probed.height": NumOf(1080)})
-	st = eng.ComputeAggregates([]Facts{unprobed, probed})
+	st = eng.ComputeAggregates([]Facts{unprobed, probed}, "")
 	if out := eng.Evaluate(probed, "", st); len(out.Rejections) != 1 {
 		t.Errorf("want a rejection once the set can answer, got %+v", out)
 	}
@@ -141,7 +141,7 @@ func TestCountAmbiguity(t *testing.T) {
 		t.Fatalf("%d aggregates, want only the set question lifted", len(eng.aggs))
 	}
 	f := release("2160p", "BluRay", []string{"remux"})
-	st := eng.ComputeAggregates([]Facts{f})
+	st := eng.ComputeAggregates([]Facts{f}, "")
 	if got := eng.Evaluate(f, "", st).Points; got != 11 {
 		t.Errorf("points = %d, want both forms to work", got)
 	}

@@ -125,7 +125,7 @@ func (r *Ranker) runRules(batch []Torrent, opt *RankOptions) {
 		for i := range batch {
 			set[i] = factsFor(&batch[i], opt.factsFor(&batch[i]))
 		}
-		aggs = r.rules.ComputeAggregates(set)
+		aggs = r.rules.ComputeAggregates(set, opt.Kind)
 	}
 	for i := range batch {
 		r.applyRules(&batch[i], opt, aggs)
