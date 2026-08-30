@@ -210,8 +210,9 @@ everything nothing had opened. `Explain` reports rule contributions alongside
 attribute ones, and `Torrent.RuleSkipped` says what did not run and why.
 
 Conditions are checked when the profile is compiled: an unknown attribute, a
-type mismatch or a bad pattern names the rule it came from. See
-[`rules`](rules/) for the full reference.
+type mismatch or a bad pattern names the rule it came from —
+`jhin rules check <file>` reports it before a search ever runs. Full reference:
+[`docs/rules.md`](docs/rules.md).
 
 ## CLI
 
@@ -222,6 +223,8 @@ jhin parse --pretty "The.Matrix.1999.1080p.BluRay.x264"   # parse a title
 jhin parse --long "The.Matrix.1999.1080p.BluRay.x264"     # ...including unset fields
 jhin rank --target "The Matrix" < titles.txt              # rank/filter/sort a list
 jhin rank --rules my-rules.txt < titles.txt               # ...with a rule file
+jhin rules check my-rules.txt                             # compile a rule file
+jhin rules fields                                         # what a rule can name
 jhin version                                              # installed version
 ```
 
