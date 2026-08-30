@@ -141,7 +141,9 @@ later work.
 
 ## Rules
 
-Recorded on an AMD Ryzen 9 5900HX, Go 1.24, `-benchtime 2000x`.
+Recorded on an AMD Ryzen 9 5900HX, Go 1.26.6, `-benchtime 2000x`, median of
+three runs on an otherwise idle machine (2026-08-30; the previous recording
+was taken while fuzzers were saturating the same cores, which inflated it).
 
 The rule set is the twelve worked examples in `rules/bench_test.go`: four
 score rules with computed points, two rejections, a release-group tier list
@@ -149,10 +151,10 @@ reached through `matched()`, a regex, and a grouped cap.
 
 | Benchmark | Time | Allocations |
 |---|---|---|
-| `Evaluate` — 12 rules, 6 firing | 4.5 µs | 1,209 B / 12 allocs |
-| `Condition` — one rule, not firing | 845 ns | 64 B / 2 allocs |
-| `Compile` — the whole set | 46 µs | 59.7 KB / 302 allocs |
-| `ComputeAggregates` — 2 questions over 100 releases | 54 µs | 66 B / 3 allocs |
+| `Evaluate` — 12 rules, 6 firing | 3.8 µs | 1,246 B / 12 allocs |
+| `Condition` — one rule, not firing | 438 ns | 64 B / 2 allocs |
+| `Compile` — the whole set | 47 µs | 67.6 KB / 301 allocs |
+| `ComputeAggregates` — 2 questions over 100 releases | 31 µs | 66 B / 3 allocs |
 
 Compilation happens once when a profile is loaded, not per release.
 
@@ -166,13 +168,13 @@ an effect.
 
 | | Total | Per title |
 |---|---|---|
-| Baseline — parse, score, filter | 67.2 ms | 58 µs |
-| With the rule set | 79.9 ms | 69 µs |
-| **Rules** | **12.8 ms** | **11 µs** |
+| Baseline — parse, score, filter | 15.3 ms | 13.2 µs |
+| With the rule set | 22.0 ms | 19.0 µs |
+| **Rules** | **6.7 ms** | **5.8 µs** |
 
-So a fifteen-rule profile costs about a fifth of what parsing and the baseline
-already cost. Facts are assembled once per release and shared between the
-set-wide questions and the per-release pass.
+So a fifteen-rule profile costs a bit under half of what parsing and the
+baseline already cost. Facts are assembled once per release and shared
+between the set-wide questions and the per-release pass.
 
 Evaluation is not allocation-free: a rule that fires allocates what it
 reports (its match, its rejection, its skip reason), and every evaluation

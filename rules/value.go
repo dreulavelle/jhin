@@ -86,7 +86,10 @@ type Value struct {
 }
 
 func BoolOf(b bool) Value {
-	return Value{k: KBool, num: map[bool]float64{true: 1, false: 0}[b]}
+	if b {
+		return Value{k: KBool, num: 1}
+	}
+	return Value{k: KBool}
 }
 
 // NumOf builds a numeric value. Every integer a release carries — year,
