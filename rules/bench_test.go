@@ -11,7 +11,7 @@ Sweet spot: score 2000 - abs(sizeGB - 4) * 300 if sizeGB > 0
 Trusted 4K: score 3000 if resolution == "2160p" and matched("UHD T1")
 IMAX: score 2000 if releaseName matches "(?i)\bIMAX\b"
 Atmos: score 800 if "atmos" in traits
-Dual audio: score 1200 if "dual_audio" in traits
+Ten-bit: score 1200 if "10bit" in traits
 Oversized: reject if sizeGB > 12 and resolution != "2160p"
 DV without fallback: reject if dolbyVision and not hdrFallback
 Real 10-bit: score 400 if probed.bitDepth >= 10

@@ -23,7 +23,7 @@ Seeders: score min(grabs, 200) * 15 if grabs > 0
 Freshness: score max(0, 500 - ageDays * 5) if true
 Sweet spot: score 2000 - abs(sizeGB - 4) * 300 if sizeGB > 0
 Atmos: score 800 if "atmos" in traits
-Dual audio: score 1200 if "dual_audio" in traits
+Ten-bit: score 1200 if "10bit" in traits
 Anime bonus [anime_show]: score 400 if "hevc" in traits
 Oversized: reject if sizeGB > 60 and resolution != "2160p"
 DV without fallback: reject if dolbyVision and not hdrFallback
