@@ -139,6 +139,9 @@ func (n *Namespace) Done() *Registry { return n.reg }
 //
 //	reg.Func("imdbRating", nil, Num, fetchRating)
 //	reg.Func("closerThan", []Type{Num, Num}, Bool, closerThan)
+//
+// A compiled Engine may be shared across goroutines, so fn must be safe to
+// call from more than one at once.
 func (r *Registry) Func(name string, params []Type, result Type, fn func(Facts, []Value) (Value, error)) *Registry {
 	if !validName(name) {
 		return r.fail("function %q: not a valid name", name)

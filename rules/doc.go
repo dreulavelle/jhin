@@ -70,7 +70,7 @@
 //
 // # Evaluating
 //
-//	aggs := eng.ComputeAggregates(everyReleasesFacts)
+//	aggs := eng.ComputeAggregates(everyReleasesFacts, "movie")
 //	out := eng.Evaluate(facts, "movie", aggs)
 //	// out.Points, out.Matched, out.Rejections, out.Skipped, out.Limits, out.Effects
 //
