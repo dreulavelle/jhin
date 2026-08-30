@@ -1589,9 +1589,10 @@ var handlers = []handler{
 	},
 	// episodes: (?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)
 	{
-		Field:     "episodes",
-		Pattern:   regexp.MustCompile(`(?i)(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)`),
-		Transform: toIntRange(),
+		Field:         "episodes",
+		Pattern:       regexp.MustCompile(`(?i)(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)`),
+		ValidateMatch: validateUniformRangePadding(1),
+		Transform:     toIntRange(),
 	},
 	// episodes: (?:\W|^)(\d{1,3}(?:[ .]*~[ .]*\d{1,3})+)(?:\W|$)
 	{
