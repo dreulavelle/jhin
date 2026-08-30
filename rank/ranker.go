@@ -54,6 +54,9 @@ type Torrent struct {
 	// evaluation and the rules pass, which cannot run until the whole batch
 	// is parsed (result-set questions need the set).
 	facts Facts
+	// traits carries the attribute detection evaluation already did, so the
+	// rules pass reads one detection rather than repeating it.
+	traits []string
 }
 
 // Resolution returns the release's resolution bucket.
@@ -276,6 +279,12 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 	d := t.Data
 	o := r.profile.Options
 	attrs := attributes(d)
+	if r.rules != nil {
+		t.traits = make([]string, len(attrs))
+		for i, a := range attrs {
+			t.traits[i] = string(a)
+		}
+	}
 
 	// --- score (always computed) ---
 	rank := 0

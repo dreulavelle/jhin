@@ -154,9 +154,25 @@ reached through `matched()`, a regex, and a grouped cap.
 | `Compile` — the whole set | 46 µs | 59.7 KB / 302 allocs |
 | `ComputeAggregates` — 2 questions over 100 releases | 54 µs | 66 B / 3 allocs |
 
-For scale, parsing one title averages ~55 µs, so a twelve-rule profile adds
-under a tenth of what parsing already costs. Compilation happens once when a
-profile is loaded, not per release.
+Compilation happens once when a profile is loaded, not per release.
+
+### Through the ranker
+
+The same machine, `rank.RankEntries` over the parser's 1,158-title golden
+corpus, with and without a fifteen-rule profile (`rank/soak_test.go`): four
+score rules with computed points, three rejections, a release-group tier list
+reached through `matched()`, a regex, a result-set question, a grouped cap and
+an effect.
+
+| | Total | Per title |
+|---|---|---|
+| Baseline — parse, score, filter | 67.2 ms | 58 µs |
+| With the rule set | 79.9 ms | 69 µs |
+| **Rules** | **12.8 ms** | **11 µs** |
+
+So a fifteen-rule profile costs about a fifth of what parsing and the baseline
+already cost. Facts are assembled once per release and shared between the
+set-wide questions and the per-release pass.
 
 Evaluation is not allocation-free: a rule that fires allocates what it
 reports (its match, its rejection, its skip reason), and every evaluation

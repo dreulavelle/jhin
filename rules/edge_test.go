@@ -239,3 +239,24 @@ func TestLayer(t *testing.T) {
 		t.Error("Layer invented a tier no source carries")
 	}
 }
+
+// A ternary reports the type of the branch that has one, which only differs
+// from either branch when one side is an empty list.
+func TestTernaryTypes(t *testing.T) {
+	for _, tc := range []struct{ when string }{
+		{`(true ? 1 : 2) == 1`},
+		{`(true ? "a" : "b") == "a"`},
+		{`(true ? true : false)`},
+		{`"x" in (true ? ["x"] : [])`},
+		{`"x" in (true ? [] : ["x"])`},
+		{`(true ? traits : []) == traits`},
+	} {
+		if _, err := Compile(testRegistry(), []Rule{{Name: "r", When: tc.when}}); err != nil {
+			t.Errorf("%s: %v", tc.when, err)
+		}
+	}
+	// branches that genuinely disagree are still refused
+	if _, err := Compile(testRegistry(), []Rule{{Name: "r", When: `(true ? 1 : "a") == 1`}}); err == nil {
+		t.Error("mismatched ternary branches compiled")
+	}
+}

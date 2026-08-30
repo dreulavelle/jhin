@@ -44,13 +44,11 @@ func (p Profile) CompileRules(reg *rules.Registry) (*rules.Engine, error) {
 
 // coreFacts answers the built-in schema for one evaluated release. An
 // application's own facts are layered over it — see Entry.Facts.
+//
+// The traits come from the attribute pass evaluation already ran, so scoring
+// and rules read one detection rather than two.
 func coreFacts(t *Torrent) rules.Facts {
-	attrs := attributes(t.Data)
-	traits := make([]string, len(attrs))
-	for i, a := range attrs {
-		traits[i] = string(a)
-	}
-	return rules.FromResult(t.Raw, t.Data, traits)
+	return rules.FromResult(t.Raw, t.Data, t.traits)
 }
 
 // factsFor layers the application's facts over the ones jhin derives itself.
@@ -68,11 +66,11 @@ func factsFor(t *Torrent, app rules.Facts) rules.Facts {
 // Points join the score, rejections join the rejection list, and caps are
 // carried on the Torrent until Sort has put the set in final order — which is
 // the only point at which "the best three of these" means anything.
-func (r *Ranker) applyRules(t *Torrent, opt *RankOptions, aggs *rules.AggregateState) {
+func (r *Ranker) applyRules(t *Torrent, facts rules.Facts, kind string, aggs *rules.AggregateState) {
 	if r.rules == nil {
 		return
 	}
-	out := r.rules.Evaluate(factsFor(t, opt.factsFor(t)), opt.Kind, aggs)
+	out := r.rules.Evaluate(facts, kind, aggs)
 	t.Rank += out.Points
 	t.RuleMatches = out.Matched
 	t.RuleSkipped = out.Skipped
@@ -119,15 +117,18 @@ func (r *Ranker) runRules(batch []Torrent, opt *RankOptions) {
 	if r.rules == nil || len(batch) == 0 {
 		return
 	}
+	// Facts are assembled once and reused: the set-wide questions and the
+	// per-release pass read the same view, and building it twice would double
+	// the only per-release allocation the rule layer makes.
+	set := make([]rules.Facts, len(batch))
+	for i := range batch {
+		set[i] = factsFor(&batch[i], opt.factsFor(&batch[i]))
+	}
 	var aggs *rules.AggregateState
 	if r.rules.HasAggregates() {
-		set := make([]rules.Facts, len(batch))
-		for i := range batch {
-			set[i] = factsFor(&batch[i], opt.factsFor(&batch[i]))
-		}
 		aggs = r.rules.ComputeAggregates(set, opt.Kind)
 	}
 	for i := range batch {
-		r.applyRules(&batch[i], opt, aggs)
+		r.applyRules(&batch[i], set[i], opt.Kind, aggs)
 	}
 }

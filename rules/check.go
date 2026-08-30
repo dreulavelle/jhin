@@ -257,7 +257,9 @@ func (c *checker) checkTernary(t *ternaryNode) (Type, error) {
 	if !at.assignable(bt) && !bt.assignable(at) {
 		return invalid, fmt.Errorf("the two branches of ? : give %s and %s; they have to agree (at %d)", at, bt, t.p)
 	}
-	if at.Elem == KInvalid {
+	// An empty list literal has no element type of its own, so the branch that
+	// does carries the answer. Every other type is its own answer.
+	if at.K == KList && at.Elem == KInvalid {
 		return bt, nil
 	}
 	return at, nil
