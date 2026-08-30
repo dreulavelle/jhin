@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0](https://github.com/dreulavelle/jhin/compare/v0.4.1...v0.5.0) (2026-08-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** `jhin parse` no longer emits unset fields by default. Scripts reading a fixed shape want `--long`.
+
+### Features
+
+* **cli:** print only the fields parse actually set ([ae18256](https://github.com/dreulavelle/jhin/commit/ae1825648b80e634511c33567fb1377cd01eb685))
+
+
+### Bug Fixes
+
+* anime episode ranges, bare DE as German, and non-default CLI output ([f4d9495](https://github.com/dreulavelle/jhin/commit/f4d9495a79d9444635997e0fc4fc34e4cc1c758b))
+* **parser:** don't read SxxEyy-NNN as an episode range ([e6868ed](https://github.com/dreulavelle/jhin/commit/e6868ed4d7da96c33b77023f6e6a225683099ef7))
+* **parser:** widen the contexts where bare DE means German ([9026cfd](https://github.com/dreulavelle/jhin/commit/9026cfd5e6f1c9faf89536f238c41c48547c9d88))
+
 ## [0.4.1](https://github.com/dreulavelle/jhin/compare/v0.4.0...v0.4.1) (2026-08-06)
 
 
