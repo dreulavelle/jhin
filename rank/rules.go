@@ -144,7 +144,19 @@ func (r *Ranker) runRules(batch []Torrent, opt *RankOptions) {
 	}
 	var aggs *rules.AggregateState
 	if r.rules.HasAggregates() {
-		aggs = r.rules.ComputeAggregates(set, opt.Kind)
+		// A result-set question is about what the search can actually offer,
+		// so a release the baseline filters already rejected does not count:
+		// "reject the upscale when a remux exists" must not fire off a remux
+		// the profile itself threw out for its language or as trash. The
+		// baseline settles before any rule runs, so rule outcomes still
+		// cannot change a count and rule order still does not matter.
+		viable := make([]rules.Facts, 0, len(batch))
+		for i := range batch {
+			if batch[i].Fetch {
+				viable = append(viable, set[i])
+			}
+		}
+		aggs = r.rules.ComputeAggregates(viable, opt.Kind)
 	}
 	for i := range batch {
 		r.applyRules(&batch[i], set[i], opt.Kind, aggs)

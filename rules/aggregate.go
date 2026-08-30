@@ -90,8 +90,12 @@ func (e *Engine) HasAggregates() bool {
 // ComputeAggregates evaluates every result-set question over the whole set,
 // once, before any rule runs.
 //
-// The set is fixed before anything fires and includes the release being
-// judged, so a 4K remux always has count(resolution == "2160p") >= 1.
+// The set is whatever the caller passes — jhin's ranker passes the releases
+// its baseline filters let through, so a rejected release is not "on offer"
+// to a question like exists(...). A nil entry is skipped, which is how a
+// caller keeps a slice index-aligned while leaving some releases out. The set
+// is fixed before anything fires, so a viable 4K remux always has
+// count(resolution == "2160p") >= 1.
 //
 // Fail-open extends here: a release missing a tier the inner condition reads
 // is not counted, and when no release in the set carries that tier the

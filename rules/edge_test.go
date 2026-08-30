@@ -376,3 +376,36 @@ func TestValuesRegistration(t *testing.T) {
 		}
 	}
 }
+
+// A score expression can overflow float64 or produce NaN; neither may turn
+// into a platform-defined integer.
+func TestScoreOverflow(t *testing.T) {
+	f := facts(map[string]Value{"title": StrOf("x")})
+
+	eng, err := Compile(testRegistry(), []Rule{{Name: "big", When: "true", Score: `num("1e308") * 2`}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := eng.Evaluate(f, "", nil)
+	if len(out.Matched) != 1 || out.Points != 1<<40 {
+		t.Errorf("an infinite score should clamp to the bound, got %+v", out)
+	}
+
+	eng, err = Compile(testRegistry(), []Rule{{Name: "neg", When: "true", Score: `-(num("1e308") * 2)`}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out := eng.Evaluate(f, "", nil); out.Points != -(1 << 40) {
+		t.Errorf("a negative infinite score should clamp to the bound, got %+v", out)
+	}
+
+	// num("nan") is a NaN, which has no direction to keep — the rule skips
+	eng, err = Compile(testRegistry(), []Rule{{Name: "nan", When: "true", Score: `num("nan") * 5`}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out = eng.Evaluate(f, "", nil)
+	if len(out.Matched) != 0 || len(out.Skipped) != 1 || out.Points != 0 {
+		t.Errorf("a NaN score should skip the rule, got %+v", out)
+	}
+}

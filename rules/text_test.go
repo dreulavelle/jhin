@@ -169,3 +169,51 @@ UHD T2: define if group in ["HiFi"]
 		t.Errorf("error %v, want it to name line 2", err)
 	}
 }
+
+// Whitespace inside a string literal is the value, not layout, so canonical
+// form must not touch it.
+func TestFormatKeepsStringSpacing(t *testing.T) {
+	line := `R: score 1 if title contains "two  spaces" and edition contains 'a	tab'`
+	r, err := ParseLine(line)
+	if err != nil {
+		t.Fatal(err)
+	}
+	formatted := FormatLine(r)
+	if !strings.Contains(formatted, `"two  spaces"`) || !strings.Contains(formatted, "'a\ttab'") {
+		t.Errorf("formatting rewrote a string literal: %s", formatted)
+	}
+	back, err := ParseLine(formatted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if back.When != r.When {
+		t.Errorf("round trip changed the condition:\n %q\n %q", r.When, back.When)
+	}
+
+	// a continued condition still folds to one line outside the strings
+	rules, err := ParseText("Long: reject if\n    title contains \"a  b\"\n    and proper\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := FormatLine(rules[0]), `Long: reject if title contains "a  b" and proper`; got != want {
+		t.Errorf("folded to %q, want %q", got, want)
+	}
+}
+
+// A tab between an action and its value reads the same as a space.
+func TestParseLineTabs(t *testing.T) {
+	r, err := ParseLine("R: score\t100 if proper")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Action != ActionScore || r.Score != "100" {
+		t.Errorf("got action %q score %q", r.Action, r.Score)
+	}
+	r, err = ParseLine("R: keep\t3\tper\tresolution if true")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Count != 3 || r.GroupBy != "resolution" {
+		t.Errorf("got count %d group %q", r.Count, r.GroupBy)
+	}
+}

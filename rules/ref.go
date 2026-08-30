@@ -61,13 +61,9 @@ func newRefs(library, ruleSet []Rule) *refExpander {
 // stack carries the chain of names currently being inlined, for cycle
 // detection and for an error that names the loop.
 func (x *refExpander) expand(n node, self string, stack []string) (node, error) {
-	var walkErr error
 	out, err := x.rewrite(n, self, stack)
 	if err != nil {
 		return nil, err
-	}
-	if walkErr != nil {
-		return nil, walkErr
 	}
 	if size(out) > maxExpansion {
 		return nil, fmt.Errorf("condition grew past %d nodes once its references were included; a reference is a copy, so a chain that names the same rules repeatedly doubles at each step", maxExpansion)

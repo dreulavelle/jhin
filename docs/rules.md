@@ -176,10 +176,13 @@ count(resolution == "2160p") < 3                                   → +500
 none(quality == "WEB-DL")                                          → +200
 ```
 
-The set is fixed before any rule fires and includes the release being judged,
-so a 4K remux always has `count(resolution == "2160p") >= 1`. Because the
-counts are taken first, a rule that rejects can never change what another rule
-counted — **so the order of your rules does not matter**. They cannot nest.
+The set is every release the profile's own filters let through, fixed before
+any rule fires — so a viable 4K remux always has
+`count(resolution == "2160p") >= 1`, and a remux the profile rejected for its
+language or as trash is not "something better" to a rule asking whether one
+exists. Because the counts are taken first, a rule that rejects can never
+change what another rule counted — **so the order of your rules does not
+matter**. They cannot nest.
 
 Fail-open extends to the set: a release missing a tier the inner condition
 reads is not counted, and when *no* release carries that tier the question is

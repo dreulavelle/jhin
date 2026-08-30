@@ -84,6 +84,17 @@ func isSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
 
+// cutSpace splits at the first whitespace of any kind, so a tab between an
+// action and its value reads the same as a space.
+func cutSpace(s string) (head, tail string) {
+	for i := 0; i < len(s); i++ {
+		if isSpace(s[i]) {
+			return s[:i], strings.TrimSpace(s[i+1:])
+		}
+	}
+	return s, ""
+}
+
 func indented(line string) bool {
 	return len(line) > 0 && (line[0] == ' ' || line[0] == '\t')
 }
@@ -107,9 +118,8 @@ func ParseLine(line string) (Rule, error) {
 	}
 
 	rest = strings.TrimSpace(rest)
-	action, tail, _ := strings.Cut(rest, " ")
-	action = strings.ToLower(strings.TrimSpace(action))
-	tail = strings.TrimSpace(tail)
+	action, tail := cutSpace(rest)
+	action = strings.ToLower(action)
 	if action == "" || action == "if" {
 		return r, fmt.Errorf("expected an action after the colon, e.g. `score 100 if ...`")
 	}
@@ -192,20 +202,19 @@ func parseKeep(body string) (int, string, error) {
 	if body == "" {
 		return 0, "", fmt.Errorf("keep needs a number, e.g. `keep 3`")
 	}
-	countText, rest, _ := strings.Cut(body, " ")
-	n, err := strconv.Atoi(strings.TrimSpace(countText))
+	countText, rest := cutSpace(body)
+	n, err := strconv.Atoi(countText)
 	if err != nil {
 		return 0, "", fmt.Errorf("keep needs a number, got %q", countText)
 	}
-	rest = strings.TrimSpace(rest)
 	if rest == "" {
 		return n, "", nil
 	}
-	per, group, found := strings.Cut(rest, " ")
-	if strings.ToLower(strings.TrimSpace(per)) != "per" || !found {
+	per, group := cutSpace(rest)
+	if strings.ToLower(per) != "per" || group == "" {
 		return 0, "", fmt.Errorf("after the number, keep takes `per <grouping>`, got %q", rest)
 	}
-	return n, strings.TrimSpace(group), nil
+	return n, group, nil
 }
 
 // splitCondition finds the ` if ` that separates a rule's body from its
@@ -306,6 +315,45 @@ func FormatLine(r Rule) string {
 		}
 	}
 	b.WriteString(" if ")
-	b.WriteString(strings.Join(strings.Fields(r.When), " "))
+	b.WriteString(foldSpace(r.When))
+	return b.String()
+}
+
+// foldSpace collapses runs of whitespace to one space — which is how a
+// condition written across continuation lines becomes one canonical line —
+// while leaving string literals untouched: the spacing inside "two  spaces"
+// is the value, not layout.
+func foldSpace(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	var quote byte
+	pending := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if quote != 0 {
+			b.WriteByte(c)
+			if c == '\\' && quote != '`' && i+1 < len(s) {
+				i++
+				b.WriteByte(s[i])
+				continue
+			}
+			if c == quote {
+				quote = 0
+			}
+			continue
+		}
+		if isSpace(c) {
+			pending = true
+			continue
+		}
+		if pending && b.Len() > 0 {
+			b.WriteByte(' ')
+		}
+		pending = false
+		if c == '"' || c == '\'' || c == '`' {
+			quote = c
+		}
+		b.WriteByte(c)
+	}
 	return b.String()
 }

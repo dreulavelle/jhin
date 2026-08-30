@@ -388,3 +388,37 @@ func TestTraitVocabularyIsChecked(t *testing.T) {
 		t.Errorf("dual audio did not read as dubbed: %+v", got.RuleMatches)
 	}
 }
+
+// A release the baseline filters rejected is not "something better": a rule
+// asking whether the set holds a remux must not count one the profile itself
+// threw out.
+func TestAggregatesIgnoreVetoedReleases(t *testing.T) {
+	p := Default()
+	p.Attributes = map[Attr]Policy{AttrUpscaled: {Fetch: true, Rank: 0}}
+	// the only remux in the batch is excluded by the profile
+	p.Exclude = []string{`\bREMUX\b`}
+	p.Rules = []rules.Rule{{
+		Name:   "Bad upscale",
+		Action: rules.ActionReject,
+		When:   `upscaled and exists(resolution == "2160p" and "remux" in traits)`,
+	}}
+	eng, err := p.CompileRules(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := New(p, WithRules(eng))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := r.RankAll([]string{
+		"Movie.2020.2160p.AI.Upscaled.WEB-DL-GRP",
+		"Movie.2020.2160p.BluRay.REMUX-GRP",
+	})
+	if got[1].Fetch {
+		t.Fatal("the remux should have been excluded by the baseline")
+	}
+	if !got[0].Fetch {
+		t.Errorf("upscale rejected off a remux the profile itself excluded: %v", got[0].Rejections)
+	}
+}

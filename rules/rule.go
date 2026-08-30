@@ -2,6 +2,7 @@ package rules
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 )
@@ -451,7 +452,12 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 				out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: "the score could not be worked out: " + err.Error()})
 				return
 			}
-			points = int(v.Num())
+			p, ok := clampPoints(v.Num())
+			if !ok {
+				out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: "the score did not come out as a number"})
+				return
+			}
+			points = p
 		}
 		out.Points += points
 		out.Matched = append(out.Matched, Match{Name: r.name, Score: points, Source: r.scoreIx})
@@ -470,6 +476,28 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 // RejectionPrefix marks a rejection as coming from a rule, so it reads apart
 // from the built-in ones in the same list.
 const RejectionPrefix = "rule:"
+
+// maxPoints bounds one rule's payout. Converting a float64 outside the
+// integer's range is platform-defined in Go, and a payout near int's edge
+// would let two rules overflow the total — a bound none of that can reach
+// keeps score arithmetic exact however wild the expression.
+const maxPoints = 1 << 40
+
+// clampPoints turns a computed score into points. Infinities clamp — the
+// author's direction survives — but NaN has no direction to keep, so it
+// reports false and the rule is skipped.
+func clampPoints(n float64) (int, bool) {
+	if math.IsNaN(n) {
+		return 0, false
+	}
+	if n > maxPoints {
+		return maxPoints, true
+	}
+	if n < -maxPoints {
+		return -maxPoints, true
+	}
+	return int(n), true
+}
 
 func groupOf(r *compiled, st *evalState) (string, bool) {
 	if r.groupBy == nil {
