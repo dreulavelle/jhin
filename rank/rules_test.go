@@ -338,3 +338,26 @@ Best 2 per resolution: keep 2 per resolution if true
 		t.Errorf("C lost its slot to an already-rejected release: %v", byName["C"].Rejections)
 	}
 }
+
+// A profile from a newer jhin is refused with an explanation rather than
+// half-understood: a condition using syntax this build never heard of would
+// otherwise fail as an unknown attribute.
+func TestSyntaxVersion(t *testing.T) {
+	p := Default()
+	p.Rules = []rules.Rule{{Name: "r", When: "true", Score: "1"}}
+
+	p.SyntaxVersion = rules.SyntaxVersion
+	if _, err := p.CompileRules(nil); err != nil {
+		t.Errorf("the current syntax version was refused: %v", err)
+	}
+	p.SyntaxVersion = 0 // written before the field existed
+	if _, err := p.CompileRules(nil); err != nil {
+		t.Errorf("a profile with no version was refused: %v", err)
+	}
+	p.SyntaxVersion = rules.SyntaxVersion + 1
+	if _, err := p.CompileRules(nil); err == nil {
+		t.Error("a profile from a newer build compiled")
+	} else if !strings.Contains(err.Error(), "upgrade jhin") {
+		t.Errorf("error %q does not say what to do about it", err)
+	}
+}

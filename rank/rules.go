@@ -32,6 +32,9 @@ func (p Profile) CompileRules(reg *rules.Registry) (*rules.Engine, error) {
 	if len(p.Rules) == 0 {
 		return nil, nil
 	}
+	if v := p.SyntaxVersion; v > rules.SyntaxVersion {
+		return nil, fmt.Errorf("rules: profile uses rule syntax %d, this build understands %d — upgrade jhin", v, rules.SyntaxVersion)
+	}
 	if reg == nil {
 		reg = rules.Core()
 	}

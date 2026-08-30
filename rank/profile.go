@@ -158,8 +158,10 @@ type Profile struct {
 	// name shadows the library's.
 	RuleLibrary []rules.Rule `json:"rule_library,omitempty"`
 
-	// SyntaxVersion pins the rule language a profile was written against.
-	// Zero means the current one.
+	// SyntaxVersion records the rule language this profile was written
+	// against, so a file from a newer jhin is refused with an explanation
+	// rather than half-understood. Zero means a profile written before the
+	// field existed. See rules.SyntaxVersion.
 	SyntaxVersion int `json:"syntax,omitempty"`
 
 	// Attributes overrides the base policy per attribute; unset attributes

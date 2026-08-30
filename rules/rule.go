@@ -27,6 +27,15 @@ var reservedActions = map[string]bool{
 // ScopeAll is the scope of a rule that applies to every content kind.
 const ScopeAll = "all"
 
+// SyntaxVersion is the rule language this build understands.
+//
+// A profile records the version it was written against so that a file from a
+// newer jhin is refused with an explanation rather than half-understood: a
+// condition using syntax this build has never heard of would otherwise fail
+// as an unknown attribute, which sends the reader looking in the wrong place.
+// Zero means a profile written before the field existed, which is version 1.
+const SyntaxVersion = 1
+
 // Rule is one named condition and what happens when it holds. It is plain
 // data: JSON in a profile, a row in an editor, a line in the text form.
 type Rule struct {
