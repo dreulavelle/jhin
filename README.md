@@ -211,7 +211,8 @@ attribute ones, and `Torrent.RuleSkipped` says what did not run and why.
 
 Conditions are checked when the profile is compiled: an unknown attribute, a
 type mismatch or a bad pattern names the rule it came from —
-`jhin rules check <file>` reports it before a search ever runs. Full reference:
+`jhin rules check <file>` reports it before a search ever runs. Guide with
+worked recipes: [`docs/rules-guide.md`](docs/rules-guide.md). Full reference:
 [`docs/rules.md`](docs/rules.md).
 
 ## CLI

@@ -5,6 +5,9 @@ holds. Rules are the general form of the weighted pattern lists: a regex sees
 one string, while a rule sees everything known about a release — including
 attributes the application registers itself.
 
+This is the reference; the tutorial with worked recipes is
+[`rules-guide.md`](./rules-guide.md).
+
 They exist because some things cannot be said with one pattern:
 
 - *Dolby Vision, but only when there is no HDR fallback.*
