@@ -458,3 +458,24 @@ func TestMinRankSeesRulePoints(t *testing.T) {
 		t.Errorf("rank %d clears the floor but the release was rejected: %v", got.Rank, got.Rejections)
 	}
 }
+
+// The parser spells bit depth "10bit"; the rules layer must read the number
+// out of it, or bitDepth >= 10 never fires for anyone.
+func TestBitDepthReadsFromTheName(t *testing.T) {
+	p := Default()
+	p.Rules = []rules.Rule{{Name: "ten", When: "bitDepth >= 10", Score: "1"}}
+	eng, err := p.CompileRules(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := New(p, WithRules(eng))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Rank("Frieren.S01E12.1080p.BluRay.10bit.Dual.Audio.x265-GRP"); len(got.RuleMatches) != 1 {
+		t.Errorf("a 10bit release did not read as bitDepth 10: %+v", got.RuleSkipped)
+	}
+	if got := r.Rank("Movie.2020.1080p.WEB-DL.x264-GRP"); len(got.RuleMatches) != 0 {
+		t.Error("a release with no bit depth read as 10-bit")
+	}
+}

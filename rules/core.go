@@ -149,7 +149,7 @@ func (f *ResultFacts) Lookup(path string) (Value, bool) {
 	case "codec":
 		return StrOf(r.Codec), true
 	case "bitDepth":
-		return NumOf(atoiSafe(r.BitDepth)), true
+		return NumOf(leadingInt(r.BitDepth)), true
 	case "hdr":
 		return StrListOf(r.HDR), true
 	case "dolbyVision":
@@ -264,6 +264,23 @@ func dynamicRange(tags []string) (dolbyVision, fallback bool) {
 func atoiSafe(s string) int {
 	n, err := strconv.Atoi(strings.TrimSpace(s))
 	if err != nil {
+		return 0
+	}
+	return n
+}
+
+// leadingInt reads the number off the front of a value, because the parser
+// spells bit depth "10bit" — fed to Atoi whole, every release would read as
+// zero bits and a rule like bitDepth >= 10 could never fire.
+func leadingInt(s string) int {
+	n, any := 0, false
+	for i := 0; i < len(s) && i < 9; i++ {
+		if s[i] < '0' || s[i] > '9' {
+			break
+		}
+		n, any = n*10+int(s[i]-'0'), true
+	}
+	if !any {
 		return 0
 	}
 	return n
