@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/dreulavelle/jhin/rank"
+	"github.com/dreulavelle/jhin/rules"
 	"github.com/urfave/cli/v3"
 )
 
@@ -21,6 +22,10 @@ var rankCommand = &cli.Command{
 		&cli.StringFlag{
 			Name:  "profile",
 			Usage: "path to a profile JSON (default: built-in default profile)",
+		},
+		&cli.StringFlag{
+			Name:  "rules",
+			Usage: "path to a rules file in the text form (one rule per line)",
 		},
 		&cli.StringFlag{
 			Name:  "target",
@@ -47,7 +52,22 @@ var rankCommand = &cli.Command{
 				return fmt.Errorf("loading profile: %w", err)
 			}
 		}
-		ranker, err := rank.New(profile)
+		if path := cmd.String("rules"); path != "" {
+			blob, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("loading rules: %w", err)
+			}
+			parsed, err := rules.ParseText(string(blob))
+			if err != nil {
+				return fmt.Errorf("loading rules: %w", err)
+			}
+			profile.Rules = parsed
+		}
+		eng, err := profile.CompileRules(nil)
+		if err != nil {
+			return err
+		}
+		ranker, err := rank.New(profile, rank.WithRules(eng))
 		if err != nil {
 			return err
 		}
@@ -75,6 +95,9 @@ var rankCommand = &cli.Command{
 			FetchableOnly: !cmd.Bool("all"),
 			BucketLimit:   cmd.Int("limit"),
 		})
+		// Caps are counted once the list is in final score order, which is the
+		// only point at which "the best three of these" means anything.
+		rank.ApplyLimits(sorted)
 
 		if cmd.Bool("json") {
 			enc := json.NewEncoder(os.Stdout)

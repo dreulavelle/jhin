@@ -9,9 +9,12 @@ import "fmt"
 // Contribution is one scored component of a release's rank.
 type Contribution struct {
 	// Source identifies the clause: "attribute:remux",
-	// "preferred_pattern", or "preferred_language".
+	// "preferred_pattern", "preferred_language", or "rule:<name>".
 	Source string `json:"source"`
 	Rank   int    `json:"rank"`
+	// Detail carries a rule's score expression, so a breakdown can show the
+	// working behind a number that was computed rather than looked up.
+	Detail string `json:"detail,omitempty"`
 }
 
 // Explain returns the score breakdown for a parsed release under this
@@ -37,6 +40,13 @@ func (r *Ranker) Explain(t *Torrent) []Contribution {
 		if pr.re.MatchString(t.Raw) {
 			out = append(out, Contribution{Source: "pattern:" + pr.re.String(), Rank: pr.rank})
 		}
+	}
+	// Rules are reported from the evaluated release rather than re-run: a
+	// rule may read facts only the caller has, so re-deriving them here would
+	// give a different answer than the score actually used. What did not run
+	// is on the release too, as Torrent.RuleSkipped.
+	for _, m := range t.RuleMatches {
+		out = append(out, Contribution{Source: "rule:" + m.Name, Rank: m.Score, Detail: m.Source})
 	}
 	return out
 }

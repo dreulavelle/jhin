@@ -24,3 +24,6 @@ go.work.sum
 
 # env file
 .env
+
+# stray git worktrees from review tooling
+/headco/

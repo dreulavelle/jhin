@@ -26,6 +26,7 @@ func main() {
 				},
 			},
 			rankCommand,
+			rulesCommand,
 			{
 				Name:      "parse",
 				Usage:     "parse a release name (only the fields it set; --long for all)",

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/dreulavelle/jhin/parser"
+	"github.com/dreulavelle/jhin/rules"
 )
 
 // Policy controls a single attribute: whether releases carrying it may be
@@ -141,6 +142,27 @@ type Profile struct {
 	Resolutions map[Resolution]bool `json:"resolutions,omitempty"`
 	Languages   Languages           `json:"languages,omitempty"`
 	Options     Options             `json:"options"`
+
+	// Rules are conditions over everything known about a release, including
+	// attributes an application registers itself. They are the general form
+	// of the pattern lists above: what a regex cannot say — a threshold with
+	// an exception, a score computed from a value, a rejection conditional on
+	// what else the search turned up — a rule says.
+	//
+	// Compile them with CompileRules and attach with WithRules; a profile
+	// carrying rules that were never compiled scores exactly as it did before
+	// they were added.
+	Rules []rules.Rule `json:"rules,omitempty"`
+	// RuleLibrary holds shared definitions every profile can name. They exist
+	// only to be referenced by matched(); a profile's own rule under the same
+	// name shadows the library's.
+	RuleLibrary []rules.Rule `json:"rule_library,omitempty"`
+
+	// SyntaxVersion records the rule language this profile was written
+	// against, so a file from a newer jhin is refused with an explanation
+	// rather than half-understood. Zero means a profile written before the
+	// field existed. See rules.SyntaxVersion.
+	SyntaxVersion int `json:"syntax,omitempty"`
 
 	// Attributes overrides the base policy per attribute; unset attributes
 	// fall back to the profile's base (DefaultPolicies unless replaced).
