@@ -254,7 +254,9 @@ func dynamicRange(tags []string) (dolbyVision, fallback bool) {
 			dolbyVision = true
 			continue
 		}
-		if t != "" {
+		// An explicit SDR tag is in the parser's dynamic-range vocabulary,
+		// and standard range is exactly what a fallback is not.
+		if t != "" && !strings.EqualFold(t, "SDR") {
 			fallback = true
 		}
 	}

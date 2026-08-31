@@ -444,3 +444,24 @@ func TestScoreTotalSaturates(t *testing.T) {
 		t.Errorf("points = %d, want the total to saturate at %d", out.Points, 1<<30)
 	}
 }
+
+// An explicit SDR tag is in the parser's dynamic-range vocabulary, and
+// standard range is exactly what a fallback is not.
+func TestSDRIsNotAFallback(t *testing.T) {
+	for _, tc := range []struct {
+		tags   []string
+		dv, fb bool
+	}{
+		{[]string{"DV", "HDR"}, true, true},
+		{[]string{"DV"}, true, false},
+		{[]string{"DV", "SDR"}, true, false},
+		{[]string{"SDR"}, false, false},
+		{[]string{"HDR10+"}, false, true},
+		{nil, false, false},
+	} {
+		dv, fb := dynamicRange(tc.tags)
+		if dv != tc.dv || fb != tc.fb {
+			t.Errorf("%v: dv=%v fb=%v, want %v %v", tc.tags, dv, fb, tc.dv, tc.fb)
+		}
+	}
+}
