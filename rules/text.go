@@ -232,7 +232,13 @@ func parseHead(head string) (name string, scope []string, enabled bool, err erro
 		default:
 			var group []string
 			for _, s := range strings.Split(tag, ",") {
-				if s = strings.TrimSpace(s); s != "" {
+				switch s = strings.TrimSpace(s); s {
+				case "":
+				case "off", "disabled":
+					// reserved by the format: a scope under this name would
+					// write back as the flag and mean something else
+					enabled = false
+				default:
 					group = append(group, s)
 				}
 			}

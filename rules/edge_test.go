@@ -428,3 +428,19 @@ func TestValueSetsLeaveSubstringsAlone(t *testing.T) {
 		}
 	}
 }
+
+// Two payouts at the bound must saturate the total, not wrap it — int is 32
+// bits on a 32-bit platform, and 2^30 + 2^30 does not fit one.
+func TestScoreTotalSaturates(t *testing.T) {
+	eng, err := Compile(testRegistry(), []Rule{
+		{Name: "a", When: "true", Score: `num("1e308") * 2`},
+		{Name: "b", When: "true", Score: `num("1e308") * 2`},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := eng.Evaluate(facts(map[string]Value{"title": StrOf("x")}), "", nil)
+	if out.Points != 1<<30 {
+		t.Errorf("points = %d, want the total to saturate at %d", out.Points, 1<<30)
+	}
+}

@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -168,6 +169,22 @@ func FuzzTextForm(f *testing.F) {
 		}
 		if again := FormatText(back); again != text {
 			t.Fatalf("formatting is not stable:\n%q\n%q", text, again)
+		}
+		// Stability alone would not notice a field format drops entirely, so
+		// compare what canonicalization must preserve field by field.
+		for i := range parsed {
+			p, b := parsed[i], back[i]
+			wantScore := foldSpace(p.Score)
+			if wantScore == "" && p.EffectiveAction() == ActionScore {
+				wantScore = "0"
+			}
+			if p.Name != b.Name || p.EffectiveAction() != b.EffectiveAction() ||
+				p.Count != b.Count || p.IsEnabled() != b.IsEnabled() ||
+				!slices.Equal(p.Scope, b.Scope) ||
+				b.When != foldSpace(p.When) || b.Score != wantScore ||
+				b.GroupBy != foldSpace(p.GroupBy) {
+				t.Fatalf("canonicalization changed rule %d:\n%+v\n%+v", i, p, b)
+			}
 		}
 	})
 }

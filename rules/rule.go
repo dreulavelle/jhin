@@ -467,7 +467,7 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 			}
 			points = p
 		}
-		out.Points += points
+		out.Points = addPoints(out.Points, points)
 		out.Matched = append(out.Matched, Match{Name: r.name, Score: points, Source: r.scoreIx})
 
 	default: // an application-registered effect
@@ -485,11 +485,12 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 // from the built-in ones in the same list.
 const RejectionPrefix = "rule:"
 
-// maxPoints bounds one rule's payout. Converting a float64 outside the
-// integer's range is platform-defined in Go, and a payout near int's edge
-// would let two rules overflow the total — a bound none of that can reach
-// keeps score arithmetic exact however wild the expression. It fits a 32-bit
-// int because int is 32 bits on a 32-bit platform.
+// maxPoints bounds one rule's payout and the running total alike, because
+// converting a float64 outside the integer's range is platform-defined in Go
+// and int is 32 bits on a 32-bit platform: two payouts of 2^30 sum past what
+// that int can hold, so the total saturates at the same bound instead of
+// wrapping. Scores anywhere near it are already nonsense, so saturating
+// changes nothing a sane profile computes.
 const maxPoints = 1 << 30
 
 // clampPoints turns a computed score into points. Infinities clamp — the
@@ -506,6 +507,19 @@ func clampPoints(n float64) (int, bool) {
 		return -maxPoints, true
 	}
 	return int(n), true
+}
+
+// addPoints folds one payout into the total, saturating at ±maxPoints. Both
+// operands are already within the bound, so the sum fits int64 everywhere.
+func addPoints(total, points int) int {
+	s := int64(total) + int64(points)
+	if s > maxPoints {
+		return maxPoints
+	}
+	if s < -maxPoints {
+		return -maxPoints
+	}
+	return int(s)
 }
 
 func groupOf(r *compiled, st *evalState) (string, bool) {

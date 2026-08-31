@@ -1,0 +1,2 @@
+go test fuzz v1
+string("0[off,]:0 if 0")
