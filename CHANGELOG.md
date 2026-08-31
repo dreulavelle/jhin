@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.6.0](https://github.com/dreulavelle/jhin/compare/v0.5.0...v0.6.0) (2026-08-31)
+
+
+### Features
+
+* **cli:** add rules check, fields and fmt ([3c48ad5](https://github.com/dreulavelle/jhin/commit/3c48ad58d58937e8ed542b3517bb5aef5a12abdb))
+* **rules:** a rule engine and expression language ([ed8829e](https://github.com/dreulavelle/jhin/commit/ed8829e8cb1a79275904124ca8c90696fdea819d))
+* **rules:** add a rule engine and expression language ([fda39be](https://github.com/dreulavelle/jhin/commit/fda39be2a0c905062802e3c03554032dbebf1d42))
+* **rules:** close a value set so a typo'd value fails compile ([27a7bdb](https://github.com/dreulavelle/jhin/commit/27a7bdbd6c885e0dd732404c8bd0ecad3ff92a7c))
+* **rules:** continue a rule across indented lines ([d3e6b60](https://github.com/dreulavelle/jhin/commit/d3e6b60977eb7340ce230b0cd18fa48b9bfb1f22))
+* **rules:** count a list of flags, and locate errors by line ([52b72cc](https://github.com/dreulavelle/jhin/commit/52b72cc9dd34937b439de2ef3ea3fe4eab02e87f))
+* **rules:** enforce the profile's syntax version ([95fe8c9](https://github.com/dreulavelle/jhin/commit/95fe8c9c3d3603f3b4a510621dd9906a34b53dde))
+
+
+### Bug Fixes
+
+* **rules:** an explicit SDR tag is not an HDR fallback ([5b90c81](https://github.com/dreulavelle/jhin/commit/5b90c81eba99d49b9d113af8f80b4a39cfb8a437))
+* **rules:** apply review round-1 findings ([d29954c](https://github.com/dreulavelle/jhin/commit/d29954c9747c83b0063ac9a40f95641aac42ee52))
+* **rules:** give result-set questions the content kind ([10e3b32](https://github.com/dreulavelle/jhin/commit/10e3b321999c98b41706580f3fdba289a4447418))
+* **rules:** keep fmt exact, guard score conversion, count only viable releases ([d847f50](https://github.com/dreulavelle/jhin/commit/d847f50fd05dbb230e3b4444204153cfb9169965))
+* **rules:** make the text form a fixed point under fmt ([5766ffc](https://github.com/dreulavelle/jhin/commit/5766ffc57fdda853247316b7fb841f79b6b7cd0d))
+* **rules:** read bitDepth out of the parser's "10bit" spelling ([0533bcf](https://github.com/dreulavelle/jhin/commit/0533bcf69378bb528e2d41f79f19211b8c8c8236))
+* **rules:** saturate the score total and reserve off inside scope groups ([f3a75c6](https://github.com/dreulavelle/jhin/commit/f3a75c6d4de5b36c1302aa25bce755c56fc6ad17))
+* **rules:** serialise an effect's value ([a9c9414](https://github.com/dreulavelle/jhin/commit/a9c9414ec52767ffddebd203e58d6e39a71f4b20))
+
+
+### Performance Improvements
+
+* **rank:** assemble a release's facts once per batch ([a3e4934](https://github.com/dreulavelle/jhin/commit/a3e493494d0b0443a0caff987ae50015c5280bfa))
+* **rules:** branch instead of a map literal in BoolOf ([4ed1954](https://github.com/dreulavelle/jhin/commit/4ed1954928eaafd6eaab8bd6cd825a2b67de3829))
+
 ## [0.5.0](https://github.com/dreulavelle/jhin/compare/v0.4.1...v0.5.0) (2026-08-30)
 
 
