@@ -140,3 +140,34 @@ func TestStepBudget(t *testing.T) {
 		t.Errorf("skipped = %+v, want the over-budget rule reported", out.Skipped)
 	}
 }
+
+// FuzzTextForm asserts the text form's contract: whatever parses, its
+// canonical form parses back to the same rules, and formatting is stable —
+// fmt applied twice is fmt applied once.
+func FuzzTextForm(f *testing.F) {
+	f.Add(`R: score 100 if title contains "two  spaces"`)
+	f.Add("A [movie, series]: keep 3 per resolution if true")
+	f.Add("B [off]: reject if proper\nC: define if repack")
+	f.Add("Long: reject if\n    proper\n    and repack")
+	f.Add("Split: score 10\n    + 5 if proper")
+	f.Fuzz(func(t *testing.T, src string) {
+		if len(src) > 1<<14 {
+			return
+		}
+		parsed, err := ParseText(src)
+		if err != nil {
+			return
+		}
+		text := FormatText(parsed)
+		back, err := ParseText(text)
+		if err != nil {
+			t.Fatalf("canonical form does not parse back: %v\n%q", err, text)
+		}
+		if len(back) != len(parsed) {
+			t.Fatalf("%d rules became %d:\n%q", len(parsed), len(back), text)
+		}
+		if again := FormatText(back); again != text {
+			t.Fatalf("formatting is not stable:\n%q\n%q", text, again)
+		}
+	})
+}

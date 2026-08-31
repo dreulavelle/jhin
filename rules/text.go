@@ -80,8 +80,39 @@ func ParseText(src string) ([]Rule, error) {
 	return out, nil
 }
 
+// isSpace covers the ASCII whitespace strings.TrimSpace strips. The two must
+// agree: a byte one layer folds and another keeps would shift where a line
+// splits between one parse and the next.
 func isSpace(c byte) bool {
-	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f'
+}
+
+// stringSpansLines rejects a string literal carrying a raw line break. The
+// text form is line-oriented — canonical output is one rule per line — so a
+// break inside a string could not survive a round trip through fmt. The
+// escape spells it instead.
+func stringSpansLines(s string) error {
+	var quote byte
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if quote == 0 {
+			if c == '"' || c == '\'' || c == '`' {
+				quote = c
+			}
+			continue
+		}
+		if c == '\\' && quote != '`' && i+1 < len(s) && s[i+1] != '\n' && s[i+1] != '\r' {
+			i++
+			continue
+		}
+		if c == '\n' || c == '\r' {
+			return fmt.Errorf("a string cannot continue on the next line; write \\n for a line break")
+		}
+		if c == quote {
+			quote = 0
+		}
+	}
+	return nil
 }
 
 // cutSpace splits at the first whitespace of any kind, so a tab between an
@@ -119,7 +150,10 @@ func ParseLine(line string) (Rule, error) {
 
 	rest = strings.TrimSpace(rest)
 	action, tail := cutSpace(rest)
-	action = strings.ToLower(action)
+	// Normalized exactly as EffectiveAction normalizes, so the two can never
+	// disagree about what the action is — TrimSpace also covers the unicode
+	// spaces the byte-level split does not.
+	action = strings.ToLower(strings.TrimSpace(action))
 	if action == "" || action == "if" {
 		return r, fmt.Errorf("expected an action after the colon, e.g. `score 100 if ...`")
 	}
@@ -159,13 +193,30 @@ func ParseLine(line string) (Rule, error) {
 		r.Action = action
 		r.Score = body
 	}
+	// Validated on the final fields rather than the raw line, because the
+	// splits above are not quote-aware: what ends up stored is what has to
+	// survive being written back onto one line.
+	for _, part := range []string{r.When, r.Score, r.GroupBy} {
+		if err := stringSpansLines(part); err != nil {
+			return r, err
+		}
+	}
 	return r, nil
 }
 
 // parseHead reads `Name [scope] [off]`, in either order and both optional.
 func parseHead(head string) (name string, scope []string, enabled bool, err error) {
 	head = strings.TrimSpace(head)
+	// The name is what starts a rule, so it lives on the first line by
+	// definition; a break in here means a continuation line is carrying
+	// what should have been a rule of its own.
+	if strings.ContainsAny(head, "\n\r") {
+		return "", nil, false, fmt.Errorf("a rule's name does not continue across lines")
+	}
 	enabled = true
+	// Brackets are read right to left, so the groups land reversed; the
+	// scopes inside one group are already in written order and stay so.
+	var groups [][]string
 	for strings.HasSuffix(head, "]") {
 		open := strings.LastIndexByte(head, '[')
 		if open < 0 {
@@ -179,19 +230,22 @@ func parseHead(head string) (name string, scope []string, enabled bool, err erro
 		case "":
 			return "", nil, false, fmt.Errorf("empty [] in the rule name")
 		default:
+			var group []string
 			for _, s := range strings.Split(tag, ",") {
 				if s = strings.TrimSpace(s); s != "" {
-					scope = append(scope, s)
+					group = append(group, s)
 				}
+			}
+			if len(group) > 0 {
+				groups = append(groups, group)
 			}
 		}
 	}
 	if head == "" {
 		return "", nil, false, fmt.Errorf("the rule has no name")
 	}
-	// brackets were read right to left; put the scopes back in written order
-	for i, j := 0, len(scope)-1; i < j; i, j = i+1, j-1 {
-		scope[i], scope[j] = scope[j], scope[i]
+	for i := len(groups) - 1; i >= 0; i-- {
+		scope = append(scope, groups[i]...)
 	}
 	return head, scope, enabled, nil
 }
@@ -296,12 +350,12 @@ func FormatLine(r Rule) string {
 		fmt.Fprintf(&b, "keep %d", r.Count)
 		if r.GroupBy != "" {
 			b.WriteString(" per ")
-			b.WriteString(r.GroupBy)
+			b.WriteString(foldSpace(r.GroupBy))
 		}
 	case ActionScore:
 		// a score rule that never had points recorded is written as score 0,
 		// so the line still parses back to the same rule
-		score := strings.TrimSpace(r.Score)
+		score := foldSpace(r.Score)
 		if score == "" {
 			score = "0"
 		}
@@ -309,7 +363,7 @@ func FormatLine(r Rule) string {
 		b.WriteString(score)
 	default:
 		b.WriteString(r.EffectiveAction())
-		if s := strings.TrimSpace(r.Score); s != "" {
+		if s := foldSpace(r.Score); s != "" {
 			b.WriteByte(' ')
 			b.WriteString(s)
 		}
