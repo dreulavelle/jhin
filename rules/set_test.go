@@ -241,7 +241,7 @@ func TestMatchedErrors(t *testing.T) {
 				{Name: "dup", Action: ActionDefine, When: "false"},
 				{Name: "a", When: `matched("dup")`},
 			},
-			"ambiguous",
+			"already has this name",
 		},
 	} {
 		if _, err := Compile(testRegistry(), tc.rules); err == nil {
@@ -249,6 +249,17 @@ func TestMatchedErrors(t *testing.T) {
 		} else if !strings.Contains(err.Error(), tc.contains) {
 			t.Errorf("error %q, want it to contain %q", err, tc.contains)
 		}
+	}
+
+	// duplicates the set itself cannot refuse — two library rules sharing a
+	// name — still make a reference to them ambiguous
+	lib := []Rule{
+		{Name: "dup", Action: ActionDefine, When: "true"},
+		{Name: "dup", Action: ActionDefine, When: "false"},
+	}
+	_, err := Compile(testRegistry(), []Rule{{Name: "a", When: `matched("dup")`}}, lib...)
+	if err == nil || !strings.Contains(err.Error(), "ambiguous") {
+		t.Errorf("error %v, want the library duplicate to be ambiguous", err)
 	}
 }
 
@@ -310,7 +321,7 @@ func TestExpansionCap(t *testing.T) {
 	rules = append(rules, Rule{Name: "top", When: `matched("` + rules[len(rules)-1].Name + `")`})
 	if _, err := Compile(testRegistry(), rules); err == nil {
 		t.Fatal("a doubling reference chain compiled")
-	} else if !strings.Contains(err.Error(), "grew past") {
+	} else if !strings.Contains(err.Error(), "past 20000 nodes") {
 		t.Errorf("error %q, want it to name the expansion cap", err)
 	}
 }
@@ -432,5 +443,78 @@ func TestCountOverBoolList(t *testing.T) {
 	_, err = Compile(testRegistry(), []Rule{{Name: "r", When: `count(traits) > 0`}})
 	if err == nil || !strings.Contains(err.Error(), "two-argument form") {
 		t.Errorf("error %v, want it to name the two-argument form", err)
+	}
+}
+
+// A release one cap turns away consumes no slot in another, so the caps'
+// declaration order cannot decide who survives.
+func TestLimitsAreIndependent(t *testing.T) {
+	fourK := Rule{Name: "at most 2 in 4K", Action: ActionLimit, Count: 2, When: `resolution == "2160p"`}
+	remux := Rule{Name: "at most 1 remux", Action: ActionLimit, Count: 1, When: `"remux" in traits`}
+
+	rel := func(res string, traits ...string) Facts {
+		return facts(map[string]Value{"resolution": StrOf(res), "traits": StrListOf(traits)})
+	}
+	set := []Facts{
+		rel("2160p", "remux"), // best
+		rel("2160p", "remux"), // over the remux cap — must not hold a 4K slot
+		rel("2160p"),          // second 4K survivor
+	}
+
+	for _, ruleSet := range [][]Rule{{fourK, remux}, {remux, fourK}} {
+		eng, err := Compile(testRegistry(), ruleSet)
+		if err != nil {
+			t.Fatal(err)
+		}
+		perItem := make([][]LimitMatch, len(set))
+		for i, f := range set {
+			perItem[i] = eng.Evaluate(f, "", nil).Limits
+		}
+		got := ApplyLimits(perItem, []int{0, 1, 2})
+		if got[0] != "" || got[2] != "" {
+			t.Errorf("%s first: survivors wrong: %q", ruleSet[0].Name, got)
+		}
+		if got[1] == "" {
+			t.Errorf("%s first: the second remux should be over its cap", ruleSet[0].Name)
+		}
+	}
+}
+
+// Two live rules under one name would merge everything they report.
+func TestDuplicateNamesRefused(t *testing.T) {
+	_, err := Compile(testRegistry(), []Rule{
+		{Name: "dupe", When: "proper", Score: "1"},
+		{Name: "dupe", When: "repack", Score: "2"},
+	})
+	if err == nil || !strings.Contains(err.Error(), "already has this name") {
+		t.Errorf("duplicate names compiled: %v", err)
+	}
+
+	// a disabled duplicate blocks nothing — it classifies nothing
+	off := false
+	if _, err := Compile(testRegistry(), []Rule{
+		{Name: "dupe", When: "proper", Score: "1"},
+		{Name: "dupe", When: "broken ((", Enabled: &off},
+	}); err != nil {
+		t.Errorf("a disabled duplicate blocked the save: %v", err)
+	}
+}
+
+// Group keys must tell two releases apart: ["a b"] and ["a", "b"] are
+// different buckets.
+func TestGroupKeysDoNotCollide(t *testing.T) {
+	eng, err := Compile(testRegistry(), []Rule{
+		{Name: "cap", Action: ActionLimit, Count: 1, GroupBy: "hdr", When: "true"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := eng.Evaluate(facts(map[string]Value{"hdr": StrListOf([]string{"a b"})}), "", nil)
+	b := eng.Evaluate(facts(map[string]Value{"hdr": StrListOf([]string{"a", "b"})}), "", nil)
+	if len(a.Limits) != 1 || len(b.Limits) != 1 {
+		t.Fatalf("caps did not match: %+v %+v", a, b)
+	}
+	if a.Limits[0].Group == b.Limits[0].Group {
+		t.Errorf("two different lists share the bucket %q", a.Limits[0].Group)
 	}
 }

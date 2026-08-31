@@ -422,3 +422,39 @@ func TestAggregatesIgnoreVetoedReleases(t *testing.T) {
 		t.Errorf("upscale rejected off a remux the profile itself excluded: %v", got[0].Rejections)
 	}
 }
+
+// MinRank is a floor on the final rank, so rule points count toward it in
+// both directions.
+func TestMinRankSeesRulePoints(t *testing.T) {
+	sink := Default()
+	sink.Options.MinRank = 0
+	sink.Rules = []rules.Rule{{Name: "sink", When: "true", Score: "-1000000"}}
+	eng, err := sink.CompileRules(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := New(sink, WithRules(eng))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := r.Rank("Movie.2020.1080p.BluRay.REMUX-GRP")
+	if got.Fetch {
+		t.Errorf("rank %d is under the floor but the release survived", got.Rank)
+	}
+
+	rescue := Default()
+	rescue.Options.MinRank = 1000000
+	rescue.Rules = []rules.Rule{{Name: "lift", When: "true", Score: "2000000"}}
+	eng, err = rescue.CompileRules(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err = New(rescue, WithRules(eng))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got = r.Rank("Movie.2020.1080p.BluRay.REMUX-GRP")
+	if !got.Fetch {
+		t.Errorf("rank %d clears the floor but the release was rejected: %v", got.Rank, got.Rejections)
+	}
+}

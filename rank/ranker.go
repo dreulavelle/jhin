@@ -359,7 +359,10 @@ func (r *Ranker) evaluate(t *Torrent, opt *RankOptions) {
 		}
 	}
 
-	if t.Rank < o.MinRank {
+	// With rules attached the rank is not final yet — their points land in
+	// the rules pass, and a floor tested against a number that is still
+	// moving would judge the wrong one. applyRules re-tests it at the end.
+	if r.rules == nil && t.Rank < o.MinRank {
 		reject("min_rank")
 	}
 

@@ -387,7 +387,7 @@ func TestScoreOverflow(t *testing.T) {
 		t.Fatal(err)
 	}
 	out := eng.Evaluate(f, "", nil)
-	if len(out.Matched) != 1 || out.Points != 1<<40 {
+	if len(out.Matched) != 1 || out.Points != 1<<30 {
 		t.Errorf("an infinite score should clamp to the bound, got %+v", out)
 	}
 
@@ -395,7 +395,7 @@ func TestScoreOverflow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if out := eng.Evaluate(f, "", nil); out.Points != -(1 << 40) {
+	if out := eng.Evaluate(f, "", nil); out.Points != -(1 << 30) {
 		t.Errorf("a negative infinite score should clamp to the bound, got %+v", out)
 	}
 
@@ -407,5 +407,24 @@ func TestScoreOverflow(t *testing.T) {
 	out = eng.Evaluate(f, "", nil)
 	if len(out.Matched) != 0 || len(out.Skipped) != 1 || out.Points != 0 {
 		t.Errorf("a NaN score should skip the rule, got %+v", out)
+	}
+}
+
+// A value set constrains membership and equality, never substring search:
+// `in` over a text field means "contained in", and any fragment is legal.
+func TestValueSetsLeaveSubstringsAlone(t *testing.T) {
+	reg := testRegistry()
+	reg.Field("status", Str, "")
+	reg.Values("status", "available", "unavailable", "unknown")
+
+	for _, when := range []string{
+		`"avail" in status`,
+		`"avail" not in status`,
+		`status in "available or unavailable"`,
+		`status contains "avail"`,
+	} {
+		if _, err := Compile(reg, []Rule{{Name: "r", When: when}}); err != nil {
+			t.Errorf("%s: %v", when, err)
+		}
 	}
 }

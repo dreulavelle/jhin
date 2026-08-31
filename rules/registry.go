@@ -168,7 +168,14 @@ func (r *Registry) Func(name string, params []Type, result Type, fn func(Facts, 
 // FuncTier is Func for a function that reads a tier, so a rule calling it
 // fails open exactly as one naming a field of that tier would.
 func (r *Registry) FuncTier(name string, params []Type, result Type, tier string, fn func(Facts, []Value) (Value, error)) *Registry {
+	prev := r.funcs[name]
 	r.Func(name, params, result, fn)
+	// A refused registration must change nothing: the name may belong to a
+	// function someone else registered, possibly already compiled into an
+	// Engine, and writing its tier would reach into that Engine too.
+	if r.funcs[name] == prev {
+		return r
+	}
 	if f, ok := r.funcs[name]; ok {
 		if _, known := r.tiers[tier]; !known && tier != "" {
 			return r.fail("function %q: tier %q is not declared", name, tier)
@@ -267,7 +274,10 @@ func (r *Registry) clone() *Registry {
 		c.tiers[k] = v
 	}
 	for k, v := range r.funcs {
-		c.funcs[k] = v
+		// copied by value so a later FuncTier on the caller's registry
+		// cannot write into a Func an Engine already holds
+		fv := *v
+		c.funcs[k] = &fv
 	}
 	for k, v := range r.effects {
 		c.effects[k] = v

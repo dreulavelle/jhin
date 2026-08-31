@@ -168,6 +168,7 @@ func Compile(reg *Registry, ruleSet []Rule, library ...Rule) (*Engine, error) {
 	eng := &Engine{reg: reg.clone()}
 	refs := newRefs(library, ruleSet)
 	aggIdx := map[string]int{}
+	names := map[string]bool{}
 
 	for i := range ruleSet {
 		rc := ruleSet[i]
@@ -175,6 +176,13 @@ func Compile(reg *Registry, ruleSet []Rule, library ...Rule) (*Engine, error) {
 		if !rc.IsEnabled() {
 			continue
 		}
+		// Everything a rule does is reported under its name — matches, skips,
+		// caps' buckets — so two live rules sharing one would silently merge:
+		// two caps named alike become one bucket at half the size.
+		if names[name] {
+			return nil, &Error{Rule: name, Err: fmt.Errorf("another rule already has this name")}
+		}
+		names[name] = true
 		c, err := eng.compileRule(rc, name, refs, aggIdx)
 		if err != nil {
 			return nil, &Error{Rule: name, Err: err}
@@ -480,8 +488,9 @@ const RejectionPrefix = "rule:"
 // maxPoints bounds one rule's payout. Converting a float64 outside the
 // integer's range is platform-defined in Go, and a payout near int's edge
 // would let two rules overflow the total — a bound none of that can reach
-// keeps score arithmetic exact however wild the expression.
-const maxPoints = 1 << 40
+// keeps score arithmetic exact however wild the expression. It fits a 32-bit
+// int because int is 32 bits on a 32-bit platform.
+const maxPoints = 1 << 30
 
 // clampPoints turns a computed score into points. Infinities clamp — the
 // author's direction survives — but NaN has no direction to keep, so it
@@ -507,6 +516,14 @@ func groupOf(r *compiled, st *evalState) (string, bool) {
 	v, err := eval(r.groupBy, st)
 	if err != nil {
 		return "", false
+	}
+	// A bucket's one job is telling two releases apart, and joining list
+	// elements with a space cannot: ["a b"] and ["a", "b"] would share a
+	// bucket. The rendered form quotes elements, so it is unambiguous.
+	if v.Kind() == KList {
+		var b strings.Builder
+		writeValue(&b, v)
+		return b.String(), true
 	}
 	return v.String(), true
 }

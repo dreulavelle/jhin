@@ -89,12 +89,14 @@ func (c *checker) checkValues(t *binaryNode) error {
 	default:
 		return nil
 	}
-	// field == "lit", "lit" == field, "lit" in field, field in ["a", "b"]
+	// field == "lit", "lit" == field, "lit" in field, field in ["a", "b"].
+	// `in` over a text field is substring containment, not membership, so a
+	// value set says nothing about it — only equality and list shapes count.
 	if f, ok := t.l.(*fieldNode); ok {
-		if lit, ok := t.r.(*litNode); ok {
+		if lit, ok := t.r.(*litNode); ok && (t.op == "==" || t.op == "!=") && f.typ.K == KStr {
 			return c.valueKnown(f, lit)
 		}
-		if list, ok := t.r.(*listNode); ok {
+		if list, ok := t.r.(*listNode); ok && f.typ.K == KStr {
 			for _, it := range list.items {
 				if lit, ok := it.(*litNode); ok {
 					if err := c.valueKnown(f, lit); err != nil {
@@ -107,7 +109,16 @@ func (c *checker) checkValues(t *binaryNode) error {
 	}
 	if f, ok := t.r.(*fieldNode); ok {
 		if lit, ok := t.l.(*litNode); ok {
-			return c.valueKnown(f, lit)
+			switch t.op {
+			case "==", "!=":
+				if f.typ.K == KStr {
+					return c.valueKnown(f, lit)
+				}
+			default: // in, not in: membership only when the field is a list
+				if f.typ.K == KList {
+					return c.valueKnown(f, lit)
+				}
+			}
 		}
 	}
 	return nil

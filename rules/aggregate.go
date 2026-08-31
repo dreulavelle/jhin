@@ -193,13 +193,22 @@ func ApplyLimits(perItem [][]LimitMatch, order []int) []string {
 		if i < 0 || i >= len(perItem) {
 			continue
 		}
+		// Every cap is tested before any is counted: a release one cap turns
+		// away is gone, so it must not have consumed a slot in another — the
+		// caps' declaration order must not decide who survives.
+		rejected := false
 		for _, lm := range perItem[i] {
-			b := bucket{lm.Name, lm.Group}
-			seen[b]++
-			if seen[b] > lm.Count {
+			if seen[bucket{lm.Name, lm.Group}]+1 > lm.Count {
 				out[i] = limitRejection(lm)
+				rejected = true
 				break
 			}
+		}
+		if rejected {
+			continue
+		}
+		for _, lm := range perItem[i] {
+			seen[bucket{lm.Name, lm.Group}]++
 		}
 	}
 	return out

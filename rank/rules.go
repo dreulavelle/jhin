@@ -95,6 +95,12 @@ func (r *Ranker) applyRules(t *Torrent, facts rules.Facts, kind string, aggs *ru
 	t.Limits = out.Limits
 	t.Effects = out.Effects
 	t.Rejections = append(t.Rejections, out.Rejections...)
+	// The floor is judged here rather than in the veto chain, because rule
+	// points count toward it: a rule can sink a release below MinRank or
+	// lift one over it, and either way it is the final rank that decides.
+	if t.Rank < r.profile.Options.MinRank {
+		t.Rejections = append(t.Rejections, "min_rank")
+	}
 	t.Fetch = len(t.Rejections) == 0
 }
 

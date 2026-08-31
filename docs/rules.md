@@ -83,6 +83,9 @@ Sweet spot: score 2000 - abs(sizePerEpisodeGB - 4) * 300  if sizePerEpisodeGB > 
 Tiered:     score resolution == "2160p" ? 3000 : 500      if true
 ```
 
+Rule points are part of the final rank, so `Options.MinRank` is judged after
+they land: a rule can sink a release below the floor or lift one over it.
+
 ## Limits
 
 "At most three of these" is about the **final score order** — which three are

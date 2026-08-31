@@ -32,6 +32,10 @@ type refExpander struct {
 	byName map[string]Rule
 	// order records declaration order for a stable duplicate report.
 	dupes map[string]bool
+	// budget is the node allowance left for the expression being expanded,
+	// charged at each inline site — after the fact would mean the work and
+	// the memory have already been spent. Reset per top-level expansion.
+	budget int
 }
 
 // newRefs builds an expander over a library and a rule set. References
@@ -61,14 +65,10 @@ func newRefs(library, ruleSet []Rule) *refExpander {
 // stack carries the chain of names currently being inlined, for cycle
 // detection and for an error that names the loop.
 func (x *refExpander) expand(n node, self string, stack []string) (node, error) {
-	out, err := x.rewrite(n, self, stack)
-	if err != nil {
-		return nil, err
+	if len(stack) == 0 {
+		x.budget = maxExpansion
 	}
-	if size(out) > maxExpansion {
-		return nil, fmt.Errorf("condition grew past %d nodes once its references were included; a reference is a copy, so a chain that names the same rules repeatedly doubles at each step", maxExpansion)
-	}
-	return out, nil
+	return x.rewrite(n, self, stack)
 }
 
 func (x *refExpander) rewrite(n node, self string, stack []string) (node, error) {
@@ -177,6 +177,13 @@ func (x *refExpander) inline(t *callNode, self string, stack []string) (node, er
 	if err != nil {
 		return nil, fmt.Errorf("matched(%q): %w", name, err)
 	}
+	// Charged before descending: a chain that names the same rules
+	// repeatedly doubles at every step, and checking the finished tree would
+	// mean the work and the memory were already spent on something that was
+	// only ever going to be refused.
+	if x.budget -= size(inner); x.budget < 0 {
+		return nil, fmt.Errorf("matched(%q) grows the condition past %d nodes; a reference is a copy, so a chain that names the same rules repeatedly doubles at each step", name, maxExpansion)
+	}
 	inner, err = x.expand(inner, name, append(append([]string{}, stack...), self))
 	if err != nil {
 		return nil, err
@@ -187,5 +194,5 @@ func (x *refExpander) inline(t *callNode, self string, stack []string) (node, er
 	if sc := scopeSet(target.Scope); len(sc) > 0 {
 		return &scopedNode{scope: sc, x: inner, p: t.p}, nil
 	}
-	return clone(inner), nil
+	return inner, nil
 }
