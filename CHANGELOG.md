@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/dreulavelle/jhin/compare/v0.6.0...v0.6.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **parser:** IMAX Enhanced is a certification, not an upscale ([2d5acf0](https://github.com/dreulavelle/jhin/commit/2d5acf089b5e0ff9594ceb816304d8a20ac868af))
+* **parser:** IMAX Enhanced is a certification, not an upscale ([860fdf0](https://github.com/dreulavelle/jhin/commit/860fdf05ec491bc009ae796651ffa25b2b9fe56f))
+
 ## [0.6.0](https://github.com/dreulavelle/jhin/compare/v0.5.0...v0.6.0) (2026-08-31)
 
 
