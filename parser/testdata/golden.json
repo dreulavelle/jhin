@@ -20623,5 +20623,28 @@
       "extension": "mkv",
       "title": "Memorist"
     }
+  },
+  {
+    "title": "Movie.2024.2160p.IMAX.Enhanced.WEB-DL.HEVC-GRP",
+    "result": {
+      "codec": "hevc",
+      "edition": "IMAX",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "2160p",
+      "title": "Movie",
+      "year": 2024
+    }
+  },
+  {
+    "title": "Movie.2020.2160p.AI.Enhanced.BluRay-GRP",
+    "result": {
+      "group": "GRP",
+      "quality": "BluRay",
+      "resolution": "2160p",
+      "title": "Movie",
+      "upscaled": true,
+      "year": 2020
+    }
   }
 ]

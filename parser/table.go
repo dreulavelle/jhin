@@ -560,10 +560,12 @@ var handlers = []handler{
 		Transform: toValue(`Remastered`),
 		Remove:    true,
 	},
-	// upscaled: \b(?:AI.?)?(Upscal(ed?|ing)|Enhanced?)\b
+	// upscaled: \b(?:AI.?)?Upscal(ed?|ing)\b|\bAI.?Enhanced?\b
+	// "Enhanced" needs the AI prefix: bare it also ends "IMAX Enhanced",
+	// which is a certification, not an upscale.
 	{
 		Field:     "upscaled",
-		Pattern:   regexp.MustCompile(`(?i)\b(?:AI.?)?(Upscal(ed?|ing)|Enhanced?)\b`),
+		Pattern:   regexp.MustCompile(`(?i)\b(?:AI.?)?Upscal(ed?|ing)\b|(?i)\bAI.?Enhanced?\b`),
 		Transform: toBoolean(),
 	},
 	// upscaled: \b(?:iris2|regrade|ups(uhd|fhd|hd|4k))\b
