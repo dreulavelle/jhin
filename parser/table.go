@@ -1902,17 +1902,17 @@ var handlers = []handler{
 	{
 		Gate:          gate("JA"),
 		Field:         "languages",
-		Pattern:       jaTagAdjacent,
+		Pattern:       bareTagAdjacent("JA"),
 		Transform:     toValueSet(`ja`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
 	},
-	// languages: bare uppercase JA in a run of two language codes (jhin #39, 3)
+	// languages: bare uppercase JA in a run of language codes, past the title (jhin #39, 3)
 	{
 		Gate:          gate("JA"),
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`\bJA\b`),
-		ValidateMatch: validateJALangCodePair(),
+		ValidateMatch: validateBareCodeRun("JA"),
 		Transform:     toValueSet(`ja`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -2687,6 +2687,31 @@ var handlers = []handler{
 		Transform:    toValueSet(`ar`),
 		KeepMatching: true,
 		SkipIfFirst:  true,
+	},
+	// languages: bare uppercase AR (jhin #39)
+	//
+	// ARA/ARABIC/ArabSub are unambiguous. Bare AR is not: besides being a
+	// Portuguese and Catalan word, the PTT corpus carries "XviD.AR [PT ENG
+	// ESP]" where it is not a language at all, so unlike DE and JA it is
+	// trusted only next to a metadata token or inside a run of codes.
+	// languages: bare uppercase AR abutting a surviving metadata token (jhin #39)
+	{
+		Gate:          gate("AR"),
+		Field:         "languages",
+		Pattern:       bareTagAdjacent("AR"),
+		Transform:     toValueSet(`ar`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
+	},
+	// languages: bare uppercase AR in a run of language codes (jhin #39)
+	{
+		Gate:          gate("AR"),
+		Field:         "languages",
+		Pattern:       regexp.MustCompile(`\bAR\b`),
+		ValidateMatch: validateBareCodeRun("AR"),
+		Transform:     toValueSet(`ar`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
 	},
 	// languages: \barab.*(?:audio|lang(?:uage)?|sub(?:s|titles?)?)\b
 	{
