@@ -1884,6 +1884,39 @@ var handlers = []handler{
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
+	// languages: bare uppercase JA, past the title region (jhin #39, 1)
+	//
+	// JP/JAP/JPN are unambiguous; a bare "ja" is "yes" in German and "I" in
+	// Polish, so it gets the same evidence-based treatment as bare DE (#27):
+	// a CASE-SENSITIVE match plus proof that the token sits in metadata.
+	{
+		Gate:          gate("JA"),
+		Field:         "languages",
+		Pattern:       regexp.MustCompile(`\bJA\b`),
+		ValidateMatch: validateDEPastTitle(),
+		Transform:     toValueSet(`ja`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
+	},
+	// languages: bare uppercase JA abutting a surviving metadata token (jhin #39, 2)
+	{
+		Gate:          gate("JA"),
+		Field:         "languages",
+		Pattern:       jaTagAdjacent,
+		Transform:     toValueSet(`ja`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
+	},
+	// languages: bare uppercase JA in a run of two language codes (jhin #39, 3)
+	{
+		Gate:          gate("JA"),
+		Field:         "languages",
+		Pattern:       regexp.MustCompile(`\bJA\b`),
+		ValidateMatch: validateJALangCodePair(),
+		Transform:     toValueSet(`ja`),
+		KeepMatching:  true,
+		SkipFromTitle: true,
+	},
 	// languages: \b(?:KOR|kor[ .-]?sub)\b
 	{
 		Field:        "languages",

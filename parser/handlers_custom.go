@@ -662,6 +662,12 @@ var deTagAdjacent = regexp.MustCompile(
 	`\b(?:DE[ ._-](?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO|TRUEDEF)` +
 		`|(?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)[ ._-]DE)\b`)
 
+// jaTagAdjacent is the same adjacency evidence for a bare uppercase JA
+// (jhin #39); the validators below are code-agnostic and are reused as-is.
+var jaTagAdjacent = regexp.MustCompile(
+	`\b(?:JA[ ._-](?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)` +
+		`|(?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)[ ._-]JA)\b`)
+
 // deAdjacentWord returns the alphabetic token abutting off — searching back
 // when dir is -1, forward when +1 — together with the byte offset it starts
 // at. Separators are skipped; a digit run or a boundary yields "", because
@@ -787,6 +793,35 @@ func validateDELangCodePair() *hMatchValidator {
 			}
 			start, end, paired := deCodeRun(input, match[0], match[1])
 			if !paired {
+				return false
+			}
+			return !deIsPreposition(input, start, end, len(runePrefix(input, ctx.endOfTitle)))
+		},
+	}
+}
+
+// validateJALangCodePair is validateDELangCodePair for a bare uppercase JA
+// (jhin #39), with one extra demand: the run must contain a language code
+// other than JA itself. "JA EN" is a language pair; the "JA JA" that opens
+// "JA JA DING DONG" is a lyric.
+func validateJALangCodePair() *hMatchValidator {
+	return &hMatchValidator{
+		span: func(input string, match []int, ctx matchContext) bool {
+			if langWwwI.MatchString(input[:match[0]]) {
+				return false
+			}
+			start, end, paired := deCodeRun(input, match[0], match[1])
+			if !paired {
+				return false
+			}
+			other := false
+			for _, word := range strings.FieldsFunc(input[start:end], func(r rune) bool { return !unicode.IsLetter(r) }) {
+				if word != "JA" && deIsLangCode(word) {
+					other = true
+					break
+				}
+			}
+			if !other {
 				return false
 			}
 			return !deIsPreposition(input, start, end, len(runePrefix(input, ctx.endOfTitle)))
