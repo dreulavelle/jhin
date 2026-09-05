@@ -662,6 +662,15 @@ var deTagAdjacent = regexp.MustCompile(
 	`\b(?:DE[ ._-](?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO|TRUEDEF)` +
 		`|(?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)[ ._-]DE)\b`)
 
+// bareTagAdjacent is deTagAdjacent for another bare uppercase code (jhin
+// #39 JA, and AR which fails the same way): the validators below are
+// code-agnostic, so each extra code costs only its adjacency pattern.
+func bareTagAdjacent(code string) *regexp.Regexp {
+	return regexp.MustCompile(
+		`\b(?:` + code + `[ ._-](?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)` +
+			`|(?i:DL|MULTI|DUBBED|SUBBED|SUBS|SYNC|LINE|AUDIO)[ ._-]` + code + `)\b`)
+}
+
 // deAdjacentWord returns the alphabetic token abutting off — searching back
 // when dir is -1, forward when +1 — together with the byte offset it starts
 // at. Separators are skipped; a digit run or a boundary yields "", because
@@ -790,6 +799,37 @@ func validateDELangCodePair() *hMatchValidator {
 				return false
 			}
 			return !deIsPreposition(input, start, end, len(runePrefix(input, ctx.endOfTitle)))
+		},
+	}
+}
+
+// langSepRun is the separator a language code may sit behind: a run of the
+// characters PTT's code-run gate allowed, and nothing else — no brackets.
+var langSepRun = regexp.MustCompile(`^[ .,/-]+$`)
+
+// validateBareCodeRun accepts a bare uppercase code that sits past the title
+// region directly beside another known two-letter language code, with only a
+// plain separator between them. It is deCodeRun's pairing with two demands
+// added: the partner must be a different code, so the "JA JA" opening "JA JA
+// DING DONG" is a lyric and not a pair; and the gap may not carry a bracket,
+// so the AR in the corpus title "XviD.AR [PT ENG ESP]" — which is not a
+// language — does not pair with the list that follows it.
+func validateBareCodeRun(code string) *hMatchValidator {
+	return &hMatchValidator{
+		span: func(input string, match []int, ctx matchContext) bool {
+			if match[0] < len(runePrefix(input, ctx.endOfTitle)) {
+				return false
+			}
+			if langWwwI.MatchString(input[:match[0]]) {
+				return false
+			}
+			if before, off := deAdjacentWord(input, match[0], -1); before != code && deIsLangCode(before) &&
+				langSepRun.MatchString(input[off+len(before):match[0]]) {
+				return true
+			}
+			after, off := deAdjacentWord(input, match[1], 1)
+			return after != code && deIsLangCode(after) &&
+				langSepRun.MatchString(input[match[1]:off])
 		},
 	}
 }
