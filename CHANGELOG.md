@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.2](https://github.com/dreulavelle/jhin/compare/v0.6.1...v0.6.2) (2026-09-05)
+
+
+### Bug Fixes
+
+* **parser:** a language fused to a sub token is subtitle evidence ([#42](https://github.com/dreulavelle/jhin/issues/42)) ([546067b](https://github.com/dreulavelle/jhin/commit/546067bdead3d5333579ac204732525407c3cb74))
+* **parser:** recognise bare uppercase JA and AR as Japanese and Arabic ([#40](https://github.com/dreulavelle/jhin/pull/40)) ([f20b167](https://github.com/dreulavelle/jhin/commit/f20b167971615cc6118939fd04da1eceb7e69f1d)), closes [#39](https://github.com/dreulavelle/jhin/issues/39)
+
 ## [0.6.1](https://github.com/dreulavelle/jhin/compare/v0.6.0...v0.6.1) (2026-09-02)
 
 
