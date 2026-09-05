@@ -1221,6 +1221,19 @@ var handlers = []handler{
 	},
 	// volumes: ['custom:handle_volumes']
 	customHandleVolumes,
+	// subbed: compound language+sub tokens (jhin, not PTT). No word boundary
+	// precedes "sub" in ENGSUB, ESub, SWESUB, KORSUB, PLSUB, RoSubbed,
+	// SUBFRENCH or VOSTFR, so the generic subbed handlers never match them,
+	// and the language handlers that do recognise them remove the text. This
+	// must run before the languages block and must not remove, or the
+	// language is lost. Because it claims the field first, the generic subbed
+	// handlers after the languages block must stay KeepMatching or their
+	// Remove is lost.
+	{
+		Field:     "subbed",
+		Pattern:   regexp.MustCompile(`(?i)\b(?:(?:en|eng|e|swe|dan|fin|nor|kor|pl|slo|ro|arab)sub(?:s|bed)?|sub(?:french|eng|ita|esp|spa|ger|deu|pt|pl|ro|nl|swe|nor|dan|fin|tur|rus|hun|cze|gre)|vost(?:fr|a|en)?)\b`),
+		Transform: toBoolean(),
+	},
 	// languages: \b(temporadas?|completa)\b
 	{
 		Field:        "languages",
@@ -1838,10 +1851,10 @@ var handlers = []handler{
 		Transform:    toValueSet(`en`),
 		KeepMatching: true,
 	},
-	// languages: \besub\b
+	// languages: \besubs?\b (PTT: \besub\b; the plural is as common)
 	{
 		Field:        "languages",
-		Pattern:      regexp.MustCompile(`(?i)\besub\b`),
+		Pattern:      regexp.MustCompile(`(?i)\besubs?\b`),
 		Transform:    toValueSet(`en`),
 		Remove:       true,
 		KeepMatching: true,
@@ -2928,18 +2941,25 @@ var handlers = []handler{
 	// languages: ['custom:infer_language_based_on_naming']
 	customInferLanguageBasedOnNaming,
 	// subbed: \bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub
+	// KeepMatching: the fused-token handler before the languages block may
+	// already hold the field; without it this Remove is skipped and a
+	// leftover MULTi reads as dubbed.
 	{
-		Field:     "subbed",
-		Pattern:   regexp.MustCompile(`(?i)\bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub`),
-		Transform: toBoolean(),
-		Remove:    true,
+		Field:        "subbed",
+		Pattern:      regexp.MustCompile(`(?i)\bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub`),
+		Transform:    toBoolean(),
+		Remove:       true,
+		KeepMatching: true,
 	},
 	// subbed: \b(?:Official.*?|Dual-?)?sub(s|bed)?\b
+	// KeepMatching for the same reason: a skipped Remove leaks Sub/Subs into
+	// the title or group.
 	{
-		Field:     "subbed",
-		Pattern:   regexp.MustCompile(`(?i)\b(?:Official.*?|Dual-?)?sub(s|bed)?\b`),
-		Transform: toBoolean(),
-		Remove:    true,
+		Field:        "subbed",
+		Pattern:      regexp.MustCompile(`(?i)\b(?:Official.*?|Dual-?)?sub(s|bed)?\b`),
+		Transform:    toBoolean(),
+		Remove:       true,
+		KeepMatching: true,
 	},
 	// dubbed: [\[(\s]?\bmulti(?:ple)?[ .-]*(?:lang(?:uages?)?|audio|VF2)\b\][\[(\s]?
 	{

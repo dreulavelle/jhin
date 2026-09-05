@@ -5,10 +5,12 @@ dependencies. Accuracy is contractual, speed is a feature, slop is a bug.
 
 ## Hard invariants — violating any of these is a broken change
 
-- **The golden corpus is law.** `parser/testdata/golden.json` pins byte-exact
-  output for 1,156 real titles. Never edit expected outputs to make a test
+- **The golden corpus is law.** `parser/testdata/golden.json` pins the
+  output for 1,160 real titles. Never edit expected outputs to make a test
   pass — fix the code. New behavior lands as new corpus titles with verified
-  expectations.
+  expectations. Changing an existing expectation is a deliberate divergence
+  from PTT: it needs the owner's sign-off, a commit message that says why,
+  and an entry in the README divergence list.
 - **Handler order is priority.** The table in `parser/table.go` resolves
   conflicts by position; earlier handlers win and may consume text later ones
   would see. Do not reorder, merge, or "clean up" handlers.

@@ -564,6 +564,7 @@
         "it",
         "tr"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Saturno Contro"
@@ -1154,6 +1155,7 @@
         "fi",
         "sv"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "A Good Day To Die Hard"
@@ -1461,6 +1463,7 @@
       "languages": [
         "sv"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "American Pie"
@@ -1713,6 +1716,7 @@
         "en",
         "ko"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Atonement"
@@ -1753,6 +1757,7 @@
         "en",
         "hi"
       ],
+      "subbed": true,
       "dubbed": true,
       "extension": "mkv",
       "episodes": [],
@@ -1778,6 +1783,7 @@
         "en",
         "hi"
       ],
+      "subbed": true,
       "dubbed": true,
       "extension": "mkv",
       "episodes": [],
@@ -2563,6 +2569,7 @@
       "languages": [
         "sv"
       ],
+      "subbed": true,
       "extension": "mp4",
       "episodes": [],
       "title": "Bron"
@@ -2975,6 +2982,7 @@
       "languages": [
         "fr"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Color Of Night"
@@ -5799,6 +5807,7 @@
         "en",
         "hi"
       ],
+      "subbed": true,
       "network": "Netflix",
       "extension": "mkv",
       "episodes": [],
@@ -6208,6 +6217,7 @@
       "languages": [
         "fr"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Identity Thief"
@@ -7893,6 +7903,7 @@
         "ko",
         "hi"
       ],
+      "subbed": true,
       "dubbed": true,
       "episodes": [],
       "seasons": [],
@@ -7955,6 +7966,7 @@
         "en",
         "ro"
       ],
+      "subbed": true,
       "network": "Netflix",
       "episodes": [],
       "seasons": [],
@@ -8038,6 +8050,7 @@
       "languages": [
         "sv"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Mission Impossible"
@@ -9250,6 +9263,7 @@
       "languages": [
         "fr"
       ],
+      "subbed": true,
       "title": "One Piece"
     }
   },
@@ -10340,6 +10354,7 @@
       "languages": [
         "sk"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Seinfeld"
@@ -10445,6 +10460,7 @@
       "languages": [
         "sv"
       ],
+      "subbed": true,
       "episodes": [],
       "title": "Skam"
     }
@@ -13194,6 +13210,7 @@
       "languages": [
         "pl"
       ],
+      "subbed": true,
       "network": "Apple TV",
       "extension": "mkv",
       "episodes": [],
@@ -13426,6 +13443,7 @@
       "languages": [
         "ko"
       ],
+      "subbed": true,
       "audio": [
         "MP3"
       ],
@@ -13621,6 +13639,7 @@
       "languages": [
         "fr"
       ],
+      "subbed": true,
       "extension": "mkv",
       "title": "The Walking Dead"
     }
@@ -14720,6 +14739,7 @@
       "languages": [
         "ro"
       ],
+      "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "X-Men"
@@ -14782,6 +14802,7 @@
       "languages": [
         "sv"
       ],
+      "subbed": true,
       "episodes": [],
       "title": "You"
     }
@@ -17316,6 +17337,7 @@
       "languages": [
         "fr"
       ],
+      "subbed": true,
       "extension": "mp4",
       "group": "Kaerizaki-Fansub",
       "seasons": [],
@@ -17466,6 +17488,7 @@
       "languages": [
         "fr"
       ],
+      "subbed": true,
       "group": "Neutrinome",
       "episodes": [],
       "seasons": [],
@@ -18290,6 +18313,7 @@
         "en",
         "ta"
       ],
+      "subbed": true,
       "size": "3.2GB",
       "site": "www.1TamilMV.pics",
       "extension": "mkv",
@@ -18986,6 +19010,7 @@
         "te",
         "ta"
       ],
+      "subbed": true,
       "size": "6GB",
       "episodes": [],
       "seasons": [],
@@ -19024,6 +19049,7 @@
       "languages": [
         "en"
       ],
+      "subbed": true,
       "size": "850MB",
       "episodes": [],
       "seasons": [],
@@ -19058,6 +19084,7 @@
         "te",
         "ta"
       ],
+      "subbed": true,
       "size": "450MB",
       "episodes": [],
       "seasons": [],
@@ -19090,6 +19117,7 @@
       "languages": [
         "en"
       ],
+      "subbed": true,
       "size": "800MB",
       "episodes": [],
       "seasons": [],
@@ -19122,6 +19150,7 @@
         "en",
         "ta"
       ],
+      "subbed": true,
       "size": "3.2GB",
       "extension": "mkv",
       "episodes": [],
@@ -19155,6 +19184,7 @@
         "en",
         "ta"
       ],
+      "subbed": true,
       "size": "3.4GB",
       "extension": "mkv",
       "episodes": [],
@@ -19213,6 +19243,7 @@
         "ml",
         "kn"
       ],
+      "subbed": true,
       "size": "8.4GB",
       "extension": "mkv",
       "episodes": [],
@@ -19252,6 +19283,7 @@
         "te",
         "ta"
       ],
+      "subbed": true,
       "size": "1GB",
       "title": "Mirzapur"
     }
@@ -19301,6 +19333,7 @@
       "languages": [
         "en"
       ],
+      "subbed": true,
       "size": "7.3GB",
       "extension": "mkv",
       "episodes": [],
@@ -19387,6 +19420,7 @@
         "en",
         "ta"
       ],
+      "subbed": true,
       "size": "400MB",
       "extension": "mkv",
       "episodes": [],
@@ -19417,6 +19451,7 @@
         "en",
         "ml"
       ],
+      "subbed": true,
       "size": "750MB",
       "extension": "mkv",
       "episodes": [],
@@ -19458,6 +19493,7 @@
         "ta",
         "ml"
       ],
+      "subbed": true,
       "size": "8.3GB",
       "extension": "mkv",
       "episodes": [],
@@ -19530,6 +19566,7 @@
         "en",
         "hi"
       ],
+      "subbed": true,
       "dubbed": true,
       "size": "950MB",
       "extension": "mkv",
@@ -19559,6 +19596,7 @@
         "te",
         "ta"
       ],
+      "subbed": true,
       "size": "4.7GB",
       "extension": "mkv",
       "episodes": [],
@@ -19597,6 +19635,7 @@
         "te",
         "ta"
       ],
+      "subbed": true,
       "size": "1.4GB",
       "extension": "mkv",
       "episodes": [],
@@ -19642,10 +19681,12 @@
         8
       ],
       "languages": [
+        "en",
         "hi",
         "te",
         "ta"
       ],
+      "subbed": true,
       "size": "2.7GB",
       "title": "The Wheel of Time"
     }
