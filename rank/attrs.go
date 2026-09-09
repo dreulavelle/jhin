@@ -37,12 +37,13 @@ const (
 	AttrTVRip    Attr = "tvrip"
 
 	// trash sources
-	AttrCam      Attr = "cam"
-	AttrTeleCine Attr = "telecine"
-	AttrTeleSync Attr = "telesync"
-	AttrScreener Attr = "screener"
-	AttrR5       Attr = "r5"
-	AttrPDTV     Attr = "pdtv"
+	AttrCam       Attr = "cam"
+	AttrTeleCine  Attr = "telecine"
+	AttrTeleSync  Attr = "telesync"
+	AttrScreener  Attr = "screener"
+	AttrR5        Attr = "r5"
+	AttrPDTV      Attr = "pdtv"
+	AttrWorkprint Attr = "workprint"
 
 	// codecs
 	AttrAVC  Attr = "avc"
@@ -125,12 +126,13 @@ var qualityAttrs = map[string]Attr{
 	"SCR":          AttrScreener,
 	"R5":           AttrR5,
 	"PDTV":         AttrPDTV,
+	"WORKPRINT":    AttrWorkprint,
 }
 
 // trashQualityAttrs are the sources considered trash by the hard trash veto.
 var trashQualityAttrs = map[Attr]bool{
 	AttrCam: true, AttrTeleCine: true, AttrTeleSync: true,
-	AttrScreener: true, AttrR5: true, AttrPDTV: true,
+	AttrScreener: true, AttrR5: true, AttrPDTV: true, AttrWorkprint: true,
 }
 
 var codecAttrs = map[string]Attr{

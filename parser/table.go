@@ -322,6 +322,12 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b`),
 		Transform: toBoolean(),
 	},
+	// trash: \bWORKPRINT\b
+	{
+		Field:     "trash",
+		Pattern:   regexp.MustCompile(`(?i)\bWORKPRINT\b`),
+		Transform: toBoolean(),
+	},
 	// trash: \bDVB[ .-]*(?:Rip)?\b
 	{
 		Field:     "trash",
@@ -503,6 +509,13 @@ var handlers = []handler{
 		Transform: toValue(`Directors Cut`),
 		Remove:    true,
 	},
+	// edition: \bCriterion\.Collection\b
+	{
+		Field:     "edition",
+		Pattern:   regexp.MustCompile(`(?i)\bCriterion\.Collection\b`),
+		Transform: toValue(`Criterion Collection`),
+		Remove:    true,
+	},
 	// edition: \b(custom.?)?Extended\b
 	{
 		Field:     "edition",
@@ -559,6 +572,16 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)\bRemaster(?:ed)?\b`),
 		Transform: toValue(`Remastered`),
 		Remove:    true,
+	},
+	// edition: \bDC\b (case-sensitive; skipped unless it follows the year —
+	// keeps title uses like "DC.League.of.Super-Pets" and "Washington.DC"
+	// out of scope, since there the match precedes the year, not follows it)
+	{
+		Field:        "edition",
+		Pattern:      regexp.MustCompile(`\bDC\b`),
+		Transform:    toValue(`Directors Cut`),
+		Remove:       true,
+		SkipIfBefore: []string{"year"},
 	},
 	// upscaled: \b(?:AI.?)?Upscal(ed?|ing)\b|\bAI.?Enhanced?\b
 	// "Enhanced" needs the AI prefix: bare it also ends "IMAX Enhanced",
@@ -892,6 +915,13 @@ var handlers = []handler{
 		Transform:     toValue(`CAM`),
 		Remove:        true,
 		SkipFromTitle: true,
+	},
+	// quality: \bWORKPRINT\b
+	{
+		Field:     "quality",
+		Pattern:   regexp.MustCompile(`(?i)\bWORKPRINT\b`),
+		Transform: toValue(`WORKPRINT`),
+		Remove:    true,
 	},
 	// quality: \bPDTV\b
 	{
@@ -3137,6 +3167,64 @@ var handlers = []handler{
 		Field:     "network",
 		Pattern:   regexp.MustCompile(`(?i)\bH(MAX|BO)\b`),
 		Transform: toValue(`HBO`),
+		Remove:    true,
+	},
+	// network: \bSHOWTIME\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bSHOWTIME\b`),
+		Transform: toValue(`Showtime`),
+		Remove:    true,
+	},
+	// network: \bPMTP\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bPMTP\b`),
+		Transform: toValue(`Paramount`),
+		Remove:    true,
+	},
+	// network: \bPCOK\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bPCOK\b`),
+		Transform: toValue(`Peacock`),
+		Remove:    true,
+	},
+	// network: \bCRAV\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bCRAV\b`),
+		Transform: toValue(`Crave`),
+		Remove:    true,
+	},
+	// network: \bBCORE\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bBCORE\b`),
+		Transform: toValue(`AMC+`),
+		Remove:    true,
+	},
+	// network: (?<=[ ._-]{2})STAN\b
+	{
+		Field:         "network",
+		Pattern:       regexp.MustCompile(`(?i)\bSTAN\b`),
+		ValidateMatch: validateLookbehind(`[ ._-]{2}`, ``, true),
+		Transform:     toValue(`Stan`),
+		Remove:        true,
+		SkipIfFirst:   true,
+	},
+	// network: \bitunes\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bitunes\b`),
+		Transform: toValue(`iTunes`),
+		Remove:    true,
+	},
+	// network: \biT\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`\biT\b`),
+		Transform: toValue(`iTunes`),
 		Remove:    true,
 	},
 	// network: \bHULU\b

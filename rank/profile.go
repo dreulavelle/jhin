@@ -218,12 +218,13 @@ var DefaultPolicies = map[Attr]Policy{
 	AttrSATRip:   {Fetch: false, Rank: -10000},
 
 	// trash sources
-	AttrCam:      {Fetch: false, Rank: -10000},
-	AttrTeleCine: {Fetch: false, Rank: -10000},
-	AttrTeleSync: {Fetch: false, Rank: -10000},
-	AttrScreener: {Fetch: false, Rank: -10000},
-	AttrR5:       {Fetch: false, Rank: -10000},
-	AttrPDTV:     {Fetch: false, Rank: -10000},
+	AttrCam:       {Fetch: false, Rank: -10000},
+	AttrTeleCine:  {Fetch: false, Rank: -10000},
+	AttrTeleSync:  {Fetch: false, Rank: -10000},
+	AttrScreener:  {Fetch: false, Rank: -10000},
+	AttrR5:        {Fetch: false, Rank: -10000},
+	AttrPDTV:      {Fetch: false, Rank: -10000},
+	AttrWorkprint: {Fetch: false, Rank: -10000},
 
 	// codecs
 	AttrAVC:  {Fetch: true, Rank: 500},
