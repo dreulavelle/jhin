@@ -346,6 +346,7 @@ Field semantics follow [PTT](https://github.com/dreulavelle/PTT) 1.8.5
 - **Site** (`string`): source website
 - **Size** (`string`): e.g. `2.3GB`
 - **Subbed** (`bool`): subtitles present, from a sub token (`SUBS`, `Multi-Subs`, `SUBBED`) or a language fused to one (`ENGSUB`, `ESub`, `VOSTFR`, `SWESUB`)
+- **Subtitles** (`[]string`, jhin, not PTT, [#38](https://github.com/dreulavelle/jhin/issues/38)): the subset of `Languages` that is specifically subtitle evidence — a language fused to (`ENGSUB`, `KORSUB`) or immediately adjacent to (`Eng-Sub`, `SUB.ITA`, `[Subs.EN]`) a sub token. Additive only: matched languages stay in `Languages` too, and a sub token with no identifiable language (`Multi-Subs`) leaves `Subtitles` empty while still setting `Subbed`.
 - **ThreeD** (`bool`): 3D release
 - **Title** (`string`): cleaned title
 - **Torrent** / **Trash** / **Uncensored** / **Unrated** / **Upscaled** (`bool`)

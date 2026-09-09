@@ -50,6 +50,7 @@ var coreFields = map[string]Type{
 	"audio":     StrList,
 	"channels":  StrList,
 	"languages": StrList,
+	"subtitles": StrList,
 
 	// numbering
 	"seasons":     NumList,
@@ -164,6 +165,8 @@ func (f *ResultFacts) Lookup(path string) (Value, bool) {
 		return StrListOf(r.Channels), true
 	case "languages":
 		return StrListOf(r.Languages), true
+	case "subtitles":
+		return StrListOf(r.Subtitles), true
 	case "seasons":
 		return NumListOf(r.Seasons), true
 	case "episodes":

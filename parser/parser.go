@@ -250,6 +250,7 @@ type Result struct {
 	Site        string   `json:"site"`
 	Size        string   `json:"size"`
 	Subbed      bool     `json:"subbed"`
+	Subtitles   []string `json:"subtitles"`
 	ThreeD      bool     `json:"3d"`
 	Title       string   `json:"title"`
 	Torrent     bool     `json:"torrent"`
@@ -628,6 +629,8 @@ func parse(title string, handlers []handler) (r *Result) {
 			r.Trash = v.(bool)
 		case "subbed":
 			r.Subbed = v.(bool)
+		case "subtitles":
+			r.Subtitles = valueSetStrings(v)
 		case "threeD":
 			r.ThreeD = v.(bool)
 		case "uncensored":
@@ -652,6 +655,9 @@ func parse(title string, handlers []handler) (r *Result) {
 	}
 	if r.Languages == nil {
 		r.Languages = []string{}
+	}
+	if r.Subtitles == nil {
+		r.Subtitles = []string{}
 	}
 
 	r.Title = cleanTitle(runePrefix(title, endOfTitle))

@@ -114,7 +114,7 @@ title  year  releaseName
 
 resolution  quality  codec  bitDepth  hdr  dolbyVision  hdrFallback
 
-audio  channels  languages
+audio  channels  languages  subtitles
 
 seasons  episodes  volumes  episodeCode  seasonPack  complete
 
@@ -129,7 +129,7 @@ traits
 ```
 
 Types: `title`, `resolution`, `group` and the like are text; `year` and
-`bitDepth` are numbers; `hdr`, `audio`, `channels`, `languages`, `extras` are
+`bitDepth` are numbers; `hdr`, `audio`, `channels`, `languages`, `subtitles`, `extras` are
 lists of text; `seasons`, `episodes`, `volumes` are lists of numbers; the rest
 are yes/no flags.
 

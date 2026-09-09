@@ -130,7 +130,7 @@ adult audio bitDepth bitrate channels codec commentary complete container
 convert country date documentary dolbyVision dubbed edition episodeCode
 episodes extension extras group hardcoded hdr hdrFallback languages network
 ppv proper quality region releaseName remastered repack resolution retail
-scene seasonPack seasons site size subbed threeD title torrent traits trash
+scene seasonPack seasons site size subbed subtitles threeD title torrent traits trash
 uncensored unrated upscaled volumes year
 ```
 

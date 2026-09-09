@@ -315,6 +315,156 @@ var customInferLanguageBasedOnNaming = handler{
 	},
 }
 
+// subtitleFusedRegex mirrors the "subbed: compound language+sub tokens"
+// pattern in table.go (ENGSUB, ESub, SWESUB, KORSUB, PLSUB, RoSubbed,
+// SUBFRENCH, VOSTFR, ...): a language fused directly to a sub token, no
+// separator between them. Kept in sync with that pattern by construction —
+// same alternatives, one capture group per branch so the matched language
+// can be read back out.
+var subtitleFusedRegex = regexp.MustCompile(`(?i)\b(?:(en|eng|e|swe|dan|fin|nor|kor|pl|slo|ro|arab)sub(?:s|bed)?|sub(french|eng|ita|esp|spa|ger|deu|pt|pl|ro|nl|swe|nor|dan|fin|tur|rus|hun|cze|gre)|vost(fr|a|en)?)\b`)
+
+// subtitleFusedPrefixLangs / subtitleFusedSuffixLangs / subtitleFusedVostLangs
+// map the fused token's language spelling to the same ISO 639-1 codes the
+// languages handlers elsewhere in table.go already use.
+var (
+	subtitleFusedPrefixLangs = map[string]string{
+		"en": "en", "eng": "en", "e": "en",
+		"swe": "sv", "dan": "da", "fin": "fi", "nor": "no",
+		"kor": "ko", "pl": "pl", "slo": "sl", "ro": "ro", "arab": "ar",
+	}
+	subtitleFusedSuffixLangs = map[string]string{
+		"french": "fr", "eng": "en", "ita": "it", "esp": "es", "spa": "es",
+		"ger": "de", "deu": "de", "pt": "pt", "pl": "pl", "ro": "ro", "nl": "nl",
+		"swe": "sv", "nor": "no", "dan": "da", "fin": "fi", "tur": "tr",
+		"rus": "ru", "hun": "hu", "cze": "cs", "gre": "el",
+	}
+	// bare "vost" (no suffix) carries no identifiable language and is
+	// intentionally absent here.
+	subtitleFusedVostLangs = map[string]string{"fr": "fr", "a": "en", "en": "en"}
+)
+
+// subtitleAdjacent{LangBeforeSub,SubBeforeLang}{,bed} cover the separated
+// forms the generic subbed handlers already flag (Eng-Sub, SUB.ITA,
+// [Subs.EN], Eng.Subbed, [ENG-SUB]): a known language abbreviation
+// immediately beside a sub token, across a single dot/dash/underscore/space
+// separator (brackets need no special case — they are non-word characters,
+// so \b already sits on them). Kept as four independent patterns, not one
+// alternation, so that rejecting a lang-before-sub reading (see the comma
+// guard below) never consumes the text a sub-before-lang reading needs.
+var (
+	subtitleAdjacentLangBeforeSub    = regexp.MustCompile(`(?i)\b([a-z]{2,4})[.\-_ ]{1,2}subs?\b`)
+	subtitleAdjacentSubBeforeLang    = regexp.MustCompile(`(?i)\bsubs?[.\-_ ]{1,2}([a-z]{2,4})\b`)
+	subtitleAdjacentLangBeforeSubbed = regexp.MustCompile(`(?i)\b([a-z]{2,4})[.\-_ ]{1,2}sub(?:bed|titled?)\b`)
+	subtitleAdjacentSubbedBeforeLang = regexp.MustCompile(`(?i)\bsub(?:bed|titled?)[.\-_ ]{1,2}([a-z]{2,4})\b`)
+)
+
+// subtitleAdjacentLangs is a conservative whitelist: only abbreviations PTT
+// and jhin already recognise as language names/codes elsewhere may pair with
+// an adjacent sub token, so an unrelated two-to-four letter tag (a group
+// name, a resolution fragment, ...) can never be misread as a subtitle
+// language.
+var subtitleAdjacentLangs = map[string]string{
+	"en": "en", "eng": "en",
+	"fr": "fr", "fre": "fr", "fra": "fr",
+	"de": "de", "ger": "de", "deu": "de",
+	"it": "it", "ita": "it",
+	"es": "es", "esp": "es", "spa": "es",
+	"pt": "pt", "por": "pt",
+	"ru": "ru", "rus": "ru",
+	"ar": "ar", "ara": "ar",
+	"ja": "ja", "jap": "ja", "jpn": "ja",
+	"ko": "ko", "kor": "ko",
+	"zh": "zh", "chi": "zh", "chs": "zh", "cht": "zh",
+	"nl": "nl", "dut": "nl", "nld": "nl",
+	"sv": "sv", "swe": "sv",
+	"no": "no", "nor": "no",
+	"da": "da", "dan": "da",
+	"fi": "fi", "fin": "fi",
+	"pl": "pl", "pol": "pl",
+	"ro": "ro", "rom": "ro", "ron": "ro",
+	"cs": "cs", "cze": "cs", "ces": "cs",
+	"el": "el", "gre": "el", "ell": "el",
+	"hu": "hu", "hun": "hu",
+	"tr": "tr", "tur": "tr",
+	"he": "he", "heb": "he",
+	"sl": "sl", "slo": "sl",
+}
+
+// customSubtitleLanguages (jhin, not PTT, #38): Subtitles is the subset of
+// Languages that is specifically subtitle evidence — a language fused to or
+// adjacent to a sub token. It runs at the same table position as the fused
+// "subbed" handler above and never removes, so Languages and Subbed are
+// completely unaffected; this only adds a new, independent field.
+var customSubtitleLanguages = handler{
+	Field: "subtitles",
+	Process: func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta {
+		vs, _ := m.value.(*valueSet[any])
+		add := func(code string) {
+			if vs == nil {
+				vs = &valueSet[any]{existMap: map[any]struct{}{}, values: []any{}}
+			}
+			vs = vs.append(code)
+		}
+		for _, sm := range subtitleFusedRegex.FindAllStringSubmatch(title, -1) {
+			switch {
+			case sm[1] != "":
+				if code, ok := subtitleFusedPrefixLangs[strings.ToLower(sm[1])]; ok {
+					add(code)
+				}
+			case sm[2] != "":
+				if code, ok := subtitleFusedSuffixLangs[strings.ToLower(sm[2])]; ok {
+					add(code)
+				}
+			default:
+				if code, ok := subtitleFusedVostLangs[strings.ToLower(sm[3])]; ok {
+					add(code)
+				}
+			}
+		}
+		// lang-before-sub readings reject a language immediately preceded by
+		// a comma: that marks the last item of a dub-language list (e.g.
+		// "dub jpn,chn,eng sub chs"), not a deliberate "lang sub" pairing —
+		// the actual subtitle language there is chs, caught below by the
+		// sub-before-lang reading instead.
+		addLangBeforeSub := func(re *regexp.Regexp) {
+			for _, idxs := range re.FindAllStringSubmatchIndex(title, -1) {
+				gs, ge := idxs[2], idxs[3]
+				if gs < 0 || ge <= gs {
+					continue
+				}
+				if gs > 0 && title[gs-1] == ',' {
+					continue
+				}
+				lang := strings.ToLower(title[gs:ge])
+				// "no subs" is a negation, not Norwegian.
+				if lang == "no" {
+					continue
+				}
+				if code, ok := subtitleAdjacentLangs[lang]; ok {
+					add(code)
+				}
+			}
+		}
+		addSubBeforeLang := func(re *regexp.Regexp) {
+			for _, g := range re.FindAllStringSubmatch(title, -1) {
+				if code, ok := subtitleAdjacentLangs[strings.ToLower(g[1])]; ok {
+					add(code)
+				}
+			}
+		}
+		addLangBeforeSub(subtitleAdjacentLangBeforeSub)
+		addSubBeforeLang(subtitleAdjacentSubBeforeLang)
+		addLangBeforeSub(subtitleAdjacentLangBeforeSubbed)
+		addSubBeforeLang(subtitleAdjacentSubbedBeforeLang)
+		if vs == nil {
+			return m
+		}
+		m.value = vs
+		m.matchedNow = true
+		return m
+	},
+}
+
 // def handle_group: drop a bracketed group that overlaps other matches.
 var customHandleGroup = handler{
 	Field: "group",

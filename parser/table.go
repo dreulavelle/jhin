@@ -20,6 +20,7 @@ var valueSetFieldMap = map[string]struct{}{
 	"extras":    {},
 	"hdr":       {},
 	"languages": {},
+	"subtitles": {},
 }
 
 var handlers = []handler{
@@ -1234,6 +1235,12 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)\b(?:(?:en|eng|e|swe|dan|fin|nor|kor|pl|slo|ro|arab)sub(?:s|bed)?|sub(?:french|eng|ita|esp|spa|ger|deu|pt|pl|ro|nl|swe|nor|dan|fin|tur|rus|hun|cze|gre)|vost(?:fr|a|en)?)\b`),
 		Transform: toBoolean(),
 	},
+	// subtitles (jhin, not PTT, #38): the subset of Languages that is
+	// specifically subtitle evidence, from the fused compound tokens above
+	// and the separated forms the generic subbed handlers below flag
+	// (Eng-Sub, SUB.ITA, [Subs.EN], Eng.Subbed). Additive only: never
+	// removes, so Languages and Subbed are unaffected.
+	customSubtitleLanguages,
 	// languages: \b(temporadas?|completa)\b
 	{
 		Field:        "languages",
