@@ -348,7 +348,7 @@ Field semantics follow [PTT](https://github.com/dreulavelle/PTT) 1.8.5
 - **Site** (`string`): source website
 - **Size** (`string`): e.g. `2.3GB`
 - **Subbed** (`bool`): subtitles present, from a sub token (`SUBS`, `Multi-Subs`, `SUBBED`) or a language fused to one (`ENGSUB`, `ESub`, `VOSTFR`, `SWESUB`)
-- **Subtitles** (`[]string`, jhin, not PTT, [#38](https://github.com/dreulavelle/jhin/issues/38)): the subset of `Languages` that is specifically subtitle evidence — a language fused to (`ENGSUB`, `KORSUB`) or immediately adjacent to (`Eng-Sub`, `SUB.ITA`, `[Subs.EN]`) a sub token. Additive only: matched languages stay in `Languages` too, and a sub token with no identifiable language (`Multi-Subs`) leaves `Subtitles` empty while still setting `Subbed`.
+- **Subtitles** (`[]string`, jhin, not PTT, [#38](https://github.com/dreulavelle/jhin/issues/38)): the languages a release names as subtitle evidence — fused to a sub token (`ENGSUB`, `KORSUB`), adjacent to one (`Eng-Sub`, `SUB.ITA`, `[Subs.EN]`), or in the run a sub token introduces (`Sub Eng Esp Tur`, `En Subs[Sv.No.Fi]`, `sub. ROM, TUR`). The run stops at the first token that isn't a language, so title words after `[Eng Subs]` are never read as one. Usually a subset of `Languages`, but not always: a subtitle-only language the audio handlers never see (`Sv.No.Fi` above) lands here alone. Additive: nothing is removed from `Languages`, and a sub token naming no language (`Multi-Subs`, `No.Subs`) leaves `Subtitles` empty while still setting `Subbed`.
 - **ThreeD** (`bool`): 3D release
 - **Title** (`string`): cleaned title
 - **Torrent** / **Trash** / **Uncensored** / **Unrated** / **Upscaled** (`bool`)
