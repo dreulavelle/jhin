@@ -271,6 +271,7 @@ var DefaultPolicies = map[Attr]Policy{
 	AttrDocumentary: {Fetch: false, Rank: -250},
 	AttrConverted:   {Fetch: false, Rank: -1000},
 	AttrDubbed:      {Fetch: true, Rank: -1000},
+	AttrDualAudio:   {Fetch: true, Rank: 0},
 	Attr3D:          {Fetch: false, Rank: -10000},
 	AttrUpscaled:    {Fetch: false, Rank: -10000},
 	AttrSite:        {Fetch: false, Rank: -10000},

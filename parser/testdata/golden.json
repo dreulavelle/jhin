@@ -1131,6 +1131,7 @@
   {
     "title": "A.Clockwork.Orange.1971.BRDRIP.1080p.DUAL.PORT-BR.ENG.gmenezes.m",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 1971,
       "languages": [
@@ -1228,6 +1229,7 @@
   {
     "title": "Abuela (2015) 1080p BluRay x264 AC3 Dual Latino-Inglés",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 2015,
       "quality": "BluRay",
@@ -1742,6 +1744,7 @@
   {
     "title": "Avatar The Way of Water (2022) 1080p HQ S-Print Dual Audio [Hindi   English] x264 AAC HC-Esub - CineVood.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "trash": true,
@@ -1768,6 +1771,7 @@
   {
     "title": "Avatar The Way of Water (2022) 1080p S Print Dual Audio [Hindi   English] x264 AAC HC-Esub - CineVood.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "trash": true,
@@ -2024,6 +2028,7 @@
   {
     "title": "Berserk 01-25 [dual audio JP,EN] MKV",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "episodes": [
         1,
@@ -2662,6 +2667,7 @@
   {
     "title": "Buttobi!! CPU - 02 (DVDRip 720x480p x265 HEVC AC3x2 2.0x2)(Dual Audio)[sxales].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "720x480p",
       "quality": "DVDRip",
@@ -2762,6 +2768,7 @@
   {
     "title": "Casablanca 1942 BDRip 1080p [multi language,multi subs].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "year": 1942,
@@ -3074,6 +3081,7 @@
   {
     "title": "Cowboy Bebop - 1080p BDrip Audio+sub MULTI (VF / VOSTFR)",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "quality": "BDRip",
       "languages": [
@@ -3089,6 +3097,7 @@
   {
     "title": "Cowboy Bebop The Movie (2001) BD 1080p.x265.Tri-Audio.Ita.Eng.Jap [Rady]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 2001,
       "codec": "hevc",
@@ -3503,6 +3512,7 @@
   {
     "title": "Desperation 2006 Multi Pal DvdR9-TBW1973",
     "result": {
+      "dual_audio": true,
       "year": 2006,
       "region": "R9",
       "quality": "DVD",
@@ -3880,6 +3890,7 @@
   {
     "title": "Dumbo.2019.1080p.Dual.Lat",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 2019,
       "languages": [
@@ -3973,6 +3984,7 @@
   {
     "title": "Ecrit.Dans.Le.Ciel.1954.MULTI.DVDRIP.x264.AC3-gismo65",
     "result": {
+      "dual_audio": true,
       "year": 1954,
       "quality": "DVDRip",
       "codec": "avc",
@@ -4371,6 +4383,7 @@
   {
     "title": "Extraction.2020.720p.NF.WEB-DL.Dual.Atmos.5.1.x264-BonsaiHD",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "year": 2020,
       "quality": "WEB-DL",
@@ -4393,6 +4406,7 @@
   {
     "title": "FLCL S05.1080p HMAX WEB-DL DD2.0 H 264-VARYG (FLCL: Shoegaze Dual-Audio Multi-Subs)",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "quality": "WEB-DL",
       "codec": "avc",
@@ -4528,6 +4542,7 @@
   {
     "title": "Fallout.S01E03.The.Head.2160p.DV.HDR10Plus.Ai-Enhanced.H265.DDP.5.1.MULTI.RIFE.4.15v2-60fps-DirtyHippie.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "2160p",
       "upscaled": true,
@@ -4558,6 +4573,7 @@
   {
     "title": "Fame (1980) [DVDRip][Dual][Ac3][Eng-Spa]",
     "result": {
+      "dual_audio": true,
       "year": 1980,
       "quality": "DVDRip",
       "audio": [
@@ -4752,6 +4768,7 @@
   {
     "title": "Friends.1994.INTEGRALE.MULTI.1080p.WEB-DL.H265-FTMVHD",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 1994,
       "quality": "WEB-DL",
@@ -5294,6 +5311,7 @@
   {
     "title": "Game of Thrones 1ª a 8ª Temporada Completa [720p-1080p] [BluRay] [DUAL]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "quality": "BluRay",
       "languages": [
@@ -5674,6 +5692,7 @@
   {
     "title": "Grimm.INTEGRAL.MULTI.COMPLETE.BLURAY-BMTH",
     "result": {
+      "dual_audio": true,
       "quality": "BluRay",
       "group": "BMTH",
       "languages": [
@@ -5888,6 +5907,7 @@
   {
     "title": "Harry Potter All Movies Collection 2001-2011 720p Dual KartiKing",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "complete": true,
       "dubbed": true,
@@ -6258,6 +6278,7 @@
   {
     "title": "Inception 2010 1080p BRRIP[dual-audio][eng-hindi]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 2010,
       "quality": "BRRip",
@@ -6863,6 +6884,7 @@
   {
     "title": "Joker.2019.MULTi.Bluray.1080p.Atmos.7.1.En.Fr.Sp.Pt-DDR[EtHD]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 2019,
       "quality": "BluRay",
@@ -6973,6 +6995,7 @@
   {
     "title": "Jumanji The Next Level (2019) 720p HDCAM Ads Blurred x264 Dual A",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "trash": true,
       "year": 2019,
@@ -6997,6 +7020,7 @@
   {
     "title": "Jurassic.World.Dominion.CUSTOM.EXTENDED.2022.2160p.MULTi.VF2.UHD.Blu-ray.REMUX.HDR.DoVi.HEVC.DTS-X.DTS-HDHRA.7.1-MOONLY.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "2160p",
       "year": 2022,
@@ -7306,6 +7330,7 @@
   {
     "title": "Le Labyrinthe 2014 Multi-VF2 1080p BluRay x264-PopHD",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 2014,
       "quality": "BluRay",
@@ -7554,6 +7579,7 @@
   {
     "title": "Macross ~ Do You Remember Love (1984) (BDRip 1920x1036p x265 HEVC DTS-HD MA, FLAC, AC3x2 5.1+2.0x3)(Dual Audio)[sxales].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "year": 1984,
@@ -7894,6 +7920,7 @@
   {
     "title": "Men in Black International (2019) 720p Korsub HDRip x264 ESub [Dual Line Audio] [Hindi English]",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "year": 2019,
       "quality": "HDRip",
@@ -8550,6 +8577,7 @@
   {
     "title": "Naruto Collection [DB 1080p][ Dual Audio ][ English & Arabic Sub ]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "complete": true,
       "languages": [
@@ -9152,6 +9180,7 @@
   {
     "title": "O Rei do Show 2018 Dual Áudio 4K UtraHD By.Luan.Harper.",
     "result": {
+      "dual_audio": true,
       "resolution": "2160p",
       "year": 2018,
       "dubbed": true,
@@ -9388,6 +9417,7 @@
   {
     "title": "Oppenheimer.2023.2160p.MA.WEB-DL.DUAL.DTS.HD.MA.5.1+DD+5.1.DV-HDR.H.265-TheBiscuitMan.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "2160p",
       "year": 2023,
@@ -9480,6 +9510,7 @@
   {
     "title": "Outlaw Star - 23 (BDRip 1440x1080p x265 HEVC AC3, FLACx2 2.0x3)(Dual Audio)[sxales].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1440x1080p",
       "quality": "BDRip",
@@ -9857,6 +9888,7 @@
   {
     "title": "Predator 1987 REMASTER MULTi 1080p BluRay x264 FiDELiO",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 1987,
       "edition": "Remastered",
@@ -10247,6 +10279,7 @@
   {
     "title": "Sakura Wars the Movie (2001) (BDRip 1920x1036p x265 HEVC FLACx2, AC3 2.0+5.1x2)(Dual Audio)[sxales].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "year": 2001,
@@ -10732,6 +10765,7 @@
   {
     "title": "Spider-Man (2002) Blu-Ray [720p] Dual Ingles-Español",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "year": 2002,
       "quality": "BluRay",
@@ -11242,6 +11276,7 @@
   {
     "title": "Supernatural - S03E01 - 720p BluRay x264-Belex - Dual Audio + Legenda.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "720p",
       "quality": "BluRay",
@@ -11926,6 +11961,7 @@
   {
     "title": "The Fifth Element 1997 REMASTERED MULTi 1080p BluRay HDLight AC3 x264 Zone80",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 1997,
       "edition": "Remastered",
@@ -12162,6 +12198,7 @@
   {
     "title": "The Karate Kid Part III 1989 1080p DUAL TİVİBU WEB-DL x264 AAC - HdT",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 1989,
       "quality": "WEB-DL",
@@ -12460,6 +12497,7 @@
   {
     "title": "The Shawshank Redemption 1994.MULTi.1080p.Blu-ray.DTS-HDMA.5.1.HEVC-DDR[EtHD]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "year": 1994,
       "quality": "BluRay",
@@ -14534,6 +14572,7 @@
   {
     "title": "Western - L'homme qui n'a pas d'étoile-1955.Multi.DVD9",
     "result": {
+      "dual_audio": true,
       "year": 1955,
       "dubbed": true,
       "episodes": [],
@@ -14825,6 +14864,7 @@
   {
     "title": "Yu-Gi-Oh! ZEXAL Temporada 1 Episodio 009 Dual Latino e Inglés [B3B4970E].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "episode_code": "B3B4970E",
       "languages": [
@@ -15071,6 +15111,7 @@
   {
     "title": "[Anime Time] One Piece (0001-1071+Movies+Specials) [BD+CR] [Dual Audio] [1080p][HEVC 10bit x265][AAC][Multi Sub]",
     "result": {
+      "dual_audio": true,
       "title": "One Piece",
       "resolution": "1080p",
       "bit_depth": "10bit",
@@ -16234,6 +16275,7 @@
   {
     "title": "[BEST-TORRENTS.COM] The.Penguin.S01E07.MULTi.1080p.AMZN.WEB-DL.H264.DDP5.1.Atmos-K83",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "quality": "WEB-DL",
       "codec": "avc",
@@ -16451,6 +16493,7 @@
   {
     "title": "[DB] Gamers! [Dual Audio 10bit 720p][HEVC-x265]",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "bit_depth": "10bit",
       "codec": "hevc",
@@ -16551,6 +16594,7 @@
   {
     "title": "[DragsterPS] Yu-Gi-Oh! S02 [480p] [Multi-Audio] [Multi-Subs]",
     "result": {
+      "dual_audio": true,
       "resolution": "480p",
       "seasons": [
         2
@@ -16853,6 +16897,7 @@
   {
     "title": "[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]",
     "result": {
+      "dual_audio": true,
       "title": "Fairy Tail",
       "resolution": "480p",
       "seasons": [
@@ -16872,6 +16917,7 @@
   {
     "title": "[F-D] Fairy Tail Season 1 -6 + Extras [480P][Dual-Audio]",
     "result": {
+      "dual_audio": true,
       "title": "Fairy Tail",
       "resolution": "480p",
       "seasons": [
@@ -16891,6 +16937,7 @@
   {
     "title": "[F-D] Fairy.Tail.-.004v2.-. [480P][Dual-Audio].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "480p",
       "episodes": [
@@ -17159,6 +17206,7 @@
   {
     "title": "[HD-ELITE.NET] -  The.Art.Of.The.Steal.2014.DVDRip.XviD.Dual.Aud",
     "result": {
+      "dual_audio": true,
       "year": 2014,
       "quality": "DVDRip",
       "codec": "xvid",
@@ -17219,6 +17267,7 @@
   {
     "title": "[IceBlue] Naruto (Season 01) - [Multi-Dub][Multi-Sub][HEVC 10Bits] 800p BD",
     "result": {
+      "dual_audio": true,
       "resolution": "800p",
       "codec": "hevc",
       "seasons": [
@@ -17267,6 +17316,7 @@
   {
     "title": "[JySzE] Naruto [v2] [R2J] [VFR] [Dual Audio] [Complete] [Extras] [x264]",
     "result": {
+      "dual_audio": true,
       "title": "Naruto",
       "region": "R2J",
       "codec": "avc",
@@ -17283,6 +17333,7 @@
   {
     "title": "[JySzE] Naruto [v3] [R2J] [VFR] [Dual Audio] [Complete] [Extras] [x264]",
     "result": {
+      "dual_audio": true,
       "title": "Naruto",
       "region": "R2J",
       "codec": "avc",
@@ -17347,6 +17398,7 @@
   {
     "title": "[LostYears] Tsuredure Children (WEB 720p Hi10 AAC) [Dual-Audio]",
     "result": {
+      "dual_audio": true,
       "resolution": "720p",
       "quality": "WEB",
       "bit_depth": "10bit",
@@ -17364,6 +17416,7 @@
   {
     "title": "[LostYears] takt op.Destiny (WEB 1080p x264 AAC) [Dual-Audio]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "quality": "WEB",
       "codec": "avc",
@@ -18103,6 +18156,7 @@
   {
     "title": "[UsifRenegade] Cardcaptor Sakura - 54 [BD-RM][1080p][x265_10Bit][Dual_AAC].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "quality": "BDRip",
@@ -18125,6 +18179,7 @@
   {
     "title": "[UsifRenegade] Cardcaptor Sakura [BD][Remastered][1080p][HEVC_10Bit][Dual] + Movies",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "edition": "Remastered",
       "quality": "BDRip",
@@ -18223,6 +18278,7 @@
   {
     "title": "[bonkai77].RahXephon.Episode.08.Bitterly.Cold.Holy.Night.[BD.1080p.Dual.Audio.x265.HEVC.10bit].mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "resolution": "1080p",
       "quality": "BDRip",
@@ -18242,6 +18298,7 @@
   {
     "title": "[naiyas] Fate Stay Night - Unlimited Blade Works Movie [BD 1080P HEVC10 QAACx2 Dual Audio]",
     "result": {
+      "dual_audio": true,
       "resolution": "1080p",
       "quality": "BDRip",
       "bit_depth": "10bit",
@@ -19555,6 +19612,7 @@
   {
     "title": "www.MovCr.to - Bikram Yogi, Guru, Predator (2019) 720p WEB_DL x264 ESubs [Dual Audio]-[Hindi + Eng] - 950MB - MovCr.mkv",
     "result": {
+      "dual_audio": true,
       "container": "mkv",
       "site": "www.MovCr.to",
       "resolution": "720p",
@@ -20685,6 +20743,112 @@
       "resolution": "2160p",
       "title": "Movie",
       "upscaled": true,
+      "year": 2020
+    }
+  },
+  {
+    "title": "[SubsPlease] Frieren - 01 (1080p) [Dual-Audio]",
+    "result": {
+      "dual_audio": true,
+      "dubbed": true,
+      "episodes": [
+        1
+      ],
+      "group": "SubsPlease",
+      "resolution": "1080p",
+      "title": "Frieren"
+    }
+  },
+  {
+    "title": "Frieren.S01E01.DUAL.1080p.WEB.H264-GROUP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": true,
+      "dubbed": true,
+      "episodes": [
+        1
+      ],
+      "group": "GROUP",
+      "quality": "WEB",
+      "resolution": "1080p",
+      "scene": true,
+      "seasons": [
+        1
+      ],
+      "title": "Frieren"
+    }
+  },
+  {
+    "title": "Movie.2020.MULTi.1080p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": true,
+      "dubbed": true,
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2020
+    }
+  },
+  {
+    "title": "Movie.2020.MULTi-Subs.1080p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": false,
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "subbed": true,
+      "title": "Movie",
+      "year": 2020
+    }
+  },
+  {
+    "title": "Movie.2020.Dual.Audio.Hindi.English.720p-GROUP",
+    "result": {
+      "dual_audio": true,
+      "dubbed": true,
+      "group": "GROUP",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "resolution": "720p",
+      "title": "Movie",
+      "year": 2020
+    }
+  },
+  {
+    "title": "Anime.S01E01.JA.EN.1080p.WEB-DL.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": false,
+      "episodes": [
+        1
+      ],
+      "group": "GROUP",
+      "languages": [
+        "en",
+        "ja"
+      ],
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        1
+      ],
+      "title": "Anime"
+    }
+  },
+  {
+    "title": "Movie.2020.1080p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": false,
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
       "year": 2020
     }
   }

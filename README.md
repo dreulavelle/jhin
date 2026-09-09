@@ -324,10 +324,12 @@ Field semantics follow [PTT](https://github.com/dreulavelle/PTT) 1.8.5
 - **Bitrate** (`string`): e.g. `448kbps`
 - **Channels** (`[]string`): `2.0`, `5.1`, `7.1`, `stereo`, `mono`
 - **Codec** (`string`): `avc`, `hevc`, `av1`, `xvid`, `mpeg` (normalized: `AVC`, `HEVC`, ...)
-- **Commentary** / **Complete** / **Convert** / **Documentary** / **Dubbed** (`bool`)
+- **Commentary** / **Complete** / **Convert** / **Documentary** (`bool`)
 - **Container** (`string`): `mkv`, `avi`, `mp4`, ...
 - **Country** (`string`): `US`, `UK`, `AU`, `NZ`, `CA`
 - **Date** (`string`): `YYYY-MM-DD`
+- **DualAudio** (`bool`): an explicit dual/multi-audio marker (`Dual Audio`, bare `DUAL`, `Multi-Audio`, bare `MULTi` when it isn't a subs marker) or 2+ languages on an already-dubbed, non-subbed release
+- **Dubbed** (`bool`)
 - **Edition** (`string`): `Anniversary Edition`, `Director's Cut`, `Extended Edition`, `IMAX`, ...
 - **EpisodeCode** (`string`): 8-char CRC code
 - **Episodes** / **Seasons** / **Volumes** (`[]int`)
@@ -336,7 +338,7 @@ Field semantics follow [PTT](https://github.com/dreulavelle/PTT) 1.8.5
 - **Group** (`string`): release group
 - **HDR** (`[]string`): `DV`, `HDR10+`, `HDR`, `SDR`
 - **Hardcoded** (`bool`)
-- **Languages** (`[]string`): ISO 639-1 codes (`en`, `ja`, `zh`, ...) plus `multi subs`, `multi audio`, `dual audio`
+- **Languages** (`[]string`): ISO 639-1 codes (`en`, `ja`, `zh`, ...); a `multi subs`/`multi audio`/`dual audio` release sets `Dubbed`/`Subbed`/`DualAudio` instead, often with `Languages` left empty
 - **Network** (`string`): `Netflix`, `Amazon`, `HBO`, ...
 - **PPV** / **Proper** / **Remastered** / **Repack** / **Retail** (`bool`)
 - **Quality** (`string`): `WEB`, `WEB-DL`, `WEBRip`, `BluRay`, `BluRay REMUX`, `HDTV`, `CAM`, `TeleSync`, `DVDRip`, ...

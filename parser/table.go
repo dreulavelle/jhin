@@ -2961,6 +2961,12 @@ var handlers = []handler{
 		Remove:       true,
 		KeepMatching: true,
 	},
+	// dual_audio: an explicit dual/multi-audio marker, checked once the two
+	// subbed handlers above have already stripped any MULTi/Dual token that
+	// was actually a subtitle marker — whatever survives here names an audio
+	// track, not a subtitle. Runs before the dubbed multi/dual handlers below
+	// so it sees the same tokens they do, without Remove so they still fire.
+	customDualAudioMarker,
 	// dubbed: [\[(\s]?\bmulti(?:ple)?[ .-]*(?:lang(?:uages?)?|audio|VF2)\b\][\[(\s]?
 	{
 		Field:        "dubbed",
@@ -3030,6 +3036,12 @@ var handlers = []handler{
 		Transform: toBoolean(),
 		Remove:    true,
 	},
+	// dual_audio: dubbed with 2+ distinct spoken languages and no subtitle
+	// marker is two audio tracks named by language rather than by a "dual"/
+	// "multi" token (e.g. "Hindi.English", "JA.EN"); a fallback for releases
+	// customDualAudioMarker's tokens don't cover, run once languages/dubbed/
+	// subbed are all final.
+	customDualAudioFromLanguages,
 	// group: ['custom:handle_group']
 	customHandleGroup,
 	// 3d: (?<=\b[12]\d{3}\b).*\b(3d|sbs|half[ .-]ou|half[ .-]sbs)\b

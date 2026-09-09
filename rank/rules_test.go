@@ -389,6 +389,31 @@ func TestTraitVocabularyIsChecked(t *testing.T) {
 	}
 }
 
+// dual_audio is its own trait alongside dubbed, so a rule can single out an
+// explicit dual-audio release without matching every plain dub too.
+func TestDualAudioTrait(t *testing.T) {
+	p := Default()
+	p.Rules = []rules.Rule{{Name: "r", When: `"dualaudio" in traits`, Score: "1"}}
+	eng, err := p.CompileRules(nil)
+	if err != nil {
+		t.Fatalf("the dualaudio trait was refused: %v", err)
+	}
+	r, err := New(p, WithRules(eng))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := r.Rank("Anime.S01E01.1080p.BluRay.Dual.Audio.x265-GRP")
+	if len(got.RuleMatches) != 1 {
+		t.Errorf("an explicit dual-audio release did not read as dualaudio: %+v", got.RuleMatches)
+	}
+
+	got = r.Rank("Anime.S01E01.1080p.BluRay.DUBBED.x265-GRP")
+	if len(got.RuleMatches) != 0 {
+		t.Errorf("a plain dubbed release incorrectly read as dualaudio: %+v", got.RuleMatches)
+	}
+}
+
 // A release the baseline filters rejected is not "something better": a rule
 // asking whether the set holds a remux must not count one the profile itself
 // threw out.

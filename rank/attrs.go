@@ -82,6 +82,7 @@ const (
 	AttrConverted   Attr = "converted"
 	AttrDocumentary Attr = "documentary"
 	AttrDubbed      Attr = "dubbed"
+	AttrDualAudio   Attr = "dualaudio"
 	AttrEdition     Attr = "edition"
 	AttrHardcoded   Attr = "hardcoded"
 	AttrNetwork     Attr = "network"
@@ -217,6 +218,7 @@ func attributes(d *parser.Result) []Attr {
 	flag(d.Convert, AttrConverted)
 	flag(d.Documentary, AttrDocumentary)
 	flag(d.Dubbed, AttrDubbed)
+	flag(d.DualAudio, AttrDualAudio)
 	flag(d.Edition != "", AttrEdition)
 	flag(d.Hardcoded, AttrHardcoded)
 	flag(d.Network != "", AttrNetwork)

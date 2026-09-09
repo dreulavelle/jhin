@@ -226,6 +226,7 @@ type Result struct {
 	Country     string   `json:"country"`
 	Date        string   `json:"date"`
 	Documentary bool     `json:"documentary"`
+	DualAudio   bool     `json:"dual_audio"`
 	Dubbed      bool     `json:"dubbed"`
 	Edition     string   `json:"edition"`
 	EpisodeCode string   `json:"episode_code"`
@@ -576,6 +577,8 @@ func parse(title string, handlers []handler) (r *Result) {
 			r.Date = v.(string)
 		case "documentary":
 			r.Documentary = v.(bool)
+		case "dualAudio":
+			r.DualAudio = v.(bool)
 		case "dubbed":
 			r.Dubbed = v.(bool)
 		case "edition":
