@@ -281,6 +281,10 @@ pinned expectations, listed here:
 - A language fused to a sub token (`ENGSUB`, `ESub`, `VOSTFR`, `SWESUB`,
   `KORSUB`, `PLSUB`, `SUBFRENCH`) sets `Subbed`, not only `Languages`, and
   the plural `ESubs` sets `Languages` to `en` like the singular.
+- `ITUNES`/`iTunes`/bare `iT` and `PMTP` are network tags (iTunes and
+  Paramount) that PTT's own table doesn't map, so it left them unset.
+- Bare `DC` after the year is Director's Cut (`Color.Of.Night.Unrated.DC...`),
+  another tag missing from PTT's table.
 
 ## How it compares
 
