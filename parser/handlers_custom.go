@@ -447,7 +447,7 @@ var subtitleAdjacentLangs = map[string]string{
 	"ja": "ja", "jp": "ja", "jap": "ja", "jpn": "ja",
 	"kan": "kn",
 	"ko":  "ko", "kor": "ko",
-	"lat": "la", "lati": "la",
+	"lat": "es-419", "lati": "es-419",
 	"lt":  "lt",
 	"mal": "ml",
 	"may": "ms",

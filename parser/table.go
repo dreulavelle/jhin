@@ -2137,7 +2137,7 @@ var handlers = []handler{
 	{
 		Field:         "languages",
 		Pattern:       regexp.MustCompile(`(?i)\bspanish\W?latino?\b|\bamerican\W*(?:spanish|espa[n\xf1]ol|spa|esp?)\b`),
-		Transform:     toValueSet(`la`),
+		Transform:     toValueSet(`es-419`),
 		Remove:        true,
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -2154,7 +2154,7 @@ var handlers = []handler{
 	{
 		Field:        "languages",
 		Pattern:      regexp.MustCompile(`(?i)\b(?:audio.)?lat(?:in?|ino)?\b`),
-		Transform:    toValueSet(`la`),
+		Transform:    toValueSet(`es-419`),
 		KeepMatching: true,
 	},
 	// languages: \b(?:audio.)?(?:ESP?|spa|(en[ .]+)?espa[nñ]ola?|castellano)\b

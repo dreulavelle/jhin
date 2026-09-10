@@ -296,6 +296,9 @@ correction is a reviewed change to the pinned expectations, listed here:
   colon binds the two halves into one token. `DTS.ES` and `DTS ES` are two
   tokens, DTS audio and the Spanish language tag, unless a `6.1` or
   `Discrete`/`Matrix` marker follows: only the format carries those.
+- Latino audio is `es-419`, not `la`. PTT emits `la` for Latin-American
+  Spanish, but ISO 639-1 `la` is Latin, a different language; `es-419` is the
+  identifier for the Spanish it actually means. Castilian stays `es`.
 - A site tag must be delimited. `<word>.<tld>` is title-shaped as often as
   it is domain-shaped, so a match floating between two separators is part of
   the title (`Buck.Rogers.TV.Series`, `Show.4Kids.TV`); a real site sits in
