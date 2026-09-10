@@ -271,9 +271,11 @@ fuzzing.
 `parser/testdata/golden.json` pins the expected output for 1,233 real-world
 release names across every field. Any behavioral regression fails CI.
 
-The corpus was seeded from the Python PTT 1.8.5 parser. jhin owns it and
-diverges where PTT is wrong; each divergence is a reviewed change to the
-pinned expectations, listed here:
+The corpus was seeded from the Python PTT 1.8.5 parser, and jhin is that
+parser's successor: PTT is where these expectations started, not what they
+have to agree with. Where PTT is wrong, jhin is corrected against how
+release names are actually written, not against PTT's reading. Each such
+correction is a reviewed change to the pinned expectations, listed here:
 
 - A domain-shaped match may not swallow the whole title (`The Net (1995)`).
 - `IMAX Enhanced` is a certification, not an upscale.
@@ -332,8 +334,9 @@ remaining microseconds buy.
 
 ## `Result` Reference
 
-Field semantics follow [PTT](https://github.com/dreulavelle/PTT) 1.8.5
-(commit `88429bb`) except for the divergences listed under Accuracy.
+Field semantics started from [PTT](https://github.com/dreulavelle/PTT) 1.8.5
+(commit `88429bb`) and are jhin's own from here. Where the two now read a
+release differently, the corrections are listed under Accuracy.
 
 - **Adult** (`bool`): adult-content detection (keyword list)
 - **Audio** (`[]string`): `DTS Lossless`, `DTS Lossy`, `DTS:X`, `DTS-ES`, `Atmos`, `TrueHD`, `FLAC`, `Dolby Digital Plus`, `Dolby Digital`, `AAC`, `PCM`, `OPUS`, `MP3`, `HQ Clean Audio`
