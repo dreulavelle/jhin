@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/dreulavelle/jhin/compare/v0.7.0...v0.7.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **parser:** Latino audio is es-419, not la ([#64](https://github.com/dreulavelle/jhin/issues/64)) ([9b522ff](https://github.com/dreulavelle/jhin/commit/9b522ff6c968811edf53d29761dfc971d6cf3c2f))
+
 ## [0.7.0](https://github.com/dreulavelle/jhin/compare/v0.6.2...v0.7.0) (2026-09-10)
 
 
