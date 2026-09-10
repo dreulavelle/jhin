@@ -14456,7 +14456,6 @@
     "result": {
       "year": 2009,
       "quality": "DVD",
-      "codec": "xvid",
       "group": "Team",
       "languages": [
         "nl"
@@ -22145,6 +22144,88 @@
       "resolution": "1080p",
       "title": "NFS Need For Speed",
       "year": 2014
+    }
+  },
+  {
+    "title": "American.Essentials.2019.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "American Essentials",
+      "year": 2019
+    }
+  },
+  {
+    "title": "American.Space.Odyssey.2019.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "American Space Odyssey",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Animal.Planetarium.S01E01.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        1
+      ],
+      "title": "Animal Planetarium"
+    }
+  },
+  {
+    "title": "FilmSubs.Movie.2019.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "FilmSubs Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2005.DVDRip-DivXPlanet",
+    "result": {
+      "group": "DivXPlanet",
+      "quality": "DVDRip",
+      "title": "Movie",
+      "year": 2005
+    }
+  },
+  {
+    "title": "Movie.2005.DVDRip.DivX5.1-GRP",
+    "result": {
+      "codec": "xvid",
+      "group": "GRP",
+      "quality": "DVDRip",
+      "title": "Movie",
+      "year": 2005
+    }
+  },
+  {
+    "title": "Pelicula.2019.1080p.American.Espanol.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "languages": [
+        "la"
+      ],
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Pelicula",
+      "year": 2019
     }
   }
 ]

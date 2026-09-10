@@ -633,10 +633,10 @@ var handlers = []handler{
 		Transform: toBoolean(),
 		Remove:    true,
 	},
-	// repack: \bREPACK|RERIP\b
+	// repack: \bREPACK|\bRERIP\b
 	{
 		Field:     "repack",
-		Pattern:   regexp.MustCompile(`(?i)\bREPACK|RERIP\b`),
+		Pattern:   regexp.MustCompile(`(?i)\bREPACK|\bRERIP\b`),
 		Transform: toBoolean(),
 		Remove:    true,
 	},
@@ -1059,10 +1059,10 @@ var handlers = []handler{
 		Remove:       true,
 		KeepMatching: true,
 	},
-	// codec: \bdivx|xvid\b
+	// codec: \bdivx\d*\b|\bxvid\b
 	{
 		Field:        "codec",
-		Pattern:      regexp.MustCompile(`(?i)\bdivx|xvid\b`),
+		Pattern:      regexp.MustCompile(`(?i)\bdivx\d*\b|\bxvid\b`),
 		Transform:    toValue(`xvid`),
 		Remove:       true,
 		KeepMatching: true,
@@ -2133,10 +2133,10 @@ var handlers = []handler{
 		Transform: toValueSet(`fr`),
 		Remove:    true,
 	},
-	// languages: \bspanish\W?latin|american\W*(?:spa|esp?)
+	// languages: \bspanish\W?latino?\b|\bamerican\W*(?:spanish|espa[n\xf1]ol|spa|esp?)\b
 	{
 		Field:         "languages",
-		Pattern:       regexp.MustCompile(`(?i)\bspanish\W?latin|american\W*(?:spa|esp?)`),
+		Pattern:       regexp.MustCompile(`(?i)\bspanish\W?latino?\b|\bamerican\W*(?:spanish|espa[n\xf1]ol|spa|esp?)\b`),
 		Transform:     toValueSet(`la`),
 		Remove:        true,
 		KeepMatching:  true,
@@ -3051,13 +3051,13 @@ var handlers = []handler{
 	},
 	// languages: ['custom:infer_language_based_on_naming']
 	customInferLanguageBasedOnNaming,
-	// subbed: \bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub
+	// subbed: \bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|\bmsubs?\b
 	// KeepMatching: the fused-token handler before the languages block may
 	// already hold the field; without it this Remove is skipped and a
 	// leftover MULTi reads as dubbed.
 	{
 		Field:        "subbed",
-		Pattern:      regexp.MustCompile(`(?i)\bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|msub`),
+		Pattern:      regexp.MustCompile(`(?i)\bmulti(?:ple)?[ .-]*(?:su?$|sub\w*|dub\w*)\b|\bmsubs?\b`),
 		Transform:    toBoolean(),
 		Remove:       true,
 		KeepMatching: true,
@@ -3129,10 +3129,10 @@ var handlers = []handler{
 		Transform: toBoolean(),
 		Remove:    true,
 	},
-	// dubbed: \b(JAP?(anese)?|ZH)\+ENG?(lish)?|ENG?(lish)?\+(JAP?(anese)?|ZH)\b
+	// dubbed: \b(JAP?(anese)?|ZH)\+ENG?(lish)?|\bENG?(lish)?\+(JAP?(anese)?|ZH)\b
 	{
 		Field:     "dubbed",
-		Pattern:   regexp.MustCompile(`(?i)\b(JAP?(anese)?|ZH)\+ENG?(lish)?|ENG?(lish)?\+(JAP?(anese)?|ZH)\b`),
+		Pattern:   regexp.MustCompile(`(?i)\b(JAP?(anese)?|ZH)\+ENG?(lish)?|\bENG?(lish)?\+(JAP?(anese)?|ZH)\b`),
 		Transform: toBoolean(),
 		Remove:    true,
 	},
@@ -3382,10 +3382,10 @@ var handlers = []handler{
 		Transform: toValue(`Adult Swim`),
 		Remove:    true,
 	},
-	// network: \bAnimal.?Planet|ANPL\b
+	// network: \bAnimal.?Planet\b|\bANPL\b
 	{
 		Field:     "network",
-		Pattern:   regexp.MustCompile(`(?i)\bAnimal.?Planet|ANPL\b`),
+		Pattern:   regexp.MustCompile(`(?i)\bAnimal.?Planet\b|\bANPL\b`),
 		Transform: toValue(`Animal Planet`),
 		Remove:    true,
 	},

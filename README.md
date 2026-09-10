@@ -268,7 +268,7 @@ fuzzing.
 
 ## Accuracy
 
-`parser/testdata/golden.json` pins the expected output for 1,233 real-world
+`parser/testdata/golden.json` pins the expected output for 1,240 real-world
 release names across every field. Any behavioral regression fails CI.
 
 The corpus was seeded from the Python PTT 1.8.5 parser, and jhin is that
@@ -296,6 +296,10 @@ correction is a reviewed change to the pinned expectations, listed here:
   colon binds the two halves into one token. `DTS.ES` and `DTS ES` are two
   tokens, DTS audio and the Spanish language tag, unless a `6.1` or
   `Discrete`/`Matrix` marker follows: only the format carries those.
+- A codec is not inferred from a release group's name. PTT read the `DivX`
+  inside `DivXNL-Team` as the codec; a group that names itself after a codec
+  is not declaring one (`Vampire in Vegas ... DivXNL-Team`). `DivX` and a
+  versioned `DivX5` still resolve as codecs on their own.
 - The `SLO` family is Slovenian, not Slovak. PTT folded `SLO` and `SLOSUBS`
   into Slovak on the ISO 639-2/B code `slo`, but in release naming `SLO` is
   Slovenia and SLOSUBS was a Slovenian subtitle community. Slovak keeps its
