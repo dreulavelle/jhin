@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type hProcessor func(title string, m *parseMeta, result map[string]*parseMeta) *parseMeta
@@ -135,15 +136,46 @@ func validateNotMatch(re *regexp.Regexp) *hMatchValidator {
 	})
 }
 
+// siteDelimiters are the characters a site tag is set off by when it is not
+// at one end of the name. A real site sits in brackets or at a boundary; a
+// bare "<word>.<tld>" floating between two separators is part of the title
+// ("Buck.Rogers.TV.Series", "Show.4Kids.TV").
+const siteDelimiters = "[](){}<>【】〈〉«»"
+
+// siteMatchIsDelimited reports whether the match touches a bracket or one end
+// of the name, ignoring spaces on either side.
+func siteMatchIsDelimited(input string, match []int) bool {
+	before := strings.TrimRight(input[:match[0]], " ._-")
+	if before == "" {
+		return true
+	}
+	if r, _ := utf8.DecodeLastRuneInString(before); strings.ContainsRune(siteDelimiters, r) {
+		return true
+	}
+	after := strings.TrimLeft(input[match[1]:], " ")
+	if after == "" {
+		return true
+	}
+	r, _ := utf8.DecodeRuneInString(after)
+	return strings.ContainsRune(siteDelimiters, r)
+}
+
 // validateSiteLeavesTitle rejects a domain-shaped match that would swallow the
 // whole title. "<word><separator><tld>" is ambiguous — "The Net", "The.Net"
 // and "Rutracker.org" all fit it — so where the match would leave no title it
 // is only trusted for a name nothing has yet been stripped from: a bare site
 // stands alone, whereas anything that carried removable metadata is a release,
 // and a release has a title.
+//
+// It also rejects a match that is not delimited at all, which is the same
+// ambiguity one level down: the pattern's own `.tv`/`.co` branches match any
+// title word that happens to precede them.
 func validateSiteLeavesTitle() *hMatchValidator {
 	return &hMatchValidator{
 		span: func(input string, match []int, ctx matchContext) bool {
+			if !siteMatchIsDelimited(input, match) {
+				return false
+			}
 			titleRegion := runePrefix(input, ctx.endOfTitle)
 			if match[0] >= len(titleRegion) {
 				return true // the match sits past the title entirely

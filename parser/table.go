@@ -3097,12 +3097,15 @@ var handlers = []handler{
 		KeepMatching: true,
 	},
 	// dubbed: \bdual\b(?![ .-]*sub)
+	// Skipped in first position: a bare "dual" ahead of every other tag is
+	// the title's own first word (Dual, 2022), not an audio marker.
 	{
 		Field:         "dubbed",
 		Pattern:       regexp.MustCompile(`(?i)\bdual\b`),
 		ValidateMatch: validateLookahead(`[ .-]*sub`, `i`, false),
 		Transform:     toBoolean(),
 		KeepMatching:  true,
+		SkipIfFirst:   true,
 	},
 	// dubbed: \b(fan\s?dub)\b
 	{
@@ -3137,11 +3140,15 @@ var handlers = []handler{
 		Remove:    true,
 	},
 	// dubbed: \bMULTi\b
+	// Skipped in first position for the same reason as bare "dual", and this
+	// one removes its match, so an unguarded hit ate the title's first word
+	// (Multi.Facial).
 	{
-		Field:     "dubbed",
-		Pattern:   regexp.MustCompile(`(?i)\bMULTi\b`),
-		Transform: toBoolean(),
-		Remove:    true,
+		Field:       "dubbed",
+		Pattern:     regexp.MustCompile(`(?i)\bMULTi\b`),
+		Transform:   toBoolean(),
+		Remove:      true,
+		SkipIfFirst: true,
 	},
 	// dual_audio: languages fallback (2+ langs, dubbed, no subs)
 	customDualAudioFromLanguages,

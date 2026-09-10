@@ -268,7 +268,7 @@ fuzzing.
 
 ## Accuracy
 
-`parser/testdata/golden.json` pins the expected output for 1,240 real-world
+`parser/testdata/golden.json` pins the expected output for 1,246 real-world
 release names across every field. Any behavioral regression fails CI.
 
 The corpus was seeded from the Python PTT 1.8.5 parser, and jhin is that
@@ -296,6 +296,12 @@ correction is a reviewed change to the pinned expectations, listed here:
   colon binds the two halves into one token. `DTS.ES` and `DTS ES` are two
   tokens, DTS audio and the Spanish language tag, unless a `6.1` or
   `Discrete`/`Matrix` marker follows: only the format carries those.
+- A site tag must be delimited. `<word>.<tld>` is title-shaped as often as
+  it is domain-shaped, so a match floating between two separators is part of
+  the title (`Buck.Rogers.TV.Series`, `Show.4Kids.TV`); a real site sits in
+  brackets or at one end of the name.
+- A bare `DUAL` or `MULTi` ahead of every other tag is the title's own first
+  word (`Dual` 2022, `Multi.Facial`), not an audio marker.
 - A codec is not inferred from a release group's name. PTT read the `DivX`
   inside `DivXNL-Team` as the codec; a group that names itself after a codec
   is not declaring one (`Vampire in Vegas ... DivXNL-Team`). `DivX` and a

@@ -22227,5 +22227,85 @@
       "title": "Pelicula",
       "year": 2019
     }
+  },
+  {
+    "title": "Buck.Rogers.TV.Series.S01E01.720p.HDTV.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "GRP",
+      "quality": "HDTV",
+      "resolution": "720p",
+      "seasons": [
+        1
+      ],
+      "title": "Buck Rogers TV Series"
+    }
+  },
+  {
+    "title": "Dual.2022.1080p.BluRay.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Dual",
+      "year": 2022
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DUAL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": true,
+      "dubbed": true,
+      "group": "GRP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.MULTi.1080p.BluRay.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "dual_audio": true,
+      "dubbed": true,
+      "group": "GRP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Multi.Facial.2013.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Multi Facial",
+      "year": 2013
+    }
+  },
+  {
+    "title": "Show.4Kids.TV.S01E01.720p.HDTV.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "GRP",
+      "quality": "HDTV",
+      "resolution": "720p",
+      "seasons": [
+        1
+      ],
+      "title": "Show 4Kids TV"
+    }
   }
 ]

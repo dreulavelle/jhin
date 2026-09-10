@@ -61,9 +61,27 @@ var customAdult = handler{
 	},
 }
 
-var dualAudioMarkerRegex = regexp.MustCompile(`(?i)\bdual[ .-]?(?:audio|line)\b|\bdual\b`)
-var multiAudioMarkerRegex = regexp.MustCompile(`(?i)\bmulti[ .-]?audio\b|\bmulti\b`)
+var dualAudioExplicitRegex = regexp.MustCompile(`(?i)\bdual[ .-]?(?:audio|line)\b|\bmulti[ .-]?audio\b`)
+var dualAudioBareRegex = regexp.MustCompile(`(?i)\bdual\b|\bmulti\b`)
 var multiSubsAfterRegex = regexp.MustCompile(`(?i)^[ .-]?subs?\b`)
+
+// A bare "dual"/"multi" sitting ahead of every other tag is the title's own
+// first word (Dual, 2022; Multi.Facial), not an audio marker. This is the
+// rule the table spells as SkipIfFirst, applied here because this handler
+// runs before the dubbed block.
+func markerPrecedesEveryField(idx int, result map[string]*parseMeta) bool {
+	hasOther := false
+	for f, fm := range result {
+		if f == "dualAudio" {
+			continue
+		}
+		hasOther = true
+		if idx >= fm.firstMIndex {
+			return false
+		}
+	}
+	return hasOther
+}
 
 // Dual audio: explicit dual/multi-audio marker or 2+ spoken languages
 var customDualAudioMarker = handler{
@@ -72,14 +90,23 @@ var customDualAudioMarker = handler{
 		if v, ok := m.value.(bool); ok && v {
 			return m
 		}
-		if dualAudioMarkerRegex.MatchString(title) {
+		set := func(idx int) *parseMeta {
 			m.value = true
+			m.mIndex = idx
+			m.matchedNow = true
 			return m
 		}
-		if idxs := multiAudioMarkerRegex.FindStringIndex(title); idxs != nil {
-			if !multiSubsAfterRegex.MatchString(title[idxs[1]:]) {
-				m.value = true
+		if idxs := dualAudioExplicitRegex.FindStringIndex(title); idxs != nil {
+			return set(idxs[0])
+		}
+		for _, idxs := range dualAudioBareRegex.FindAllStringIndex(title, -1) {
+			if markerPrecedesEveryField(idxs[0], result) {
+				continue
 			}
+			if multiSubsAfterRegex.MatchString(title[idxs[1]:]) {
+				continue
+			}
+			return set(idxs[0])
 		}
 		return m
 	},
