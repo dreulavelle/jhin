@@ -5,14 +5,11 @@
 
 ### Features
 
-* **parser:** add dual_audio field for explicit dual/multi-audio releases ([a52537d](https://github.com/dreulavelle/jhin/commit/a52537d1d1829e7364e3e997945caa9490170526))
-* **parser:** add dual_audio field for explicit dual/multi-audio releases ([775bbf7](https://github.com/dreulavelle/jhin/commit/775bbf79d82b8cc7b75fa027265e1033a0d39dc3))
+* **parser:** add dual_audio field for explicit dual/multi-audio releases ([#52](https://github.com/dreulavelle/jhin/issues/52)) ([a52537d](https://github.com/dreulavelle/jhin/commit/a52537d1d1829e7364e3e997945caa9490170526))
 * **parser:** add missing network, edition and workprint tags ([#58](https://github.com/dreulavelle/jhin/issues/58)) ([eeecc23](https://github.com/dreulavelle/jhin/commit/eeecc23f7a917d407c998550eadeabb417779694))
-* **parser:** expose subtitle languages in a subtitles field ([aacaf20](https://github.com/dreulavelle/jhin/commit/aacaf209250300f085ccca8a8dfc81c2fac7d622))
-* **parser:** expose subtitle languages in a subtitles field ([ac10927](https://github.com/dreulavelle/jhin/commit/ac10927b3db482b70975bcdfc58e164d21794510))
+* **parser:** expose subtitle languages in a subtitles field ([#51](https://github.com/dreulavelle/jhin/issues/51)) ([aacaf20](https://github.com/dreulavelle/jhin/commit/aacaf209250300f085ccca8a8dfc81c2fac7d622))
 * **parser:** recognise DTS:X, DTS-ES, VC-1 and 6.1 channels ([#57](https://github.com/dreulavelle/jhin/issues/57)) ([6811e37](https://github.com/dreulavelle/jhin/commit/6811e370a4a8624ba7a094aba78564029a5eea96))
-* **parser:** recognise HLG as an HDR format ([1f89b98](https://github.com/dreulavelle/jhin/commit/1f89b9857ca3195a92291bc580962567edb3282f))
-* **parser:** recognise HLG as an HDR format ([b0c8514](https://github.com/dreulavelle/jhin/commit/b0c8514a56e8d87475ebf023152d8e96d3e0338b))
+* **parser:** recognise HLG as an HDR format ([#46](https://github.com/dreulavelle/jhin/issues/46)) ([1f89b98](https://github.com/dreulavelle/jhin/commit/1f89b9857ca3195a92291bc580962567edb3282f))
 
 
 ### Bug Fixes
@@ -20,8 +17,7 @@
 * **parser:** anchor six more alternations that matched inside words ([#61](https://github.com/dreulavelle/jhin/issues/61)) ([3bb5306](https://github.com/dreulavelle/jhin/commit/3bb530691be84326de24f0924d44e751ae2f28f0))
 * **parser:** anchor three alternations that matched inside words ([#56](https://github.com/dreulavelle/jhin/issues/56)) ([0882558](https://github.com/dreulavelle/jhin/commit/08825589afe43b7752e2f3ffd23def0482ca8b1a))
 * **parser:** collect every language in a subtitle run ([#55](https://github.com/dreulavelle/jhin/issues/55)) ([46f2605](https://github.com/dreulavelle/jhin/commit/46f2605ae4bddfe7e91bfcf2441607d940ba55fd))
-* **parser:** keep separators when removing Diamond Edition token ([#44](https://github.com/dreulavelle/jhin/issues/44)) ([a998fbd](https://github.com/dreulavelle/jhin/commit/a998fbdeffe16b15e1b9721e3f640e2f32a04bdf))
-* **parser:** keep separators when removing Diamond Edition token ([#44](https://github.com/dreulavelle/jhin/issues/44)) ([13e4781](https://github.com/dreulavelle/jhin/commit/13e47814592f7ae5c8a4e41363e3b237b27eb172))
+* **parser:** keep separators when removing Diamond Edition token ([#45](https://github.com/dreulavelle/jhin/issues/45)) ([a998fbd](https://github.com/dreulavelle/jhin/commit/a998fbdeffe16b15e1b9721e3f640e2f32a04bdf)), closes [#44](https://github.com/dreulavelle/jhin/issues/44)
 * **parser:** stop three tags from matching the title's own words ([#62](https://github.com/dreulavelle/jhin/issues/62)) ([cf94a38](https://github.com/dreulavelle/jhin/commit/cf94a38ce796eeaad5caca6ff51649c4028ec9e0))
 * **parser:** the SLO family is Slovenian, not Slovak ([#59](https://github.com/dreulavelle/jhin/issues/59)) ([8a35d0e](https://github.com/dreulavelle/jhin/commit/8a35d0ef733c1df813f601229e52c9b99edc9d34))
 
