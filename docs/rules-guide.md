@@ -143,19 +143,20 @@ whole "block DV-only releases" rule.
 
 `traits` is the list of attributes jhin's own scoring detected, under the same
 keys the policy map uses — one detection shared by baseline scoring and rules.
-All 67:
+All 72:
 
 ```
 Sources:   bdrip bluray brrip cam dvd dvdrip hdrip hdtv pdtv ppvrip r5 remux
            satrip screener telecine telesync tvrip uhdrip vhs vhsrip web
-           webdl webdlrip webmux webrip
-Codecs:    av1 avc hevc mpeg xvid
+           webdl webdlrip webmux webrip workprint
+Codecs:    av1 avc hevc mpeg vc1 xvid
 Range:     dolby_vision hdr hdr10plus hlg sdr 10bit
-Audio:     aac atmos clean_audio dolby_digital dolby_digital_plus
-           dts_lossless dts_lossy flac mp3 opus pcm truehd
+Audio:     aac atmos clean_audio dolby_digital dolby_digital_plus dts_es
+           dts_lossless dts_lossy dts_x flac mp3 opus pcm truehd
 Channels:  mono stereo surround
-Extras:    3d converted documentary dubbed edition hardcoded network ppv
-           proper repack retail scene site size subbed uncensored upscaled
+Extras:    3d converted documentary dualaudio dubbed edition hardcoded
+           network proper repack retail scene site size subbed uncensored
+           upscaled
 ```
 
 ```
@@ -165,8 +166,8 @@ Extras:    3d converted documentary dubbed edition hardcoded network ppv
 
 The trait vocabulary is **closed and checked**: `"dual_audio" in traits`
 fails to compile with `traits never holds "dual_audio" (did you mean
-"clean_audio"?)` instead of silently never firing. (Dual audio surfaces as
-the `dubbed` flag and trait.)
+"dualaudio"?)` instead of silently never firing. Note the shapes differ: the
+trait is `dualaudio`, the field is `dualAudio`.
 
 ### What your application adds
 
@@ -474,8 +475,10 @@ $ jhin rank --rules my.rules --json "<title>" …
 
 - **Rules never compiled are inert.** A profile carrying rules that were
   never attached scores exactly as it did before they were written.
-- **Dual audio is `dubbed`** — there is no `dual_audio` trait, and the
-  compiler will tell you so, by name.
+- **`dubbed` and `dualAudio` ask different things.** `dubbed` is "this
+  carries a dub"; `dualAudio` is "this carries two or more audio tracks", so
+  a plain single-track dub sets only the first. The trait spelling is
+  `dualaudio`; `dual_audio` is neither, and the compiler names the right one.
 - **Unparseable text is zero, not an error**: `num(bitrate) > 5` on a release
   with no bitrate reads false; it does not reject anything.
 - **A runtime failure skips the rule.** Division by zero, an unanswerable set
