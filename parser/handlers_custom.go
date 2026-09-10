@@ -373,7 +373,7 @@ var (
 	subtitleFusedPrefixLangs = map[string]string{
 		"en": "en", "eng": "en", "e": "en",
 		"swe": "sv", "dan": "da", "fin": "fi", "nor": "no",
-		"kor": "ko", "pl": "pl", "slo": "sk", "ro": "ro", "arab": "ar",
+		"kor": "ko", "pl": "pl", "slo": "sl", "ro": "ro", "arab": "ar",
 	}
 	subtitleFusedSuffixLangs = map[string]string{
 		"french": "fr", "eng": "en", "ita": "it", "esp": "es", "spa": "es",

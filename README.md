@@ -268,7 +268,7 @@ fuzzing.
 
 ## Accuracy
 
-`parser/testdata/golden.json` pins the expected output for 1,160 real-world
+`parser/testdata/golden.json` pins the expected output for 1,191 real-world
 release names across every field. Any behavioral regression fails CI.
 
 The corpus was seeded from the Python PTT 1.8.5 parser. jhin owns it and
@@ -281,6 +281,10 @@ pinned expectations, listed here:
 - A language fused to a sub token (`ENGSUB`, `ESub`, `VOSTFR`, `SWESUB`,
   `KORSUB`, `PLSUB`, `SUBFRENCH`) sets `Subbed`, not only `Languages`, and
   the plural `ESubs` sets `Languages` to `en` like the singular.
+- The `SLO` family is Slovenian, not Slovak. PTT folded `SLO` and `SLOSUBS`
+  into Slovak on the ISO 639-2/B code `slo`, but in release naming `SLO` is
+  Slovenia and SLOSUBS was a Slovenian subtitle community. Slovak keeps its
+  own name and gains `SVK`, Slovakia's abbreviation, in their place.
 
 ## How it compares
 

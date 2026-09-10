@@ -2529,10 +2529,14 @@ var handlers = []handler{
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
-	// languages: \bslo(?:vak|vakian|subs|[\]_)]?\.\w{2,4}$)\b
+	// languages: \b(?:slovak(?:ian)?|svk)\b
+	// PTT folded the whole SLO family into Slovak on the ISO 639-2/B code
+	// slo. In release naming SLO is Slovenia, so the SLO forms moved to the
+	// Slovenian handler; SVK, Slovakia's own abbreviation, takes their place
+	// here so Slovak keeps a short form.
 	{
 		Field:         "languages",
-		Pattern:       regexp.MustCompile(`(?i)\bslo(?:vak|vakian|subs|[\]_)]?\.\w{2,4}$)\b`),
+		Pattern:       regexp.MustCompile(`(?i)\b(?:slovak(?:ian)?|svk)\b`),
 		Transform:     toValueSet(`sk`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -2601,10 +2605,13 @@ var handlers = []handler{
 		Transform:    toValueSet(`hr`),
 		KeepMatching: true,
 	},
-	// languages: \bslovenian\b
+	// languages: \b(?:slovenian|slosubs?|slo[\]_)]?\.\w{2,4}$)\b
+	// SLO is Slovenia in release naming, and SLOSUBS was a Slovenian subtitle
+	// community, so the SLO forms are Slovenian here rather than the Slovak
+	// they carry under ISO 639-2/B.
 	{
 		Field:         "languages",
-		Pattern:       regexp.MustCompile(`(?i)\bslovenian\b`),
+		Pattern:       regexp.MustCompile(`(?i)\b(?:slovenian|slosubs?|slo[\]_)]?\.\w{2,4}$)\b`),
 		Transform:     toValueSet(`sl`),
 		KeepMatching:  true,
 		SkipFromTitle: true,

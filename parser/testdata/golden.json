@@ -10475,14 +10475,14 @@
       "codec": "xvid",
       "complete": true,
       "languages": [
-        "sk"
+        "sl"
       ],
       "subbed": true,
       "episodes": [],
       "seasons": [],
       "title": "Seinfeld",
       "subtitles": [
-        "sk"
+        "sl"
       ]
     }
   },
@@ -11184,7 +11184,7 @@
     "title": "Subs/35_slo.srt",
     "result": {
       "languages": [
-        "sk"
+        "sl"
       ],
       "subbed": true,
       "extension": "srt",
@@ -21428,6 +21428,47 @@
       "quality": "WEB-DL",
       "resolution": "2160p",
       "title": "Movie"
+    }
+  },
+  {
+    "title": "Some.Movie.2019.SLO.1080p.WEB-DL.x264-GRP.mkv",
+    "result": {
+      "codec": "avc",
+      "container": "mkv",
+      "extension": "mkv",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Some Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Some.Movie.2019.SLOVAK.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "languages": [
+        "sk"
+      ],
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Some Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Some.Movie.2019.SVK.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "languages": [
+        "sk"
+      ],
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Some Movie",
+      "year": 2019
     }
   }
 ]
