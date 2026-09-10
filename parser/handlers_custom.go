@@ -386,36 +386,62 @@ var (
 
 var (
 	subtitleAdjacentLangBeforeSub    = regexp.MustCompile(`(?i)\b([a-z]{2,4})[.\-_ ]{1,2}subs?\b`)
-	subtitleAdjacentSubBeforeLang    = regexp.MustCompile(`(?i)\bsubs?[.\-_ ]{1,2}([a-z]{2,4})\b`)
 	subtitleAdjacentLangBeforeSubbed = regexp.MustCompile(`(?i)\b([a-z]{2,4})[.\-_ ]{1,2}sub(?:bed|titled?)\b`)
-	subtitleAdjacentSubbedBeforeLang = regexp.MustCompile(`(?i)\bsub(?:bed|titled?)[.\-_ ]{1,2}([a-z]{2,4})\b`)
+
+	// A sub marker introduces a run of languages, not a single one:
+	// "Sub Eng Esp Tur", "sub. ROM, TUR", "En Subs[Sv.No.Fi]". The run walks
+	// forward while every token is a known language and stops at the first
+	// one that isn't. A closing bracket ends it, so the title words after
+	// "[Eng Subs]" are never read as languages.
+	subtitleMarkerRegex   = regexp.MustCompile(`(?i)\bsub(?:s|bed|titled?)?\b`)
+	subtitleRunSepRegex   = regexp.MustCompile(`^[.,_/+&\- \[(]{1,3}`)
+	subtitleRunTokenRegex = regexp.MustCompile(`^[A-Za-z]{2,4}\b`)
 )
 
 var subtitleAdjacentLangs = map[string]string{
-	"en": "en", "eng": "en",
-	"fr": "fr", "fre": "fr", "fra": "fr",
-	"de": "de", "ger": "de", "deu": "de",
-	"it": "it", "ita": "it",
-	"es": "es", "esp": "es", "spa": "es",
-	"pt": "pt", "por": "pt",
-	"ru": "ru", "rus": "ru",
 	"ar": "ar", "ara": "ar",
-	"ja": "ja", "jap": "ja", "jpn": "ja",
-	"ko": "ko", "kor": "ko",
-	"zh": "zh", "chi": "zh", "chs": "zh", "cht": "zh",
-	"nl": "nl", "dut": "nl", "nld": "nl",
-	"sv": "sv", "swe": "sv",
-	"no": "no", "nor": "no",
-	"da": "da", "dan": "da",
+	"bul": "bg",
+	"ben": "bn",
+	"cs":  "cs", "cz": "cs", "ces": "cs", "cze": "cs", "czh": "cs",
+	"da": "da", "dk": "da", "dan": "da",
+	"de": "de", "deu": "de", "ger": "de",
+	"el": "el", "ell": "el", "gre": "el",
+	"en": "en", "eng": "en", "ing": "en", "engl": "en", "esub": "en",
+	"es": "es", "sp": "es", "esp": "es", "spa": "es",
 	"fi": "fi", "fin": "fi",
-	"pl": "pl", "pol": "pl",
+	"fr": "fr", "vf": "fr", "fra": "fr", "fre": "fr", "vfb": "fr", "vff": "fr", "vfi": "fr", "vfq": "fr", "vfr": "fr", "frvf": "fr", "vost": "fr",
+	"guj": "gu",
+	"he":  "he", "heb": "he",
+	"hin": "hi",
+	"hrv": "hr",
+	"hu":  "hu", "hun": "hu",
+	"ind": "id",
+	"it":  "it", "ita": "it",
+	"ja": "ja", "jp": "ja", "jap": "ja", "jpn": "ja",
+	"kan": "kn",
+	"ko":  "ko", "kor": "ko",
+	"lat": "la", "lati": "la",
+	"lt":  "lt",
+	"mal": "ml",
+	"may": "ms",
+	"mar": "mr", "mara": "mr",
+	"nl": "nl", "dut": "nl", "nld": "nl",
+	"no": "no", "nob": "no", "nor": "no",
+	"pun": "pa",
+	"pl":  "pl", "pol": "pl",
+	"pt": "pt", "por": "pt", "enbr": "pt", "prbr": "pt", "ptbr": "pt", "pten": "pt", "ptpt": "pt",
 	"ro": "ro", "rom": "ro", "ron": "ro",
-	"cs": "cs", "cze": "cs", "ces": "cs",
-	"el": "el", "gre": "el", "ell": "el",
-	"hu": "hu", "hun": "hu",
-	"tr": "tr", "tur": "tr",
-	"he": "he", "heb": "he",
+	"ru": "ru", "rus": "ru",
 	"sl": "sl", "slo": "sl",
+	"srp": "sr",
+	"se":  "sv", "sv": "sv", "swe": "sv",
+	"tam": "ta",
+	"tel": "te",
+	"tha": "th", "thai": "th",
+	"tr": "tr", "tur": "tr",
+	"ukr": "uk",
+	"vie": "vi",
+	"zh":  "zh", "chi": "zh", "chn": "zh", "chs": "zh", "cht": "zh",
 }
 
 // Subtitles: subset of Languages for subtitle-specific evidence
@@ -464,17 +490,29 @@ var customSubtitleLanguages = handler{
 				}
 			}
 		}
-		addSubBeforeLang := func(re *regexp.Regexp) {
-			for _, g := range re.FindAllStringSubmatch(title, -1) {
-				if code, ok := subtitleAdjacentLangs[strings.ToLower(g[1])]; ok {
+		addRunAfterSub := func() {
+			for _, idxs := range subtitleMarkerRegex.FindAllStringIndex(title, -1) {
+				for pos := idxs[1]; pos < len(title); {
+					sep := subtitleRunSepRegex.FindString(title[pos:])
+					if sep == "" {
+						break
+					}
+					tok := subtitleRunTokenRegex.FindString(title[pos+len(sep):])
+					if tok == "" {
+						break
+					}
+					code, ok := subtitleAdjacentLangs[strings.ToLower(tok)]
+					if !ok {
+						break
+					}
 					add(code)
+					pos += len(sep) + len(tok)
 				}
 			}
 		}
 		addLangBeforeSub(subtitleAdjacentLangBeforeSub)
-		addSubBeforeLang(subtitleAdjacentSubBeforeLang)
 		addLangBeforeSub(subtitleAdjacentLangBeforeSubbed)
-		addSubBeforeLang(subtitleAdjacentSubbedBeforeLang)
+		addRunAfterSub()
 		if vs == nil {
 			return m
 		}
@@ -1103,6 +1141,11 @@ func toPttDate(formats ...string) hTransformer {
 }
 
 var audioHrAfterRegex = regexp.MustCompile(`(?i)^.+HR`)
+
+// Only a real DTS-ES track carries a 6.1 layout or the Discrete/Matrix
+// variant name, so these disambiguate "DTS.ES" from DTS audio plus a Spanish
+// language tag.
+var audioDtsEsExtendedRegex = regexp.MustCompile(`(?i)^[ .\-]{0,2}(?:6[.\- ]1|discrete|matrix)\b`)
 
 var (
 	yearPrefixRejectRegex = regexp.MustCompile(`(?i)(?:\d|Cap[. ]?)$`)

@@ -326,6 +326,12 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b`),
 		Transform: toBoolean(),
 	},
+	// trash: \bWORKPRINT\b
+	{
+		Field:     "trash",
+		Pattern:   regexp.MustCompile(`(?i)\bWORKPRINT\b`),
+		Transform: toBoolean(),
+	},
 	// trash: \bDVB[ .-]*(?:Rip)?\b
 	{
 		Field:     "trash",
@@ -507,6 +513,13 @@ var handlers = []handler{
 		Transform: toValue(`Directors Cut`),
 		Remove:    true,
 	},
+	// edition: \bCriterion\.Collection\b
+	{
+		Field:     "edition",
+		Pattern:   regexp.MustCompile(`(?i)\bCriterion\.Collection\b`),
+		Transform: toValue(`Criterion Collection`),
+		Remove:    true,
+	},
 	// edition: \b(custom.?)?Extended\b
 	{
 		Field:     "edition",
@@ -570,6 +583,14 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)\bRemaster(?:ed)?\b`),
 		Transform: toValue(`Remastered`),
 		Remove:    true,
+	},
+	// edition: \bDC\b (case-sensitive, skipIfBefore year)
+	{
+		Field:        "edition",
+		Pattern:      regexp.MustCompile(`\bDC\b`),
+		Transform:    toValue(`Directors Cut`),
+		Remove:       true,
+		SkipIfBefore: []string{"year"},
 	},
 	// upscaled: \b(?:AI.?)?Upscal(ed?|ing)\b|\bAI.?Enhanced?\b
 	// "Enhanced" needs the AI prefix: bare it also ends "IMAX Enhanced",
@@ -904,6 +925,13 @@ var handlers = []handler{
 		Remove:        true,
 		SkipFromTitle: true,
 	},
+	// quality: \bWORKPRINT\b
+	{
+		Field:     "quality",
+		Pattern:   regexp.MustCompile(`(?i)\bWORKPRINT\b`),
+		Transform: toValue(`WORKPRINT`),
+		Remove:    true,
+	},
 	// quality: \bPDTV\b
 	{
 		Field:     "quality",
@@ -1055,6 +1083,14 @@ var handlers = []handler{
 		Remove:       true,
 		KeepMatching: true,
 	},
+	// codec: \bVC[-. ]?1\b
+	{
+		Field:        "codec",
+		Pattern:      regexp.MustCompile(`(?i)\bVC[-. ]?1\b`),
+		Transform:    toValue(`vc1`),
+		Remove:       true,
+		KeepMatching: true,
+	},
 	// codec: \b(?:mpe?g\d*)\b
 	{
 		Field:        "codec",
@@ -1089,6 +1125,38 @@ var handlers = []handler{
 		Remove:       true,
 		KeepMatching: true,
 	},
+	// audio: DTS-ES (Extended Surround). Runs ahead of the channels block, so
+	// the 6.1 layout it disambiguates against is still in the title, and
+	// ahead of the language block so a
+	// genuine trailing "ES" is not read as Spanish, and before the generic
+	// lossy DTS handler so it gets its own value.
+	//
+	// A hyphen or colon binds the two halves into one token, so DTS-ES and
+	// DTS:ES are always the format. A dot or a space is the scene separator
+	// between tokens, so "DTS.ES" is DTS audio followed by the Spanish
+	// language tag — unless a 6.1 or Discrete/Matrix marker follows, which
+	// only the format carries.
+	{
+		Gate:  gate("dts"),
+		Field: "audio",
+		Process: scanValid("audio", regexp.MustCompile(`(?i)\bDTS([:\-. ])ES\b`), func(title string, idxs []int) bool {
+			if sep := title[idxs[2]]; sep == ':' || sep == '-' {
+				return true
+			}
+			return audioDtsEsExtendedRegex.MatchString(title[idxs[1]:])
+		}, true, false, true),
+		Transform:    toValueSet(`DTS-ES`),
+		Remove:       true,
+		KeepMatching: true,
+	},
+	// channels: \b6[\.\- ]1(.?ch(annel)?)?\b
+	{
+		Field:        "channels",
+		Pattern:      regexp.MustCompile(`(?i)\b6[\.\- ]1(.?ch(annel)?)?\b`),
+		Transform:    toValueSet(`6.1`),
+		Remove:       true,
+		KeepMatching: true,
+	},
 	// channels: \+?2[\.\s]0(?:x[2-4])?\b
 	{
 		Field:        "channels",
@@ -1118,6 +1186,21 @@ var handlers = []handler{
 		Pattern:      regexp.MustCompile(`(?i)\bmono\b`),
 		Transform:    toValueSet(`mono`),
 		KeepMatching: true,
+	},
+	// audio: \b(?!.+HR)DTS[:\-.]X\b (DTS:X with an explicit separator; must
+	// run before the combined DTS-HD Ma/DTS.?X handler below so a genuine
+	// DTS:X gets its own value instead of DTS Lossless. Titles that spell it
+	// without a separator, e.g. "DTSEX", still fall through to that handler
+	// unchanged so existing golden expectations are not disturbed.)
+	{
+		Gate:  gate("dts"),
+		Field: "audio",
+		Process: scanValid("audio", regexp.MustCompile(`(?i)\bDTS[:\-.]X\b`), func(title string, idxs []int) bool {
+			return !audioHrAfterRegex.MatchString(title[idxs[0]:])
+		}, true, false, true),
+		Transform:    toValueSet(`DTS:X`),
+		KeepMatching: true,
+		Remove:       true,
 	},
 	// audio: \b(?!.+HR)(DTS.?HD.?Ma(ster)?|DTS.?X)\b
 	{
@@ -2532,10 +2615,14 @@ var handlers = []handler{
 		KeepMatching: true,
 		SkipIfFirst:  true,
 	},
-	// languages: \bslo(?:vak|vakian|subs|[\]_)]?\.\w{2,4}$)\b
+	// languages: \b(?:slovak(?:ian)?|svk)\b
+	// PTT folded the whole SLO family into Slovak on the ISO 639-2/B code
+	// slo. In release naming SLO is Slovenia, so the SLO forms moved to the
+	// Slovenian handler; SVK, Slovakia's own abbreviation, takes their place
+	// here so Slovak keeps a short form.
 	{
 		Field:         "languages",
-		Pattern:       regexp.MustCompile(`(?i)\bslo(?:vak|vakian|subs|[\]_)]?\.\w{2,4}$)\b`),
+		Pattern:       regexp.MustCompile(`(?i)\b(?:slovak(?:ian)?|svk)\b`),
 		Transform:     toValueSet(`sk`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -2604,10 +2691,13 @@ var handlers = []handler{
 		Transform:    toValueSet(`hr`),
 		KeepMatching: true,
 	},
-	// languages: \bslovenian\b
+	// languages: \b(?:slovenian|slosubs?|slo[\]_)]?\.\w{2,4}$)\b
+	// SLO is Slovenia in release naming, and SLOSUBS was a Slovenian subtitle
+	// community, so the SLO forms are Slovenian here rather than the Slovak
+	// they carry under ISO 639-2/B.
 	{
 		Field:         "languages",
-		Pattern:       regexp.MustCompile(`(?i)\bslovenian\b`),
+		Pattern:       regexp.MustCompile(`(?i)\b(?:slovenian|slosubs?|slo[\]_)]?\.\w{2,4}$)\b`),
 		Transform:     toValueSet(`sl`),
 		KeepMatching:  true,
 		SkipFromTitle: true,
@@ -3163,6 +3253,64 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)\bH(MAX|BO)\b`),
 		Transform: toValue(`HBO`),
 		Remove:    true,
+	},
+	// network: \bSHOWTIME\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bSHOWTIME\b`),
+		Transform: toValue(`Showtime`),
+		Remove:    true,
+	},
+	// network: \bPMTP\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bPMTP\b`),
+		Transform: toValue(`Paramount`),
+		Remove:    true,
+	},
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bPCOK\b`),
+		Transform: toValue(`Peacock`),
+		Remove:    true,
+	},
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bCRAV\b`),
+		Transform: toValue(`Crave`),
+		Remove:    true,
+	},
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bBCORE\b`),
+		Transform: toValue(`AMC+`),
+		Remove:    true,
+	},
+	{
+		Field:         "network",
+		Pattern:       regexp.MustCompile(`(?i)\bSTAN\b`),
+		ValidateMatch: validateLookbehind(`[ ._-]{2}`, ``, true),
+		Transform:     toValue(`Stan`),
+		Remove:        true,
+		SkipIfFirst:   true,
+	},
+	// network: \bitunes\b
+	{
+		Field:     "network",
+		Pattern:   regexp.MustCompile(`(?i)\bitunes\b`),
+		Transform: toValue(`iTunes`),
+		Remove:    true,
+	},
+	// network: \biT\b
+	// Case-sensitive, and skipped in first position: "iT" is a real platform
+	// tag in source position ("...1080p.iT.WEB-DL..."), but at the head of a
+	// title it is the title's own first word (iT.Chapter.Two).
+	{
+		Field:       "network",
+		Pattern:     regexp.MustCompile(`\biT\b`),
+		Transform:   toValue(`iTunes`),
+		Remove:      true,
+		SkipIfFirst: true,
 	},
 	// network: \bHULU\b
 	{

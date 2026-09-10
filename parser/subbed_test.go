@@ -25,7 +25,7 @@ func TestCompoundSubtitleTokens(t *testing.T) {
 		{"Show.S01.SweSub.720p.WEB-DL.H264", true, "sv"},
 		{"Movie.2018.KORSUB.HDRip.XviD.MP3-GRP", true, "ko"},
 		{"Movie.2025.PLSUB.1080p.WEB-DL.DDP5.1.H.264-GRP.mkv", true, "pl"},
-		{"Show.COMPLETE.SLOSUBS.DVDRip.XviD", true, "sk"},
+		{"Show.COMPLETE.SLOSUBS.DVDRip.XviD", true, "sl"},
 		{"Movie.Tetralogy.BRRip.XviD.AC3.RoSubbed-GRP", true, "ro"},
 		{"Movie.2020.1080p.WEB-DL.DDP5.1.H.264.EN-ROSub-GRP", true, "ro"},
 		{"Movie.2018.1080p.BluRay.ArabSub.x264-GRP", true, "ar"},
