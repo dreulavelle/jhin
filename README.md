@@ -268,7 +268,7 @@ fuzzing.
 
 ## Accuracy
 
-`parser/testdata/golden.json` pins the expected output for 1,211 real-world
+`parser/testdata/golden.json` pins the expected output for 1,226 real-world
 release names across every field. Any behavioral regression fails CI.
 
 The corpus was seeded from the Python PTT 1.8.5 parser. jhin owns it and
@@ -288,6 +288,12 @@ pinned expectations, listed here:
 - Bare `iT` is the iTunes platform tag in source position
   (`...1080p.iT.WEB-DL...`), but never in first position, where it is the
   title's own first word (`iT.Chapter.Two`).
+- `6.1` is a real channel layout; PTT left `DTS-HD-HR-6.1` (`Basic
+  Instinct`) with no `Channels` at all.
+- `DTS-ES` and `DTS:ES` are the Extended Surround format, since a hyphen or
+  colon binds the two halves into one token. `DTS.ES` and `DTS ES` are two
+  tokens, DTS audio and the Spanish language tag, unless a `6.1` or
+  `Discrete`/`Matrix` marker follows: only the format carries those.
 
 ## How it compares
 
@@ -326,11 +332,11 @@ Field semantics follow [PTT](https://github.com/dreulavelle/PTT) 1.8.5
 (commit `88429bb`) except for the divergences listed under Accuracy.
 
 - **Adult** (`bool`): adult-content detection (keyword list)
-- **Audio** (`[]string`): `DTS Lossless`, `DTS Lossy`, `Atmos`, `TrueHD`, `FLAC`, `Dolby Digital Plus`, `Dolby Digital`, `AAC`, `PCM`, `OPUS`, `MP3`, `HQ Clean Audio`
+- **Audio** (`[]string`): `DTS Lossless`, `DTS Lossy`, `DTS:X`, `DTS-ES`, `Atmos`, `TrueHD`, `FLAC`, `Dolby Digital Plus`, `Dolby Digital`, `AAC`, `PCM`, `OPUS`, `MP3`, `HQ Clean Audio`
 - **BitDepth** (`string`): `8bit`, `10bit`, `12bit`
 - **Bitrate** (`string`): e.g. `448kbps`
-- **Channels** (`[]string`): `2.0`, `5.1`, `7.1`, `stereo`, `mono`
-- **Codec** (`string`): `avc`, `hevc`, `av1`, `xvid`, `mpeg` (normalized: `AVC`, `HEVC`, ...)
+- **Channels** (`[]string`): `2.0`, `5.1`, `6.1`, `7.1`, `stereo`, `mono`
+- **Codec** (`string`): `avc`, `hevc`, `av1`, `xvid`, `mpeg`, `vc1` (normalized: `AVC`, `HEVC`, ...)
 - **Commentary** / **Complete** / **Convert** / **Documentary** (`bool`)
 - **Container** (`string`): `mkv`, `avi`, `mp4`, ...
 - **Country** (`string`): `US`, `UK`, `AU`, `NZ`, `CA`

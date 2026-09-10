@@ -1104,6 +1104,11 @@ func toPttDate(formats ...string) hTransformer {
 
 var audioHrAfterRegex = regexp.MustCompile(`(?i)^.+HR`)
 
+// Only a real DTS-ES track carries a 6.1 layout or the Discrete/Matrix
+// variant name, so these disambiguate "DTS.ES" from DTS audio plus a Spanish
+// language tag.
+var audioDtsEsExtendedRegex = regexp.MustCompile(`(?i)^[ .\-]{0,2}(?:6[.\- ]1|discrete|matrix)\b`)
+
 var (
 	yearPrefixRejectRegex = regexp.MustCompile(`(?i)(?:\d|Cap[. ]?)$`)
 	yearSuffixRejectRegex = regexp.MustCompile(`(?i)^(?:\d|kbps)`)

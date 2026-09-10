@@ -232,6 +232,7 @@ var DefaultPolicies = map[Attr]Policy{
 	AttrAV1:  {Fetch: true, Rank: 500},
 	AttrXvid: {Fetch: false, Rank: -10000},
 	AttrMPEG: {Fetch: false, Rank: -1000},
+	AttrVC1:  {Fetch: true, Rank: 100},
 
 	// hdr / depth
 	AttrDolbyVision: {Fetch: true, Rank: 3000},
@@ -243,10 +244,12 @@ var DefaultPolicies = map[Attr]Policy{
 
 	// audio
 	AttrDTSLossless:      {Fetch: true, Rank: 2000},
+	AttrDTSX:             {Fetch: true, Rank: 2000},
 	AttrTrueHD:           {Fetch: true, Rank: 2000},
 	AttrAtmos:            {Fetch: true, Rank: 1000},
 	AttrDolbyDigitalPlus: {Fetch: true, Rank: 150},
 	AttrDTSLossy:         {Fetch: true, Rank: 100},
+	AttrDTSES:            {Fetch: true, Rank: 100},
 	AttrAAC:              {Fetch: true, Rank: 100},
 	AttrDolbyDigital:     {Fetch: true, Rank: 50},
 	AttrFLAC:             {Fetch: true, Rank: 0},

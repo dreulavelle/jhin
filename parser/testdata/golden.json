@@ -1973,7 +1973,10 @@
       "episodes": [],
       "seasons": [],
       "languages": [],
-      "title": "Basic Instinct"
+      "title": "Basic Instinct",
+      "channels": [
+        "6.1"
+      ]
     }
   },
   {
@@ -3023,10 +3026,10 @@
       "episodes": [],
       "seasons": [],
       "title": "Color Of Night",
-      "edition": "Directors Cut",
       "subtitles": [
         "fr"
-      ]
+      ],
+      "edition": "Directors Cut"
     }
   },
   {
@@ -21388,6 +21391,245 @@
       "quality": "WEB-DL",
       "resolution": "2160p",
       "title": "Movie"
+    }
+  },
+  {
+    "title": "Movie.2019.2160p.UHD.BluRay.Remux.HDR.HEVC.DTS-HD.MA.7.1-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossless"
+      ],
+      "channels": [
+        "7.1"
+      ],
+      "codec": "hevc",
+      "group": "GROUP",
+      "hdr": [
+        "HDR"
+      ],
+      "quality": "BluRay REMUX",
+      "resolution": "2160p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS-X.7.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS:X"
+      ],
+      "channels": [
+        "7.1"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.X.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS:X"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.WEB-DL.DTS:X.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS:X"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS-ES.6.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS-ES"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019,
+      "channels": [
+        "6.1"
+      ]
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.ES.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "languages": [
+        "es"
+      ],
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.ES.6.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS-ES"
+      ],
+      "channels": [
+        "6.1"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.ES.Discrete.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS-ES"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Pelicula.2019.1080p.BluRay.DTS.ES.EN.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "languages": [
+        "en",
+        "es"
+      ],
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Pelicula",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2008.1080p.BluRay.VC-1.TrueHD.5.1-GROUP",
+    "result": {
+      "audio": [
+        "TrueHD"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "vc1",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2008
+    }
+  },
+  {
+    "title": "Movie.2008.1080p.BluRay.VC1.DTS-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "vc1",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2008
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS-HD.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.TrueHD.6.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "TrueHD"
+      ],
+      "channels": [
+        "6.1"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.720p.WEBRip.AC3.6.1-GROUP",
+    "result": {
+      "audio": [
+        "Dolby Digital"
+      ],
+      "channels": [
+        "6.1"
+      ],
+      "group": "GROUP",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "title": "Movie",
+      "year": 2019
     }
   },
   {

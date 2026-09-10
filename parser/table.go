@@ -1080,6 +1080,14 @@ var handlers = []handler{
 		Remove:       true,
 		KeepMatching: true,
 	},
+	// codec: \bVC[-. ]?1\b
+	{
+		Field:        "codec",
+		Pattern:      regexp.MustCompile(`(?i)\bVC[-. ]?1\b`),
+		Transform:    toValue(`vc1`),
+		Remove:       true,
+		KeepMatching: true,
+	},
 	// codec: \b(?:mpe?g\d*)\b
 	{
 		Field:        "codec",
@@ -1114,6 +1122,38 @@ var handlers = []handler{
 		Remove:       true,
 		KeepMatching: true,
 	},
+	// audio: DTS-ES (Extended Surround). Runs ahead of the channels block, so
+	// the 6.1 layout it disambiguates against is still in the title, and
+	// ahead of the language block so a
+	// genuine trailing "ES" is not read as Spanish, and before the generic
+	// lossy DTS handler so it gets its own value.
+	//
+	// A hyphen or colon binds the two halves into one token, so DTS-ES and
+	// DTS:ES are always the format. A dot or a space is the scene separator
+	// between tokens, so "DTS.ES" is DTS audio followed by the Spanish
+	// language tag — unless a 6.1 or Discrete/Matrix marker follows, which
+	// only the format carries.
+	{
+		Gate:  gate("dts"),
+		Field: "audio",
+		Process: scanValid("audio", regexp.MustCompile(`(?i)\bDTS([:\-. ])ES\b`), func(title string, idxs []int) bool {
+			if sep := title[idxs[2]]; sep == ':' || sep == '-' {
+				return true
+			}
+			return audioDtsEsExtendedRegex.MatchString(title[idxs[1]:])
+		}, true, false, true),
+		Transform:    toValueSet(`DTS-ES`),
+		Remove:       true,
+		KeepMatching: true,
+	},
+	// channels: \b6[\.\- ]1(.?ch(annel)?)?\b
+	{
+		Field:        "channels",
+		Pattern:      regexp.MustCompile(`(?i)\b6[\.\- ]1(.?ch(annel)?)?\b`),
+		Transform:    toValueSet(`6.1`),
+		Remove:       true,
+		KeepMatching: true,
+	},
 	// channels: \+?2[\.\s]0(?:x[2-4])?\b
 	{
 		Field:        "channels",
@@ -1143,6 +1183,21 @@ var handlers = []handler{
 		Pattern:      regexp.MustCompile(`(?i)\bmono\b`),
 		Transform:    toValueSet(`mono`),
 		KeepMatching: true,
+	},
+	// audio: \b(?!.+HR)DTS[:\-.]X\b (DTS:X with an explicit separator; must
+	// run before the combined DTS-HD Ma/DTS.?X handler below so a genuine
+	// DTS:X gets its own value instead of DTS Lossless. Titles that spell it
+	// without a separator, e.g. "DTSEX", still fall through to that handler
+	// unchanged so existing golden expectations are not disturbed.)
+	{
+		Gate:  gate("dts"),
+		Field: "audio",
+		Process: scanValid("audio", regexp.MustCompile(`(?i)\bDTS[:\-.]X\b`), func(title string, idxs []int) bool {
+			return !audioHrAfterRegex.MatchString(title[idxs[0]:])
+		}, true, false, true),
+		Transform:    toValueSet(`DTS:X`),
+		KeepMatching: true,
+		Remove:       true,
 	},
 	// audio: \b(?!.+HR)(DTS.?HD.?Ma(ster)?|DTS.?X)\b
 	{
