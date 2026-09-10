@@ -252,18 +252,21 @@ var handlers = []handler{
 		Transform: toValue(`480p`),
 		Remove:    true,
 	},
-	// resolution: \b(?:4k|2160p|1080p|720p|480p)(?!.*\b(?:4k|2160p|1080p|720p|480p)\b)
+	// resolution: \b(?:4k\b|2160p|1080p|720p|480p)(?!.*\b(?:4k|2160p|1080p|720p|480p)\b)
+	// Only the 4k branch closes on a word boundary: it is the one whose
+	// letters can start a real word (4Kids). The numeric branches stay open
+	// so a trailing frame rate (2160p60) still resolves.
 	{
 		Field:         "resolution",
-		Pattern:       regexp.MustCompile(`(?i)\b(?:4k|2160p|1080p|720p|480p)`),
+		Pattern:       regexp.MustCompile(`(?i)\b(?:4k\b|2160p|1080p|720p|480p)`),
 		ValidateMatch: validateLookahead(`.*\b(?:4k|2160p|1080p|720p|480p)\b`, `i`, false),
 		Transform:     toTransformedResolution(),
 		Remove:        true,
 	},
-	// resolution: \b4k|21600?[pi]\b
+	// resolution: \b4k\b|\b21600?[pi]\b
 	{
 		Field:     "resolution",
-		Pattern:   regexp.MustCompile(`(?i)\b4k|21600?[pi]\b`),
+		Pattern:   regexp.MustCompile(`(?i)\b4k\b|\b21600?[pi]\b`),
 		Transform: toValue(`2160p`),
 		Remove:    true,
 	},
@@ -348,10 +351,10 @@ var handlers = []handler{
 		Pattern:   regexp.MustCompile(`(?i)threesixtyp`),
 		Transform: toBoolean(),
 	},
-	// trash: \bR5|R6\b
+	// trash: \bR[56]\b
 	{
 		Field:     "trash",
-		Pattern:   regexp.MustCompile(`(?i)\bR5|R6\b`),
+		Pattern:   regexp.MustCompile(`(?i)\bR[56]\b`),
 		Transform: toBoolean(),
 	},
 	// trash: \b(?:Deleted[ .-]*)?Scene(?:s)?\b
@@ -3133,10 +3136,10 @@ var handlers = []handler{
 		Transform: toValue(`Amazon`),
 		Remove:    true,
 	},
-	// network: \bNF|Netflix\b
+	// network: \b(?:NF|Netflix)\b
 	{
 		Field:     "network",
-		Pattern:   regexp.MustCompile(`(?i)\bNF|Netflix\b`),
+		Pattern:   regexp.MustCompile(`(?i)\b(?:NF|Netflix)\b`),
 		Transform: toValue(`Netflix`),
 		Remove:    true,
 	},

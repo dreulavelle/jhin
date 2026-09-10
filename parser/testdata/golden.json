@@ -21386,5 +21386,51 @@
       "resolution": "2160p",
       "title": "Movie"
     }
+  },
+  {
+    "title": "4Kids.Entertainment.Yu-Gi-Oh.S01E01.DVDRip.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "GRP",
+      "quality": "DVDRip",
+      "seasons": [
+        1
+      ],
+      "title": "4Kids Entertainment Yu-Gi-Oh"
+    }
+  },
+  {
+    "title": "Movie.2005.R55.XviD-GRP",
+    "result": {
+      "codec": "xvid",
+      "group": "GRP",
+      "title": "Movie",
+      "year": 2005
+    }
+  },
+  {
+    "title": "Movie.NFL.Films.2020.1080p.WEB-DL.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Movie NFL Films",
+      "year": 2020
+    }
+  },
+  {
+    "title": "NFS.Need.For.Speed.2014.1080p.BluRay.x264-GRP",
+    "result": {
+      "codec": "avc",
+      "group": "GRP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "NFS Need For Speed",
+      "year": 2014
+    }
   }
 ]
