@@ -1867,7 +1867,8 @@
       "episodes": [],
       "seasons": [],
       "languages": [],
-      "title": "Avengers Endgame"
+      "title": "Avengers Endgame",
+      "network": "iTunes"
     }
   },
   {
@@ -1972,7 +1973,10 @@
       "episodes": [],
       "seasons": [],
       "languages": [],
-      "title": "Basic Instinct"
+      "title": "Basic Instinct",
+      "channels": [
+        "6.1"
+      ]
     }
   },
   {
@@ -3024,7 +3028,8 @@
       "title": "Color Of Night",
       "subtitles": [
         "fr"
-      ]
+      ],
+      "edition": "Directors Cut"
     }
   },
   {
@@ -12065,7 +12070,8 @@
       "site": "RARBG",
       "episodes": [],
       "languages": [],
-      "title": "The Fairly OddParents Fairly Odder"
+      "title": "The Fairly OddParents Fairly Odder",
+      "network": "Paramount"
     }
   },
   {
@@ -21428,6 +21434,630 @@
       "quality": "WEB-DL",
       "resolution": "2160p",
       "title": "Movie"
+    }
+  },
+  {
+    "title": "Movie.2019.2160p.UHD.BluRay.Remux.HDR.HEVC.DTS-HD.MA.7.1-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossless"
+      ],
+      "channels": [
+        "7.1"
+      ],
+      "codec": "hevc",
+      "group": "GROUP",
+      "hdr": [
+        "HDR"
+      ],
+      "quality": "BluRay REMUX",
+      "resolution": "2160p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS-X.7.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS:X"
+      ],
+      "channels": [
+        "7.1"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.X.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS:X"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.WEB-DL.DTS:X.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS:X"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS-ES.6.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS-ES"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019,
+      "channels": [
+        "6.1"
+      ]
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.ES.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "languages": [
+        "es"
+      ],
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.ES.6.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS-ES"
+      ],
+      "channels": [
+        "6.1"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.ES.Discrete.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS-ES"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Pelicula.2019.1080p.BluRay.DTS.ES.EN.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "languages": [
+        "en",
+        "es"
+      ],
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Pelicula",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2008.1080p.BluRay.VC-1.TrueHD.5.1-GROUP",
+    "result": {
+      "audio": [
+        "TrueHD"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "vc1",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2008
+    }
+  },
+  {
+    "title": "Movie.2008.1080p.BluRay.VC1.DTS-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "vc1",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2008
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.DTS-HD.x264-GROUP",
+    "result": {
+      "audio": [
+        "DTS Lossy"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.1080p.BluRay.TrueHD.6.1.x264-GROUP",
+    "result": {
+      "audio": [
+        "TrueHD"
+      ],
+      "channels": [
+        "6.1"
+      ],
+      "codec": "avc",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Movie.2019.720p.WEBRip.AC3.6.1-GROUP",
+    "result": {
+      "audio": [
+        "Dolby Digital"
+      ],
+      "channels": [
+        "6.1"
+      ],
+      "group": "GROUP",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "title": "Movie",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Halo.S02E01.1080p.PMTP.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "NTb",
+      "network": "Paramount",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        2
+      ],
+      "title": "Halo"
+    }
+  },
+  {
+    "title": "Yellowstone.S05E01.720p.PMTP.WEBRip.x264-ION10",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "ION10",
+      "network": "Paramount",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "seasons": [
+        5
+      ],
+      "title": "Yellowstone"
+    }
+  },
+  {
+    "title": "Bel-Air.S01E01.1080p.PCOK.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "NTb",
+      "network": "Peacock",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        1
+      ],
+      "title": "Bel-Air"
+    }
+  },
+  {
+    "title": "Poker.Face.S01E01.720p.PCOK.WEBRip.x264-ION10",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "ION10",
+      "network": "Peacock",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "seasons": [
+        1
+      ],
+      "title": "Poker Face"
+    }
+  },
+  {
+    "title": "Billions.S06E01.1080p.SHOWTIME.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "NTb",
+      "network": "Showtime",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        6
+      ],
+      "title": "Billions"
+    }
+  },
+  {
+    "title": "Yellowjackets.S02E01.720p.SHOWTIME.WEBRip.x264-ION10",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "ION10",
+      "network": "Showtime",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "seasons": [
+        2
+      ],
+      "title": "Yellowjackets"
+    }
+  },
+  {
+    "title": "Letterkenny.S10E01.1080p.CRAV.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "NTb",
+      "network": "Crave",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        10
+      ],
+      "title": "Letterkenny"
+    }
+  },
+  {
+    "title": "Trailer.Park.Boys.S12E01.720p.CRAV.WEBRip.x264-ION10",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "ION10",
+      "network": "Crave",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "seasons": [
+        12
+      ],
+      "title": "Trailer Park Boys"
+    }
+  },
+  {
+    "title": "Interview.With.The.Vampire.S01E01.1080p.BCORE.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "NTb",
+      "network": "AMC+",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        1
+      ],
+      "title": "Interview With The Vampire"
+    }
+  },
+  {
+    "title": "Kin.S01E01.720p.BCORE.WEBRip.x264-ION10",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "ION10",
+      "network": "AMC+",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "seasons": [
+        1
+      ],
+      "title": "Kin"
+    }
+  },
+  {
+    "title": "Bump.S01E01.1080p..STAN.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "NTb",
+      "network": "Stan",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "seasons": [
+        1
+      ],
+      "title": "Bump"
+    }
+  },
+  {
+    "title": "Wolf.Like.Me.S01E01.720p--STAN.WEBRip.x264-ION10",
+    "result": {
+      "codec": "avc",
+      "episodes": [
+        1
+      ],
+      "group": "ION10",
+      "network": "Stan",
+      "quality": "WEBRip",
+      "resolution": "720p",
+      "seasons": [
+        1
+      ],
+      "title": "Wolf Like Me"
+    }
+  },
+  {
+    "title": "Oppenheimer.2023.1080p.iTunes.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "group": "NTb",
+      "network": "iTunes",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Oppenheimer",
+      "year": 2023
+    }
+  },
+  {
+    "title": "Dune.Part.Two.2024.1080p.iT.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "group": "NTb",
+      "network": "iTunes",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Dune Part Two",
+      "year": 2024
+    }
+  },
+  {
+    "title": "iT.Chapter.Two.2019.1080p.WEB-DL.DDP5.1.H.264-NTb",
+    "result": {
+      "audio": [
+        "Dolby Digital Plus"
+      ],
+      "channels": [
+        "5.1"
+      ],
+      "codec": "avc",
+      "group": "NTb",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "iT Chapter Two",
+      "year": 2019
+    }
+  },
+  {
+    "title": "Seven.Samurai.1954.Criterion.Collection.1080p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "edition": "Criterion Collection",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Seven Samurai",
+      "year": 1954
+    }
+  },
+  {
+    "title": "The.Third.Man.1949.Criterion.Collection.720p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "edition": "Criterion Collection",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "720p",
+      "title": "The Third Man",
+      "year": 1949
+    }
+  },
+  {
+    "title": "Kingdom.of.Heaven.2005.DC.1080p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "edition": "Directors Cut",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Kingdom of Heaven",
+      "year": 2005
+    }
+  },
+  {
+    "title": "Watchmen.2009.DC.1080p.BluRay.x264-GROUP",
+    "result": {
+      "codec": "avc",
+      "edition": "Directors Cut",
+      "group": "GROUP",
+      "quality": "BluRay",
+      "resolution": "1080p",
+      "title": "Watchmen",
+      "year": 2009
+    }
+  },
+  {
+    "title": "Deadpool.2016.WORKPRINT.720p.XviD-GROUP",
+    "result": {
+      "codec": "xvid",
+      "group": "GROUP",
+      "quality": "WORKPRINT",
+      "resolution": "720p",
+      "title": "Deadpool",
+      "trash": true,
+      "year": 2016
+    }
+  },
+  {
+    "title": "The.Wolverine.2013.WORKPRINT.480p.XviD-GROUP",
+    "result": {
+      "codec": "xvid",
+      "group": "GROUP",
+      "quality": "WORKPRINT",
+      "resolution": "480p",
+      "title": "The Wolverine",
+      "trash": true,
+      "year": 2013
+    }
+  },
+  {
+    "title": "DC.League.of.Super-Pets.2022.1080p.WEB-DL-GROUP",
+    "result": {
+      "group": "GROUP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "DC League of Super-Pets",
+      "year": 2022
+    }
+  },
+  {
+    "title": "Paramount.Pictures.90th.Anniversary.2022.1080p.WEB-DL-GROUP",
+    "result": {
+      "group": "GROUP",
+      "quality": "WEB-DL",
+      "resolution": "1080p",
+      "title": "Paramount Pictures 90th Anniversary",
+      "year": 2022
     }
   },
   {
