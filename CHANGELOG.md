@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/dreulavelle/jhin/compare/v0.7.1...v0.8.0) (2026-09-16)
+
+
+### Features
+
+* **rules:** report functions and tier descriptions from the registry ([#71](https://github.com/dreulavelle/jhin/issues/71)) ([7bca04e](https://github.com/dreulavelle/jhin/commit/7bca04eac341a1d867ae57b660ef7172227ff44b))
+
+
+### Bug Fixes
+
+* **rules:** settle a rule on the tiers it can read before skipping it ([#70](https://github.com/dreulavelle/jhin/issues/70)) ([406c609](https://github.com/dreulavelle/jhin/commit/406c6097abe183777093df44fed9c45d46d57654))
+
 ## [0.7.1](https://github.com/dreulavelle/jhin/compare/v0.7.0...v0.7.1) (2026-09-10)
 
 
