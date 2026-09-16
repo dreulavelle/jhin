@@ -252,7 +252,7 @@ func (e *Engine) compileRule(rc Rule, name string, refs *refExpander, aggIdx map
 			// A grouping is not required to yield any particular type: what a
 			// bucket needs is an identity, not a value, and every type has one
 			// once it is written out.
-			n, err := e.compileExpr(rc.GroupBy, refs, name, aggIdx, tiers, anyType, "group by")
+			n, err := e.compileExpr(rc.GroupBy, refs, name, aggIdx, tiers, Any, "group by")
 			if err != nil {
 				return nil, err
 			}
@@ -297,7 +297,7 @@ func (e *Engine) compileExpr(src string, refs *refExpander, self string, aggIdx 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", what, locate(src, err))
 	}
-	if want != anyType && !got.assignable(want) {
+	if want != Any && !got.assignable(want) {
 		return nil, fmt.Errorf("%s has to be %s, but it gives %s", what, want, got)
 	}
 	for t := range ck.tiers {

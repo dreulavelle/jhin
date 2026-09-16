@@ -458,14 +458,14 @@ func (c *checker) checkBuiltin(t *callNode, b *builtin) (Type, error) {
 			}
 			continue
 		}
-		if want == anyType {
+		if want == Any {
 			continue
 		}
 		if !at.assignable(want) {
 			return invalid, fmt.Errorf("%s argument %d wants %s, got %s (at %d)", t.name, i+1, want, at, a.pos())
 		}
 	}
-	if b.result == anyType && len(t.args) > 0 {
+	if b.result == Any && len(t.args) > 0 {
 		return c.check(t.args[0])
 	}
 	return b.result, nil

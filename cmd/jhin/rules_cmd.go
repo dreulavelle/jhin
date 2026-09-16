@@ -71,6 +71,28 @@ var rulesCommand = &cli.Command{
 			},
 		},
 		{
+			Name:  "funcs",
+			Usage: "list the functions a rule can call",
+			Action: func(ctx context.Context, cmd *cli.Command) error {
+				funcs := rank.CoreRegistry().Funcs()
+				for _, f := range funcs {
+					params := make([]string, len(f.Params))
+					for i, p := range f.Params {
+						params[i] = p.String()
+					}
+					if f.Variadic {
+						params[0] += "..."
+					}
+					if f.Form == rules.FormCollection {
+						params[1] = "# test"
+					}
+					fmt.Printf("%-10s  %-28s  %s\n", f.Form, f.Name+"("+strings.Join(params, ", ")+")", f.Result)
+				}
+				fmt.Fprintf(os.Stderr, "\n%d functions. An application adds its own; see the rules package.\n", len(funcs))
+				return nil
+			},
+		},
+		{
 			Name:      "fmt",
 			Usage:     "rewrite a rule file in canonical form",
 			ArgsUsage: "<file>",

@@ -263,6 +263,109 @@ func (r *Registry) Tiers() []string {
 	return out
 }
 
+// TierInfo is one confidence group and what its absence means.
+type TierInfo struct {
+	Name string `json:"name"`
+	// Description is what Tier was declared with, and what a skip report
+	// says a rule "needs" when a release carries nothing in the tier.
+	Description string `json:"description"`
+}
+
+// TierDetails is Tiers with the descriptions, sorted by name, so an
+// application can explain a skip in the same words jhin would.
+func (r *Registry) TierDetails() []TierInfo {
+	out := make([]TierInfo, 0, len(r.tiers))
+	for name, d := range r.tiers {
+		out = append(out, TierInfo{Name: name, Description: d})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
+// The shapes a callable name can take. A name may have more than one:
+// count, any and none are a collection predicate over two arguments and a
+// result-set question over one.
+const (
+	// FormFunction is a plain call: the builtins and everything registered.
+	FormFunction = "function"
+	// FormCollection is the two-argument form over a list, where # stands
+	// for the element under test: any(hdr, # == "DV").
+	FormCollection = "collection"
+	// FormAggregate is the one-argument form that asks about the whole
+	// result set rather than this release: exists(resolution == "2160p").
+	FormAggregate = "aggregate"
+)
+
+// FuncInfo is one callable name and its signature.
+type FuncInfo struct {
+	Name   string `json:"name"`
+	Params []Type `json:"params"`
+	Result Type   `json:"result"`
+	// Form is FormFunction, FormCollection or FormAggregate.
+	Form string `json:"form"`
+	// Tier is set for a function registered with FuncTier: a call depends on
+	// the tier the way naming one of its fields would.
+	Tier string `json:"tier,omitempty"`
+	// Variadic reports that Params[0] repeats, one or more times.
+	Variadic bool `json:"variadic,omitempty"`
+}
+
+// Funcs lists every callable name with its signature, sorted by name and
+// then by form: jhin's builtins, the collection and result-set forms, and
+// whatever the application registered. A parameter of type Any takes any
+// value, and an untyped list parameter takes a list of anything. matched()
+// is not listed: it names a rule rather than calling anything, and is
+// resolved before a condition is checked.
+//
+// With Fields and TierDetails this is the whole vocabulary a rule can use,
+// read from the same registry the rules are checked against — so a rule
+// editor's completions, or a capabilities endpoint, cannot drift from what
+// compiles.
+func (r *Registry) Funcs() []FuncInfo {
+	out := make([]FuncInfo, 0, len(builtins)+len(aggregateForms)+len(r.funcs))
+	for name, b := range builtins {
+		if b.predicate {
+			out = append(out, FuncInfo{
+				Name:   name,
+				Params: []Type{{K: KList}, Bool},
+				Result: b.result,
+				Form:   FormCollection,
+			})
+			continue
+		}
+		out = append(out, FuncInfo{
+			Name:     name,
+			Params:   append([]Type(nil), b.params...),
+			Result:   b.result,
+			Form:     FormFunction,
+			Variadic: b.variadic,
+		})
+	}
+	for name := range aggregateForms {
+		result := Bool
+		if name == "count" {
+			result = Num
+		}
+		out = append(out, FuncInfo{Name: name, Params: []Type{Bool}, Result: result, Form: FormAggregate})
+	}
+	for name, f := range r.funcs {
+		out = append(out, FuncInfo{
+			Name:   name,
+			Params: append([]Type(nil), f.Params...),
+			Result: f.Result,
+			Form:   FormFunction,
+			Tier:   f.Tier,
+		})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Name != out[j].Name {
+			return out[i].Name < out[j].Name
+		}
+		return out[i].Form < out[j].Form
+	})
+	return out
+}
+
 // clone snapshots the registry so a compiled Engine is unaffected by later
 // registration on the caller's copy.
 func (r *Registry) clone() *Registry {

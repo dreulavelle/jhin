@@ -11,9 +11,11 @@ import (
 // beyond this is a registered function, which keeps the grammar closed and
 // the checker's job finite.
 
-// anyType marks a builtin parameter that takes whatever it is given, and a
-// result that echoes the first argument's type.
-var anyType = Type{K: KInvalid, Elem: 255}
+// Any is the type of a builtin parameter that takes whatever it is given —
+// len and string — and, as a result, echoes the first argument's type. It is
+// reported by Registry.Funcs and cannot be registered against: an
+// application function declares exact parameters.
+var Any = Type{K: KInvalid, Elem: 255}
 
 // aggregateForms are the names that ask about the whole result set when they
 // are called with a single yes/no argument.
@@ -44,7 +46,7 @@ var builtins map[string]*builtin
 
 func init() {
 	builtins = map[string]*builtin{
-		"len": {params: []Type{anyType}, result: Num, fn: func(a []Value) (Value, error) {
+		"len": {params: []Type{Any}, result: Num, fn: func(a []Value) (Value, error) {
 			switch a[0].Kind() {
 			case KList:
 				return NumOf(len(a[0].List())), nil
@@ -88,7 +90,7 @@ func init() {
 			}
 			return NumOf(m), nil
 		}},
-		"string": {params: []Type{anyType}, result: Str, fn: func(a []Value) (Value, error) {
+		"string": {params: []Type{Any}, result: Str, fn: func(a []Value) (Value, error) {
 			return StrOf(a[0].String()), nil
 		}},
 		"num": {params: []Type{Str}, result: Num, fn: func(a []Value) (Value, error) {

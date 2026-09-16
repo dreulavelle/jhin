@@ -54,11 +54,24 @@ var (
 func List(elem Type) Type { return Type{K: KList, Elem: elem.K} }
 
 func (t Type) String() string {
+	if t == Any {
+		return "any"
+	}
 	if t.K == KList {
+		// an untyped list — an empty literal, or a builtin's parameter that
+		// takes a list of anything — has no element type to name
+		if t.Elem == KInvalid {
+			return "list"
+		}
 		return "list<" + t.Elem.String() + ">"
 	}
 	return t.K.String()
 }
+
+// MarshalJSON renders a type as its name — "num", "list<string>", "any" —
+// so a signature reported by Registry.Funcs reads the way a rule author
+// would write it rather than as two numbers.
+func (t Type) MarshalJSON() ([]byte, error) { return json.Marshal(t.String()) }
 
 func (t Type) valid() bool { return t.K != KInvalid }
 

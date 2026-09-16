@@ -211,8 +211,11 @@ attribute ones, and `Torrent.RuleSkipped` says what did not run and why.
 
 Conditions are checked when the profile is compiled: an unknown attribute, a
 type mismatch or a bad pattern names the rule it came from —
-`jhin rules check <file>` reports it before a search ever runs. Guide with
-worked recipes: [`docs/rules-guide.md`](docs/rules-guide.md). Full reference:
+`jhin rules check <file>` reports it before a search ever runs. The registry
+reports its own vocabulary (`Fields`, `Funcs`, `TierDetails`), and
+`rules.SyntaxVersion` is the number a profile records and a client branches
+on: it tracks the language, not the release. Guide with worked recipes:
+[`docs/rules-guide.md`](docs/rules-guide.md). Full reference:
 [`docs/rules.md`](docs/rules.md).
 
 ## CLI
@@ -226,6 +229,7 @@ jhin rank --target "The Matrix" < titles.txt              # rank/filter/sort a l
 jhin rank --rules my-rules.txt < titles.txt               # ...with a rule file
 jhin rules check my-rules.txt                             # compile a rule file
 jhin rules fields                                         # what a rule can name
+jhin rules funcs                                          # what a rule can call
 jhin version                                              # installed version
 ```
 

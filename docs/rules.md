@@ -282,4 +282,13 @@ reg.Effect("tag", rules.Str)
   reports `Effect{Name, Value}` and the application decides what it means.
 - **Scopes** are opaque strings jhin never reads.
 
+The registry reports what it holds, so an editor's completions or a
+capabilities endpoint read the vocabulary rules are actually checked against
+rather than a copy of it: `Fields()` and `Lookup()` for attributes,
+`TierDetails()` for tiers with the descriptions a skip report uses, and
+`Funcs()` for every callable name with its signature — jhin's builtins, the
+collection and result-set forms, and whatever the application registered.
+`rules.SyntaxVersion` is the number a profile records and a client branches
+on; it tracks the language, not the release.
+
 See the [`rules`](../rules/) package documentation for the API.
