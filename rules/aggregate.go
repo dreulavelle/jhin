@@ -17,11 +17,10 @@ import (
 
 type aggregate struct {
 	program node
-	// tiers are the tiers the inner condition reads. A release missing one
-	// cannot be judged and does not count; a set where no release carries
-	// them leaves the aggregate unknown.
-	tiers []string
-	// scope, when set, comes from an inlined reference inside the condition.
+	// tiers are the tiers the inner condition reads. A release whose answer
+	// turns on one it lacks cannot be judged and does not count; a set where
+	// no release can answer leaves the aggregate unknown.
+	tiers  []string
 	source string
 }
 
@@ -34,14 +33,12 @@ type AggregateState struct {
 	answered []bool
 }
 
-// value reads a computed answer. A caller that skipped the known check gets
-// an error rather than a silent zero.
+// value reads a computed answer. A question nothing could answer — or that
+// the caller never computed — is unanswerable rather than a silent zero, so
+// a rule reading it is skipped the way a rule reading an absent tier is.
 func (st *AggregateState) value(idx int, form string) (Value, error) {
-	if st == nil || idx >= len(st.values) {
-		return Value{}, fmt.Errorf("a result-set question was not computed for this set")
-	}
-	if !st.answered[idx] {
-		return Value{}, fmt.Errorf("nothing in the result set could answer this question")
+	if !st.known(idx) {
+		return Value{}, &unanswerable{reason: "asks about the result set, and nothing in it could answer"}
 	}
 	n := st.values[idx]
 	switch form {
@@ -70,7 +67,7 @@ func (st *AggregateState) known(idx int) bool {
 // a copy would be wasted work, and storing an unchecked copy would leave its
 // field references untyped, which reads as absent however present the
 // attribute is.
-func (e *Engine) liftAggregate(inner node, form string, tiers []string, aggIdx map[string]int) (int, error) {
+func (e *Engine) liftAggregate(inner node, tiers []string, aggIdx map[string]int) (int, error) {
 	src := render(inner)
 	if idx, ok := aggIdx[src]; ok {
 		return idx, nil
@@ -97,11 +94,13 @@ func (e *Engine) HasAggregates() bool {
 // is fixed before anything fires, so a viable 4K remux always has
 // count(resolution == "2160p") >= 1.
 //
-// Fail-open extends here: a release missing a tier the inner condition reads
-// is not counted, and when no release in the set carries that tier the
+// Fail-open extends here: a release whose answer turns on a tier it carries
+// nothing in is not counted, and when no release in the set can answer the
 // question is unanswerable, so rules reading it are skipped rather than fed a
 // zero. On a fresh search where nothing has been probed,
-// none(probed.height >= 2000) must not read as "there is no good 4K".
+// none(probed.height >= 2000) must not read as "there is no good 4K". The
+// same three-valued reading as Evaluate applies, so an unprobed 2160p release
+// does answer exists(resolution == "2160p" or probed.height >= 2000).
 //
 // kind is the content kind the request is for, matched against the scope of
 // any rule an inner condition references.
@@ -121,31 +120,22 @@ func (e *Engine) ComputeAggregates(set []Facts, kind string) *AggregateState {
 	for i := range e.aggs {
 		agg := &e.aggs[i]
 		for _, facts := range set {
-			if facts == nil || !tiersPresent(agg.tiers, facts) {
+			if facts == nil {
+				continue
+			}
+			ev.use(facts)
+			ev.begin(agg.tiers)
+			v, err := eval(agg.program, ev)
+			if isUnanswerable(err) {
 				continue
 			}
 			st.answered[i] = true
-			ev.facts = facts
-			ev.steps = 0
-			v, err := eval(agg.program, ev)
-			if err != nil {
-				continue
-			}
-			if v.Bool() {
+			if err == nil && v.Bool() {
 				st.values[i]++
 			}
 		}
 	}
 	return st
-}
-
-func tiersPresent(tiers []string, facts Facts) bool {
-	for _, t := range tiers {
-		if !facts.TierPresent(t) {
-			return false
-		}
-	}
-	return true
 }
 
 // AggregateReport is one computed result-set question, for a preview that

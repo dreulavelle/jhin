@@ -153,8 +153,8 @@ a rule reach anything the baseline has an opinion about:
 
 ## Fail-open
 
-**A rule that reads a tier the release carries nothing in does not run.** It
-is skipped and reported, not failed.
+**A rule whose outcome turns on a tier the release carries nothing in does
+not act.** It is skipped and reported, not failed.
 
 Without this, one rule — `probed.height < 1080 → reject` — would empty every
 result list of everything except the releases something has opened, because a
@@ -164,9 +164,27 @@ The practical consequence is worth knowing: a probe rule can only ever
 *reward*, or remove releases that were probed. It cannot demote everything
 else by omission.
 
+Absence is judged on the outcome, not on the names a condition mentions. A
+read of an absent tier is *unknown*, and `and` and `or` settle it where the
+other side can:
+
+| condition, on an unprobed 1080p release | outcome |
+|---|---|
+| `resolution == "1080p" or probed.bitDepth == 10` | fires |
+| `resolution == "720p" or probed.bitDepth == 10` | skipped |
+| `resolution == "1080p" and probed.bitDepth == 10` | skipped |
+| `resolution == "720p" and probed.bitDepth == 10` | does not fire |
+| `not probed.dolbyVision` | skipped |
+
+So "reward this, or that as a fallback" is one rule — `score 500 if
+"remux" in traits or probed.bitDepth == 10` — and pays out on the name alone
+when nothing has probed the file. A rule is skipped exactly when the missing
+fact could have changed what it did, and the report names what was missing.
+
 Tiers travel. Grouping a cap by `probed.height` makes the whole rule
 measured-only, and referring to a probe rule through `matched()` makes the
-referring rule probe-dependent.
+referring rule probe-dependent — in each case by the same reading, so a
+grouping or a reference the release can settle without the tier still runs.
 
 ## Asking about the result set
 
@@ -190,9 +208,11 @@ exists. Because the counts are taken first, a rule that rejects can never
 change what another rule counted — **so the order of your rules does not
 matter**. They cannot nest.
 
-Fail-open extends to the set: a release missing a tier the inner condition
-reads is not counted, and when *no* release carries that tier the question is
-unanswerable, so the rule is skipped rather than fed a zero.
+Fail-open extends to the set: a release whose answer turns on a tier it
+carries nothing in is not counted, and when *no* release can answer the
+question is unanswerable, so the rule is skipped rather than fed a zero. An
+unprobed 2160p release still answers `exists(resolution == "2160p" or
+probed.height >= 2000)`, by the same reading as above.
 
 ## Referring to another rule
 

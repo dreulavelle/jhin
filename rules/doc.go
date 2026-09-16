@@ -45,15 +45,22 @@
 // # Confidence tiers
 //
 // Facts differ in how far they can be trusted and in whether they are there
-// at all. A field belongs to a tier, a compiled rule carries the tiers its
-// condition reads, and a rule reading a tier the release carries nothing in
-// is skipped and reported rather than judged against zero values.
+// at all. A field belongs to a tier, and a rule whose outcome turns on a tier
+// the release carries nothing in is skipped and reported rather than judged
+// against zero values.
 //
 // Without that, one rule — probed.height < 1080 → reject — empties every
 // result list of everything except the releases something has opened, because
 // a release nobody probed has a probed height of zero. The practical
 // consequence is worth knowing: a probe rule can only ever reward, or remove
 // releases that were probed. It cannot demote everything else by omission.
+//
+// Absence is judged on the outcome, not on the names a condition mentions. A
+// read of an absent tier is unknown, and `and` and `or` settle it where the
+// other side can: resolution == "1080p" or probed.bitDepth == 10 holds for an
+// unprobed 1080p release, and not inLibrary and probed.height < 1080 is false
+// for an unprobed release already in the library. A rule is skipped exactly
+// when the missing fact could have changed what it did.
 //
 // # Asking about the result set
 //

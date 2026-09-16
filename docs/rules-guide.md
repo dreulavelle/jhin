@@ -316,12 +316,25 @@ name — is always present. The conventional names for what applications add:
 | `community` | An availability database. Possibly stale. |
 | `measured` | What a probe found in the actual file. Ground truth, but only for files something has opened. |
 
-**A rule that reads a tier this release carries nothing in is skipped, not
-run.** Judged against zero values, one innocent rule — `probed.height < 1080:
-reject` — would empty every result list of everything that was never probed.
-Instead it is skipped and reported (`Torrent.RuleSkipped` says *"needs a
-probed file"*), so a probe rule can reward or remove probed releases but can
-never demote everything else by omission.
+**A rule whose outcome turns on a tier this release carries nothing in is
+skipped, not run.** Judged against zero values, one innocent rule —
+`probed.height < 1080: reject` — would empty every result list of everything
+that was never probed. Instead it is skipped and reported
+(`Torrent.RuleSkipped` says *"needs a probed file"*), so a probe rule can
+reward or remove probed releases but can never demote everything else by
+omission.
+
+Only the outcome has to be in doubt. A read of an absent tier is unknown, and
+`and`/`or` settle it where the other side can, so a fallback is one rule:
+
+```
+Good enough: score 500 if "remux" in traits or probed.bitDepth == 10
+```
+
+pays out on the name alone for a file nothing has probed, and is skipped only
+for a non-remux, where the probe would have decided. Likewise `resolution ==
+"720p" and probed.bitDepth == 10` simply does not fire for an unprobed 1080p
+release; the probe could not have made it true.
 
 The same holds for set questions: on a fresh search where nothing was probed,
 `none(probed.height >= 2000)` is unanswerable, so the rule skips rather than

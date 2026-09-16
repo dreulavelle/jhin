@@ -23,7 +23,7 @@ type checker struct {
 	hashType Type
 	inHash   bool
 	// aggs receives lifted result-set conditions.
-	lift func(inner node, form string, tiers []string, p int) (int, error)
+	lift func(inner node, tiers []string, p int) (int, error)
 }
 
 func newChecker(reg *Registry) *checker {
@@ -384,8 +384,9 @@ func (c *checker) checkCall(t *callNode) (Type, error) {
 //
 // The inner condition is checked by a checker of its own, with no lift of its
 // own — which is both how result-set questions are stopped from nesting and
-// why the tiers it reads stay its own. A rule asking whether the set holds a
-// probed release does not itself need this release to be probed.
+// why the tiers it reads stay its own: they are judged per release when the
+// set is counted, and a rule asking whether the set holds a probed release
+// does not itself read the probe.
 func (c *checker) checkAggregate(t *callNode) (Type, error) {
 	if c.lift == nil {
 		return invalid, fmt.Errorf("%s asks about the whole result set, which cannot be answered here — result-set questions do not nest (at %d)", t.name, t.p)
@@ -412,7 +413,7 @@ func (c *checker) checkAggregate(t *callNode) (Type, error) {
 	if form == "any" {
 		form = "exists"
 	}
-	idx, err := c.lift(t.args[0], form, sortedKeys(sub.tiers), t.p)
+	idx, err := c.lift(t.args[0], sortedKeys(sub.tiers), t.p)
 	if err != nil {
 		return invalid, err
 	}

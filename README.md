@@ -203,11 +203,13 @@ best := ranker.Sort(torrents, rank.SortOptions{FetchableOnly: true})
 rank.ApplyLimits(best)                    // caps need the final order
 ```
 
-A field belongs to a confidence tier, and a rule reading a tier the release
-carries nothing in is **skipped and reported** rather than judged against zero
-— otherwise one `probed.height < 1080` rule would empty every result list of
-everything nothing had opened. `Explain` reports rule contributions alongside
-attribute ones, and `Torrent.RuleSkipped` says what did not run and why.
+A field belongs to a confidence tier, and a rule whose outcome turns on a
+tier the release carries nothing in is **skipped and reported** rather than
+judged against zero — otherwise one `probed.height < 1080` rule would empty
+every result list of everything nothing had opened. Only the outcome has to be
+in doubt: `"remux" in traits or probed.bitDepth == 10` pays out for an
+unprobed remux. `Explain` reports rule contributions alongside attribute ones,
+and `Torrent.RuleSkipped` says what did not run and why.
 
 Conditions are checked when the profile is compiled: an unknown attribute, a
 type mismatch or a bad pattern names the rule it came from —

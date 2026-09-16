@@ -133,7 +133,6 @@ type compiled struct {
 	count   int
 	groupBy node
 	tiers   []string
-	aggs    []int
 }
 
 // Engine is a compiled rule set. It is immutable, so one Engine serves every
@@ -271,7 +270,6 @@ func (e *Engine) compileRule(rc Rule, name string, refs *refExpander, aggIdx map
 	}
 
 	c.tiers = sortedKeys(tiers)
-	c.aggs = e.aggsFor(c.when, c.score, c.groupBy)
 	return c, nil
 }
 
@@ -290,8 +288,8 @@ func (e *Engine) compileExpr(src string, refs *refExpander, self string, aggIdx 
 	}
 
 	ck := newChecker(e.reg)
-	ck.lift = func(inner node, form string, tiers []string, _ int) (int, error) {
-		return e.liftAggregate(inner, form, tiers, aggIdx)
+	ck.lift = func(inner node, tiers []string, _ int) (int, error) {
+		return e.liftAggregate(inner, tiers, aggIdx)
 	}
 	got, err := ck.check(n)
 	if err != nil {
@@ -304,21 +302,6 @@ func (e *Engine) compileExpr(src string, refs *refExpander, self string, aggIdx 
 		tiers[t] = true
 	}
 	return n, nil
-}
-
-func (e *Engine) aggsFor(nodes ...node) []int {
-	seen := map[int]bool{}
-	var out []int
-	for _, n := range nodes {
-		walk(n, func(x node) {
-			if a, ok := x.(*aggNode); ok && !seen[a.idx] {
-				seen[a.idx] = true
-				out = append(out, a.idx)
-			}
-		})
-	}
-	sort.Ints(out)
-	return out
 }
 
 func scopeSet(scopes []string) map[string]bool {
@@ -378,12 +361,20 @@ func (e *Engine) ReadsTier(tier string) bool {
 
 // Evaluate runs the rules that apply to this content kind.
 //
-// A rule is skipped, not failed, when it reads a tier the release carries
-// nothing in. Judging those against zero values would let a single rule like
-// `probed.height < 1080` reject every release that was never probed, which is
-// the opposite of what it asks. The same contract covers a runtime failure: a
-// compiled, type-checked rule that fails on data no test covered skips, so an
-// inconclusive check never removes a release.
+// A rule is skipped, not failed, when its outcome turns on a tier the release
+// carries nothing in. Judging those against zero values would let a single
+// rule like `probed.height < 1080` reject every release that was never
+// probed, which is the opposite of what it asks. Absence is judged on the
+// outcome rather than on the names a condition mentions: a read of an absent
+// tier is unknown, and `and` and `or` settle it where the other operand can,
+// so `resolution == "1080p" or probed.bitDepth == 10` holds for an unprobed
+// 1080p release and `not inLibrary and probed.height < 1080` is false for an
+// unprobed release already in the library. Only a rule the missing fact could
+// have swung is skipped, and the report names what was missing.
+//
+// The same contract covers a runtime failure: a compiled, type-checked rule
+// that fails on data no test covered skips, so an inconclusive check never
+// removes a release.
 //
 // A set with result-set questions expects the caller to have computed them —
 // ComputeAggregates over the whole set, then pass the state here.
@@ -392,23 +383,21 @@ func (e *Engine) Evaluate(facts Facts, kind string, aggs *AggregateState) Outcom
 	if e == nil {
 		return out
 	}
-	st := &evalState{facts: facts, reg: e.reg, kind: kind, aggs: aggs}
+	st := &evalState{reg: e.reg, kind: kind, aggs: aggs}
+	st.use(facts)
 
 	for i := range e.rules {
 		r := &e.rules[i]
 		if !scopeAllows(r.scope, kind) {
 			continue
 		}
-		if reason, skip := e.skipReason(r, facts, aggs); skip {
-			out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: reason})
+		st.begin(r.tiers)
+		v, err := eval(r.when, st)
+		if err != nil {
+			out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: err.Error()})
 			continue
 		}
-		st.steps = 0
-		v, err := eval(r.when, st)
-		if err != nil || !v.Bool() {
-			if err != nil {
-				out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: err.Error()})
-			}
+		if !v.Bool() {
 			continue
 		}
 		e.apply(r, st, &out)
@@ -416,21 +405,13 @@ func (e *Engine) Evaluate(facts Facts, kind string, aggs *AggregateState) Outcom
 	return out
 }
 
-func (e *Engine) skipReason(r *compiled, facts Facts, aggs *AggregateState) (string, bool) {
-	for _, tier := range r.tiers {
-		if !facts.TierPresent(tier) {
-			if d := e.reg.tiers[tier]; d != "" {
-				return "needs " + d, true
-			}
-			return "needs " + tier + " data, which this release has none of", true
-		}
+// skipText words a failure for the Skipped report. An unanswerable expression
+// already says what was missing; any other failure says what it was doing.
+func skipText(err error, doing string) string {
+	if isUnanswerable(err) {
+		return err.Error()
 	}
-	for _, idx := range r.aggs {
-		if !aggs.known(idx) {
-			return "asks about the result set, and nothing in it could answer", true
-		}
-	}
-	return "", false
+	return doing + ": " + err.Error()
 }
 
 func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
@@ -439,14 +420,14 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 		out.Rejections = append(out.Rejections, RejectionPrefix+r.name)
 
 	case ActionLimit:
-		group, ok := groupOf(r, st)
-		if !ok {
-			// A grouping that fails at runtime cannot say which bucket this
-			// release belongs in, and a cap that does not know that cannot
-			// count it. Dropping the match rather than guessing keeps the
-			// promise the tier checks make: a rule that cannot be judged
+		group, err := groupOf(r, st)
+		if err != nil {
+			// A grouping that cannot be worked out cannot say which bucket
+			// this release belongs in, and a cap that does not know that
+			// cannot count it. Dropping the match rather than guessing keeps
+			// the promise the tier checks make: a rule that cannot be judged
 			// never removes a release.
-			out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: "the grouping could not be worked out"})
+			out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: skipText(err, "the grouping could not be worked out")})
 			return
 		}
 		out.Limits = append(out.Limits, LimitMatch{Name: r.name, Count: r.count, Group: group})
@@ -457,7 +438,7 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 			st.steps = 0
 			v, err := eval(r.score, st)
 			if err != nil {
-				out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: "the score could not be worked out: " + err.Error()})
+				out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: skipText(err, "the score could not be worked out")})
 				return
 			}
 			p, ok := clampPoints(v.Num())
@@ -474,7 +455,7 @@ func (e *Engine) apply(r *compiled, st *evalState, out *Outcome) {
 		st.steps = 0
 		v, err := eval(r.score, st)
 		if err != nil {
-			out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: "the value could not be worked out: " + err.Error()})
+			out.Skipped = append(out.Skipped, Skip{Name: r.name, Reason: skipText(err, "the value could not be worked out")})
 			return
 		}
 		out.Effects = append(out.Effects, Effect{Name: r.action, Value: v})
@@ -522,14 +503,14 @@ func addPoints(total, points int) int {
 	return int(s)
 }
 
-func groupOf(r *compiled, st *evalState) (string, bool) {
+func groupOf(r *compiled, st *evalState) (string, error) {
 	if r.groupBy == nil {
-		return "", true
+		return "", nil
 	}
 	st.steps = 0
 	v, err := eval(r.groupBy, st)
 	if err != nil {
-		return "", false
+		return "", err
 	}
 	// A bucket's one job is telling two releases apart, and joining list
 	// elements with a space cannot: ["a b"] and ["a", "b"] would share a
@@ -537,7 +518,7 @@ func groupOf(r *compiled, st *evalState) (string, bool) {
 	if v.Kind() == KList {
 		var b strings.Builder
 		writeValue(&b, v)
-		return b.String(), true
+		return b.String(), nil
 	}
-	return v.String(), true
+	return v.String(), nil
 }

@@ -29,10 +29,13 @@ dependencies. Accuracy is contractual, speed is a feature, slop is a bug.
   per release, and explainable. After touching `rules/`, run
   `go test -race ./rules` and a fuzz smoke
   `go test -run '^$' -fuzz FuzzCompile -fuzztime 30s ./rules`.
-- **A rule that cannot be answered is skipped, not failed.** A condition
-  reading a tier the release carries nothing in never runs. Judging it against
-  zero values would let one rule empty a result list, so any change that makes
-  an unanswerable rule act is a bug however reasonable it looks.
+- **A rule that cannot be answered is skipped, not failed.** A read of a
+  tier the release carries nothing in is unknown, and a rule is skipped
+  exactly when that unknown could have changed its outcome: `true or unknown`
+  fires, `false and unknown` does not fire, everything else skips. Judging an
+  unknown as a zero value would let one rule empty a result list, so any
+  change that makes an unanswerable rule act is a bug however reasonable it
+  looks.
 - **Libraries don't log.** Failures come back as errors or data
   (`Result.Error()`, `Torrent.Rejections`, `Explain()`). Logging belongs to
   `cmd/jhin` only.

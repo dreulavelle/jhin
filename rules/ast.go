@@ -116,33 +116,3 @@ func size(n node) int {
 	}
 	return 1
 }
-
-// walk visits every node depth-first. Used to collect tiers and aggregate
-// references after checking.
-func walk(n node, fn func(node)) {
-	if n == nil {
-		return
-	}
-	fn(n)
-	switch t := n.(type) {
-	case *listNode:
-		for _, it := range t.items {
-			walk(it, fn)
-		}
-	case *unaryNode:
-		walk(t.x, fn)
-	case *binaryNode:
-		walk(t.l, fn)
-		walk(t.r, fn)
-	case *ternaryNode:
-		walk(t.cond, fn)
-		walk(t.then, fn)
-		walk(t.els, fn)
-	case *callNode:
-		for _, a := range t.args {
-			walk(a, fn)
-		}
-	case *scopedNode:
-		walk(t.x, fn)
-	}
-}

@@ -28,6 +28,29 @@ const maxSteps = 100_000
 // runtime failure it skips the rule rather than rejecting the release.
 var errBudget = errors.New("expression did more work than a rule is allowed")
 
+// unanswerable reports that an expression's value turns on something this
+// release does not carry: a field in a tier it has none of, a function that
+// reads one, or a result-set question nothing in the set could answer.
+//
+// It travels as an error so that every operator propagates it without a case
+// of its own — a comparison, a call or a `not` over an unknown is unknown.
+// Only `and` and `or` look at it, because those are the operators whose
+// result the other operand can settle: `false and unknown` is false and
+// `true or unknown` is true whatever the unknown would have been. A rule is
+// therefore skipped exactly when the missing fact could have changed its
+// outcome, which is the guarantee the tier machinery exists for.
+type unanswerable struct{ reason string }
+
+func (u *unanswerable) Error() string { return u.reason }
+
+// isUnanswerable is a plain assertion rather than errors.As: nothing wraps
+// the value on its way up, and errors.As would cost an allocation per call on
+// the hottest path there is.
+func isUnanswerable(err error) bool {
+	_, ok := err.(*unanswerable)
+	return ok
+}
+
 type evalState struct {
 	facts Facts
 	reg   *Registry
@@ -35,6 +58,78 @@ type evalState struct {
 	aggs  *AggregateState
 	hash  Value
 	steps int
+	// partial is set while evaluating an expression that reads a tier this
+	// release does not carry, so that field reads check for absence. An
+	// expression whose tiers are all present — the common case — skips the
+	// check at every read, and the compile-time tier list is what says so.
+	partial bool
+	// tiers memoises Facts.TierPresent for this release: every field of a
+	// namespace asks about the same tier, and a rule set asks about the same
+	// few tiers over and over. An absent tier's entry holds the skip reason,
+	// built once rather than at every read. It is a fixed array rather than
+	// a slice into one so that the state stays off the heap; a registry with
+	// more tiers than fit is answered without memoising.
+	tiers  [4]tierState
+	ntiers int
+}
+
+type tierState struct {
+	name   string
+	absent error
+}
+
+// use points the state at another release. ComputeAggregates walks a whole
+// set with one state, so what was learned about the last release must not
+// carry over.
+func (e *evalState) use(facts Facts) {
+	e.facts = facts
+	e.ntiers = 0
+}
+
+// missing reports why a read of tier cannot be answered, or nil when the
+// release carries it. The empty tier is always present.
+func (e *evalState) missing(tier string) error {
+	if tier == "" {
+		return nil
+	}
+	for i := 0; i < e.ntiers; i++ {
+		if e.tiers[i].name == tier {
+			return e.tiers[i].absent
+		}
+	}
+	var absent error
+	if !e.facts.TierPresent(tier) {
+		absent = &unanswerable{reason: tierReason(e.reg, tier)}
+	}
+	if e.ntiers < len(e.tiers) {
+		e.tiers[e.ntiers] = tierState{name: tier, absent: absent}
+		e.ntiers++
+	}
+	return absent
+}
+
+// begin readies the state for an expression that reads tiers: field reads
+// check for absence only when at least one of them is missing.
+func (e *evalState) begin(tiers []string) {
+	e.steps = 0
+	e.partial = false
+	for _, t := range tiers {
+		if e.missing(t) != nil {
+			e.partial = true
+			return
+		}
+	}
+}
+
+// tierReason words an absent tier for the Skipped report, in the terms the
+// application declared it with.
+func tierReason(reg *Registry, tier string) string {
+	if reg != nil {
+		if d := reg.tiers[tier]; d != "" {
+			return "needs " + d
+		}
+	}
+	return "needs " + tier + " data, which this release has none of"
 }
 
 func (e *evalState) funcOf(name string) *Func {
@@ -64,6 +159,11 @@ func eval(n node, st *evalState) (Value, error) {
 		return st.hash, nil
 
 	case *fieldNode:
+		if st.partial {
+			if err := st.missing(t.tier); err != nil {
+				return Value{}, err
+			}
+		}
 		if v, ok := st.facts.Lookup(t.path); ok && v.Kind() == t.typ.K {
 			return v, nil
 		}
@@ -122,17 +222,40 @@ func eval(n node, st *evalState) (Value, error) {
 func evalBinary(t *binaryNode, st *evalState) (Value, error) {
 	// and/or short-circuit, which is what lets a rule guard a division or a
 	// lookup with the test that makes it safe.
+	//
+	// An operand that could not be answered does not decide on its own: the
+	// other side is tried, and settles the result when it can — `false and
+	// unknown` is false, `true or unknown` is true. When it cannot, the
+	// operator is unknown and the report names the first thing that was
+	// missing. A right side that fails outright while the left is unknown is
+	// unknown too: had the guard been false the failure would never have
+	// been reached, and had it been true the rule would be skipped anyway.
 	switch t.op {
 	case "and":
 		l, err := eval(t.l, st)
-		if err != nil || !l.Bool() {
-			return BoolOf(false), err
+		if err != nil {
+			if !isUnanswerable(err) {
+				return Value{}, err
+			}
+			if r, rerr := eval(t.r, st); rerr == nil && !r.Bool() {
+				return BoolOf(false), nil
+			}
+			return Value{}, err
+		}
+		if !l.Bool() {
+			return BoolOf(false), nil
 		}
 		r, err := eval(t.r, st)
 		return BoolOf(r.Bool()), err
 	case "or":
 		l, err := eval(t.l, st)
 		if err != nil {
+			if !isUnanswerable(err) {
+				return Value{}, err
+			}
+			if r, rerr := eval(t.r, st); rerr == nil && r.Bool() {
+				return BoolOf(true), nil
+			}
 			return Value{}, err
 		}
 		if l.Bool() {
@@ -245,6 +368,11 @@ func evalCall(t *callNode, st *evalState) (Value, error) {
 		return b.fn(args)
 	}
 	if fn := st.funcOf(t.name); fn != nil {
+		if st.partial {
+			if err := st.missing(fn.Tier); err != nil {
+				return Value{}, err
+			}
+		}
 		args := make([]Value, len(t.args))
 		for i, a := range t.args {
 			v, err := eval(a, st)
